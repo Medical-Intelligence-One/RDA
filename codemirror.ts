@@ -5,7 +5,7 @@ import { autocompletion, CompletionContext } from "@codemirror/autocomplete"
 import { StateField, EditorSelection } from "@codemirror/state"
 import { Tooltip, showTooltip } from "@codemirror/tooltip"
 import { indentUnit } from '@codemirror/language'
-import dataFromFile from '../mi1-rare-disease/rare-diseases.json'
+import dataFromFile from '../mi1-rare-disease/rare-diseases.json'       //test data until api is working
 const axios = require('axios')
 const headers = {
     'Access-Control-Allow-Origin': '*'
