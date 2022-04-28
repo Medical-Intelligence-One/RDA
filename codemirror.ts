@@ -15,6 +15,9 @@ var searchOptions = []
 var arrCUIs = []
 var codemirror = $('#editor').nextAll('.CodeMirror')[0]
 
+var divSelectedTerms = $('#selected-terms')
+var divAssociatedFindings = $('#associated-findings')
+
 let myTheme = EditorView.theme({
     "cm-editor": {
         fontSize: "18px",
@@ -83,7 +86,7 @@ async function fetchAutoComplete(startsWith) {
                     label: label,
                     apply: () => {
                         $('.cm-activeLine').text('')
-                        createTag($('#selected-terms'), label, info, frequency, addClasses, fetchDiseases)
+                        createTag(divSelectedTerms, label, info, frequency, addClasses, fetchDiseases)
                     }
                 })
 
@@ -122,34 +125,34 @@ let state = EditorState.create({
 async function fetchDiseases() {
 
     //write selected CUI tag elements into array
-    // let cuiArrayPromise = new Promise(function (resolve) {
-    var cuis = []
-    let $selectedTags = $('.selection-tag.selected:not(.d-none)')
-    if ($selectedTags.length > 0) {
-        $selectedTags.each(function (i, obj) {
-            cuis.push({
-                CUI: $(obj).attr('id')
+    let cuiArrayPromise = new Promise(function (resolve) {
+        var cuis = []
+        let $selectedTags = $('.selection-tag.selected:not(.d-none)')
+        if ($selectedTags.length > 0) {
+            $selectedTags.each(function (i, obj) {
+                cuis.push({
+                    CUI: $(obj).attr('id')
+                })
             })
-        })
-    }
-    //     resolve({ CUIs: cuis })
-    // })
+        }
+        resolve({ CUIs: cuis })
+    })
 
-    // await axios.post('https://api.mi1.ai/api/rareDiseaseSearch', await (cuiArrayPromise), { headers })
-    // // await axios.post('https://api.mi1.ai/api/PotentialComorbidities', await (cuiArrayPromise), { headers })
-    //     .then(async function (response) {
-    //         $('.suggestions-container').remove();   //clear existing diseases from suggestions container
+    await axios.post('https://api.mi1.ai/api/rareDiseaseSearch', await (cuiArrayPromise), { headers })
+        // await axios.post('https://api.mi1.ai/api/PotentialComorbidities', await (cuiArrayPromise), { headers })
+        .then(async function (response) {
+            $('.suggestions-container').remove();   //clear existing diseases from suggestions container
+            $('#associated-findings .selection-tag').remove()
+
+            showDiseases(response.data)
+        }).catch(function (error) {
+
+            $('.preloader').addClass('d-none')
+        });
+
+    // $('#suggestions-container .div-suggestion').remove()   //clear existing diseases from suggestions container
     // $('#associated-findings .selection-tag').remove()
-
-    //         showDiseases(response.data)
-    //     }).catch(function (error) {
-
-    //         $('.preloader').addClass('d-none')
-    //     });
-
-    $('#suggestions-container .div-suggestion').remove()   //clear existing diseases from suggestions container
-    $('#associated-findings .selection-tag').remove()
-    showDiseases(dataFromFile);
+    // showDiseases(dataFromFile);
 }
 
 //create a findings tag with click event. This has a call back function to ensure api call is done only on completion of tag creation
@@ -164,22 +167,22 @@ function createTag(parentElement, label, id, frequency, addClasses, callback) {
 
     //add click event if this tag is selectable
     if ($divTag.hasClass('selectable')) {
-        $divTag.attr('title', $divTag.hasClass('selected') ? 'Finding used in Search. Click to Remove' : 'Finding excluded from Search. Click to Add.')
+        addTagTitle($divTag)
 
         $divTag.on("click", function () {
             $divTag.toggleClass('selected')
             let selected = $divTag.hasClass('selected')
             //if element is in associated findings, add/remove this from selected terms
-            if (($divTag).closest($('#associated-findings')).length > 0) {
+            if (($divTag).closest(divAssociatedFindings).length > 0) {
                 if (selected) {
-                    $('#selected-terms').append($divTag)
+                    divSelectedTerms.append($divTag)
                 }
                 else {
-                    $('#selected-terms').find('#' + id).remove()
+                    divSelectedTerms.find('#' + id).remove()
                 }
 
             }
-            $divTag.attr('title', $divTag.hasClass('selected') ? 'Finding used in Search. Click to Remove' : 'Finding excluded from Search. Click to Add.')
+            addTagTitle($divTag)
             fetchDiseases()
         })
     }
@@ -202,6 +205,24 @@ function createTag(parentElement, label, id, frequency, addClasses, callback) {
     if (callback) {
         callback()
     }
+}
+
+function addTagTitle($divTag) {
+    let title = ''
+    if ($divTag.hasClass('selectable')) {
+        if ($divTag.hasClass('selected')) {
+            title = 'Finding used in Search. Click to Remove'
+        }
+        else {
+            if (($divTag).closest(divAssociatedFindings).length > 0) {
+                title = "Click to add Finding to Search"
+            }
+            else {
+                title = 'Finding excluded from Search. Click to Add.'
+            }
+        }
+    }
+    $divTag.attr('title', title)
 }
 
 //display output from api call showing returned diseases in order of probability
@@ -273,10 +294,11 @@ function showDiseases(data) {
                     let addClasses = ""
 
                     createTag($divSuggestion.find('.disease-findings'), label, id, frequency, addClasses, null)
-                    //if this is one on of the top 3 suggested diseases, also add the tag to the associated findings div
-                    if (arrIndex < 3) {
+                    //if this is one on of the top 3 suggested diseases, also add the tag to the associated findings div if not already in this or the 
+                    //selected terms div
+                    if (arrIndex < 3 && divAssociatedFindings.find('#' + id).length == 0 && divSelectedTerms.find('#' + id).length == 0) {
                         addClasses = "selectable"
-                        createTag($('#associated-findings'), label, id, frequency, addClasses, null)
+                        createTag(divAssociatedFindings, label, id, frequency, addClasses, null)
                     }
 
                 }

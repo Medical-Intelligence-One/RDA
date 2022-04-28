@@ -192,14 +192,15 @@ div.tooltip-inner {
 }
 
 /* tick */
-.selection-tag.selectable.selected:after {         
+#selected-terms .selection-tag.selected:after {         
     font-family: "Font Awesome 5 Free";
     content: "\f058";
     padding-left: 1em;
     color: green;
 }
+
 /* cross */
-.selection-tag.selectable:after {
+#selected-terms .selection-tag:after {
     font-family: "Font Awesome 5 Free";
     content: "\f057";
     padding-left:1em;
