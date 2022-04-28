@@ -1,0 +1,24 @@
+{
+  "name": "CodeMirror",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": ".",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "parcel index.html"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "parcel-bundler": "^1.12.5",
+    "typescript": "^4.5.5"
+  },
+  "dependencies": {
+    "@codemirror/autocomplete": "^0.19.13",
+    "@codemirror/basic-setup": "^0.19.1",
+    "axios": "^0.26.1",
+    "particles.js": "^2.0.0"
+  }
+}

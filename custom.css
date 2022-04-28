@@ -1,0 +1,209 @@
+
+.container-fluid {
+    width: 95%;
+    margin-top: 1em;
+    text-align: -webkit-center;
+}
+
+div.tooltip-inner {
+    border: solid .2rem darkblue;
+    background-color: cornflowerblue;
+    color: white;
+}
+
+.tooltip.in {
+    opacity: 1 !important;
+}
+
+#mi1-toast {
+    color: #212b32;
+    background-color: #efefef;
+    border: 1px solid darkgrey;
+    opacity: 1 !important;
+    z-index: 99999;
+    text-align: center;
+}
+
+#div-main {
+    /* height:80%; */
+    padding: 0;
+}
+
+#div-patient-notes {
+    height: 100vh;
+}
+
+#text-area-notes {
+    width: 100%;
+    height: 80%;
+    border: solid .2rem darkblue;
+}
+
+.div-header {
+    text-align: center;
+    color: white;
+    background-color: cornflowerblue;
+    border: solid .2rem darkblue;
+    font-size: 1.3rem;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.rda-title {
+    text-align: center;
+    color: darkblue;
+    /* background-color: cornflowerblue; */
+    /* border: solid .2rem darkblue; */
+    font-size: 1.4em;
+    margin-bottom: 0.3rem;
+    width: 100%;
+}
+
+.div-rda-header {
+    text-align: left;
+    color: darkblue;
+    /* background-color: cornflowerblue; */
+    /* border: solid .2rem darkblue; */
+    font-size: 1.2rem;
+    padding: 0.5rem;
+    margin-bottom: 0.1rem;
+    width: 100%;
+}
+
+#editor-container{
+    text-align: left;
+}
+
+#suggestions-container, #associated-findings {
+    border: solid 0.2rem gray;
+    width: 100%;
+    padding: 1em;
+    color: darkblue;
+    background-color: gainsboro;
+    border-radius: 7px;
+    text-align:left;
+    min-height: 3em;
+}
+
+.suggestions-container.is-empty {
+    background: lightgray;
+}
+
+/* .suggestion-header {
+    padding: .7em .2em !important;
+} */
+
+.div-suggestion {
+    /* margin: 1em; */
+    padding: .7em 1em !important;
+    border: solid 0.2rem grey;
+    background-color: white;
+    color: darkblue;
+}
+
+.associated-evidence{
+    cursor:pointer;
+}
+
+.associated-evidence:after {
+    font-family: "Font Awesome 5 Free";
+    content: "\f35a";
+    padding-left: 1em;
+}
+
+.disease-name{
+    font-weight: bold;
+    /* padding-left: 1em; */
+}
+
+
+/* .disease-probability {
+    border: solid 0.1rem grey;
+    border-radius: 100%;
+    width: 2.5em;
+    min-height: 1.5em;
+    text-align: center;
+} */
+
+/* .disease-prevalence {
+
+} */
+.disease-score {
+    display: inline-block;
+    width: 7%;
+    color: green;
+    text-align-last: right;
+}
+.disease-evidence{
+    padding:.5em;
+    background-color: lightblue;
+}
+
+.publication-url{
+    padding:0 1em;
+}
+.search-editor {
+    background-color: whitesmoke;
+    border:solid 3px grey;    
+    /* max-width: 80%;  */
+    border-radius: 7px;
+}
+
+
+.selection-tag {
+    border: 1px solid #ddd;
+    background-color: #f6f6f6;
+    padding: .5em;
+    margin:.5em 0em;
+    font-size: .8em;
+    color: black;
+    width: fit-content;
+    border-radius: 7px;
+}
+
+.selection-tag.selectable{
+        cursor:pointer;
+}
+
+.selection-tag.selected {
+    background-color: lightgoldenrodyellow;
+}
+.selection-tag.matched {
+    background-color: darkblue;
+    color:white;
+}
+
+.selection-tag.selectable .selection-tag-text:hover {
+    text-decoration: underline;
+}
+
+/* hide frequency for selected terms */
+#selected-terms .selection-tag-frequency {
+    display: none;
+}
+
+.selection-tag-frequency {
+    font-size: .8em;
+    color: white;
+    margin-left: 1em;
+    background-color: grey;
+    border-radius: .5em;
+    padding: .1em .5em
+}
+
+/* tick */
+.selection-tag.selectable.selected:after {         
+    font-family: "Font Awesome 5 Free";
+    content: "\f058";
+    padding-left: 1em;
+    color: green;
+}
+/* cross */
+.selection-tag.selectable:after {
+    font-family: "Font Awesome 5 Free";
+    content: "\f057";
+    padding-left:1em;
+    color: red;
+}
+
+
