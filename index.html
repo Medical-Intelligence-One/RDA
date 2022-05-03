@@ -34,7 +34,7 @@
         <div id="suggestion-template" class="div-suggestion">
             <div class="suggestion-header d-flex mb-2">
                 <span class="disease-name me-auto">Disease Name</span>
-                <span class="disease-probability ms-2" title="Probability"></span>
+                <span class="disease-probability" title="Probability"></span>
                 <span class="disease-prevalence ms-2" title="Prevalence"></span>
                 <!-- <span class="associated-evidence ms-2 me-2" title="Associated Evidence" data-bs-toggle="tooltip"
                     data-bs-placement="bottom"></span> -->
@@ -45,14 +45,10 @@
             <div class="disease-evidence"></div>
         </div>
     </div>
-    <div class="container-fluid">
-        <!-- <div class="ui-widget">
-            <label for="symptoms">Rare Disease Symptom: </label>
-            <input id="symptoms" size="150" class="ui-autocomplete-input" autocomplete="off">
-        </div> -->
+    <div class="container-fluid  col-sm-12 col-xl-6">
         <div class="rda-title">MI-1 Rare Disease Application</div>
 
-        <div class="code-mirror-app col-sm-12 col-xl-6">
+        <div class="code-mirror-app">
             <div class="code-mirror-wrapper">
                 <div id="editor-container">
                     <label for="search-editor" class="mb-1 div-rda-header">Findings used in Search</label>
@@ -66,7 +62,7 @@
                     <span class="selection-tag-frequency" title="Frequency">23%</span>
                 </div>
             </div>
-            <div class="div-rda-header">Associated Findings</div>
+            <div class="div-rda-header">Associated Findings (Click to Add to Search Criteria)</div>
             <div id="associated-findings" class="d-flex flex-wrap mb-2"></div>
             <div class="div-rda-header">Diseases</div>
             <div id="suggestions-container"></div>
