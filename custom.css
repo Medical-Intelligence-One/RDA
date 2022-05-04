@@ -1,10 +1,28 @@
-
-.container-fluid {
-    width: 95%;
-    margin-top: 1em;
-    text-align: -webkit-center;
+.btn {
+    min-width: 6em;
+    height: fit-content;
+    background-color: #1d3557;
 }
 
+body{
+    text-align: -webkit-center;
+    background-color: #1d3557;
+}
+.container-fluid {
+    background-color: whitesmoke;
+    margin: 3em;
+    padding: 1em;
+    text-align: -webkit-center;
+    border: solid .1em darkblue;
+    display: flex;
+    flex-direction: column;
+    width:90%;
+}
+@media all and (min-width: 1200px) {
+    .container-fluid {
+        width: 50%;
+    }
+}
 div.tooltip-inner {
     border: solid .2rem darkblue;
     background-color: cornflowerblue;
@@ -39,7 +57,7 @@ div.tooltip-inner {
     border: solid .2rem darkblue;
 }
 
-.div-header {
+/* .div-header {
     text-align: center;
     color: white;
     background-color: cornflowerblue;
@@ -47,16 +65,18 @@ div.tooltip-inner {
     font-size: 1.3rem;
     padding: 0.5rem;
     margin-bottom: 0.5rem;
-}
+} */
 
 .rda-title {
     text-align: center;
-    color: darkblue;
-    /* background-color: cornflowerblue; */
+    color: white;
+    background-color: #573F1D; 
     /* border: solid .2rem darkblue; */
     font-size: 1.4em;
-    margin-bottom: 0.3rem;
+    margin-bottom: 1.5em;
     width: 100%;
+    padding:.5em;
+    border-radius: .5em;
 }
 
 .div-rda-header {
@@ -74,7 +94,7 @@ div.tooltip-inner {
     text-align: left;
 }
 
-#suggestions-container, #associated-findings {
+.section-container {
     border: solid 0.2rem gray;
     width: 100%;
     padding: 1em;
@@ -83,6 +103,7 @@ div.tooltip-inner {
     border-radius: 7px;
     text-align:left;
     min-height: 3em;
+    margin-bottom: 2em;
 }
 
 .suggestions-container.is-empty {
@@ -94,11 +115,12 @@ div.tooltip-inner {
 } */
 
 .div-suggestion {
-    /* margin: 1em; */
+    margin: 1em;
     padding: .7em 1em !important;
-    border: solid 0.2rem grey;
+    border: solid 0.1rem darkblue;
     background-color: white;
     color: darkblue;
+    box-shadow: 0.2em 0.2em darkslateblue;
 }
 
 .associated-evidence{
@@ -117,17 +139,29 @@ div.tooltip-inner {
 }
 
 
-/* .disease-probability {
-    border: solid 0.1rem grey;
+.disease-prevalence, .disease-probability {
+    background-color: darkblue;
+    color: white;
+    padding: 0em .3em;
+    border: solid .1em grey;
+    border-radius: .3em;
+}
+
+.disease-probability:before {
+    /* border: solid 0.1rem grey;
     border-radius: 100%;
     width: 2.5em;
     min-height: 1.5em;
-    text-align: center;
-} */
+    text-align: center; */
+    content: 'Pb: ';
+    /* background-color:white;
+    color:grey; */
+}
 
-/* .disease-prevalence {
+.disease-prevalence:before {
+    content:'Pr: ';
+}
 
-} */
 .disease-score {
     display: inline-block;
     width: 7%;

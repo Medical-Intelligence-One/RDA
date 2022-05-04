@@ -12,8 +12,8 @@ const headers = {
 }
 var view
 var searchOptions = []
-var arrCUIs = []
-var codemirror = $('#editor').nextAll('.CodeMirror')[0]
+// var arrCUIs = []
+// var codemirror = $('#editor').nextAll('.CodeMirror')[0]
 
 var divSelectedTerms = $('#selected-terms')
 var divAssociatedFindings = $('#associated-findings')
@@ -85,8 +85,15 @@ async function fetchAutoComplete(startsWith) {
                     info: info,
                     label: label,
                     apply: () => {
-                        $('.cm-activeLine').text('')
+                        view.dispatch({
+                            changes: {
+                                from: 0,
+                                to: view.state.doc.length,
+                                insert: ''
+                            }
+                        })
                         createTag(divSelectedTerms, label, info, frequency, addClasses, fetchDiseases)
+
                     }
                 })
 
@@ -96,21 +103,19 @@ async function fetchAutoComplete(startsWith) {
 }
 
 function myCompletions(context: CompletionContext) {
-    let word = context.matchBefore(/\w*/)
+    let word = view.state.doc.toString();       //get content of editor
 
-    // var wordLength = $('.cm-activeline').text().length
-    if (word.text.length < 3) {
+    if (word.length < 3) {
         searchOptions = []
+        return null
     }
     else {
-        fetchAutoComplete(word.text)
+        fetchAutoComplete(word)
     }
 
 
-    if (word.from == word.to && !context.explicit)
-        return null
     return {
-        from: word.from,
+        from: 0,
         options: searchOptions
     }
 }
@@ -132,6 +137,7 @@ async function fetchDiseases() {
             $selectedTags.each(function (i, obj) {
                 cuis.push({
                     CUI: $(obj).attr('id')
+                    // CUI: "C0442874"
                 })
             })
         }
@@ -141,17 +147,17 @@ async function fetchDiseases() {
     await axios.post('https://api.mi1.ai/api/rareDiseaseSearch', await (cuiArrayPromise), { headers })
         // await axios.post('https://api.mi1.ai/api/PotentialComorbidities', await (cuiArrayPromise), { headers })
         .then(async function (response) {
-            $('.suggestions-container').remove();   //clear existing diseases from suggestions container
-            $('#associated-findings .selection-tag').remove()
+            $('#associated-findings').empty()
+            $('#suggestions-container').empty()
 
             showDiseases(response.data)
         }).catch(function (error) {
-
-            $('.preloader').addClass('d-none')
+            console.log('api error')
+            $('#associated-findings').empty()
+            $('#suggestions-container').empty()
+            // $('.preloader').addClass('d-none')
         });
 
-    // $('#suggestions-container .div-suggestion').remove()   //clear existing diseases from suggestions container
-    // $('#associated-findings .selection-tag').remove()
     // showDiseases(dataFromFile);
 }
 
@@ -189,24 +195,12 @@ function createTag(parentElement, label, id, frequency, addClasses, callback) {
 
     parentElement.append($divTag)
 
-    // //populate cuis for callback to search for diseases using selected tags where applicable
-    // var cuis = []
-    // let $selectedTags = $('.selection-tag.selected:not(.d-none)')
-    // if ($selectedTags.length > 0) {
-    //     $selectedTags.each(function (i, obj) {
-    //         cuis.push({
-    //             "CUI": $(obj).attr('id')
-    //             // console.log($(obj).text())
-    //         })
-    //     })
-    // }
-
-
     if (callback) {
         callback()
     }
 }
 
+//adds a mouseover caption to a tag
 function addTagTitle($divTag) {
     let title = ''
     if ($divTag.hasClass('selectable')) {
@@ -225,7 +219,7 @@ function addTagTitle($divTag) {
     $divTag.attr('title', title)
 }
 
-//display output from api call showing returned diseases in order of probability
+//display output from api call showing returned diseases with associated evidence displayed as tags
 function showDiseases(data) {
 
     //sort data by probability 
@@ -243,7 +237,8 @@ function showDiseases(data) {
 
             $divSuggestion.find('.disease-info').text(obj.Disease_Definition)
 
-            let probability = Math.round(Math.abs(obj.Disease_Probability)) + '%'
+            // let probability = Math.round(Math.abs(obj.Disease_Probability)) + '%'
+            let probability = Math.round(obj.Disease_Probability)
             $divSuggestion.find('.disease-probability').text(probability)
 
             let prevalence = obj.Disease_Prevalence
@@ -313,14 +308,6 @@ function showDiseases(data) {
 
 $(function () {
 
-    // $('#editor').on("keyup", function () {
-    //     var searchTerm = $('.cm-activeline').text()
-
-    //     if (searchTerm.length >= 3) {
-    //         fetchAutoComplete(searchTerm)
-    //     }
-    // })
-
     const initialState = EditorState.create({
         doc: '',
         extensions: [
@@ -341,8 +328,17 @@ $(function () {
         state: initialState,
     })
 
-    let element: HTMLElement = $('#editor-container')[0] as HTMLElement;
+    let element: HTMLElement = $('#editor-container')[0] as HTMLElement
 
+    view.focus()
+
+    $('#btnClearAll').on("click", function () {
+        $('#selected-terms').empty()
+        $('#associated-findings').empty()
+        $('#suggestions-container').empty()
+        view.focus()
+
+    })
 
 })
 
