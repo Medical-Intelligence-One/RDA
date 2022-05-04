@@ -121,7 +121,7 @@ function myCompletions(context: CompletionContext) {
 }
 
 let state = EditorState.create({
-    // doc: "Press Ctrl-Space in here...\n",
+    doc: "Press Ctrl-Space in here...\n",
     extensions: [basicSetup, autocompletion({ override: [myCompletions], defaultKeymap: true }),
     ]
 })
@@ -263,7 +263,12 @@ function showDiseases(data) {
                 $divSuggestion.find('.disease-evidence').append(publicationsHtmlString)
             }
 
-            //populate findings div for diaganosis and associated findings div for top 3 diagnoses 
+            $divSuggestion.find('.expand-contract').on("click", function (e) {
+                // $(e.currentTarget).parents('.suggestions-container').toggleClass('contracted');
+                $divSuggestion.toggleClass('contracted');
+            })
+
+            //populate findings div for diaganosis and associated findings div for top 3 diagnoses
             let matchedFindings = obj.Matched_Findings
             let unMatchedFindings = obj.Unmatched_Findings
 
