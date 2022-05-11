@@ -15,7 +15,8 @@ const headers = {
 }
 var view
 var searchOptions = []
-var curFindings = []
+var diseaseFindings = []
+// var curFindings = []
 var myCodeMirror
 // var arrCUIs = []
 // var codemirror = $('#editor').nextAll('.CodeMirror')[0]
@@ -61,7 +62,7 @@ let myTheme = EditorView.theme({
 }, { dark: false })
 
 //refresh autocomplete list for findings using startsWith phrase
-async function fetchAutoComplete(startsWith) {
+async function fetchAutoCompleteFromAPI(startsWith) {
 
     let autoCompleteData = []
     if (startsWith.length >= 3) {
@@ -78,13 +79,13 @@ async function fetchAutoComplete(startsWith) {
         await axios.post('https://api.mi1.ai/api/autocomplete_rareDz_findings', body, { headers })
             .then(function (response) {
                 let autoCompleteData = response.data
-
+                searchOptions = []
 
                 // if (autoCompleteData.length > 0) {
                 //     searchOptions = []
                 //     searchOptions = searchOptions.concat(curFindings)
                 // }
-                searchOptions = curFindings.slice()
+                // searchOptions = curFindings.slice()
                 //add autoComplete API response to autocomplete list. On selection, add tag to selected-terms div and refresh disease data 
                 for (var i = 0; i <= autoCompleteData.length - 1; i++) {
 
@@ -114,17 +115,51 @@ async function fetchAutoComplete(startsWith) {
     }
 }
 
+//populates autocomplete searchoptions using disease findings
+function fetchAutoCompleteFromDiseaseFindings(contains) {
+    searchOptions = []
+    let $divFindings = $('#suggestions-container .selection-tag')
+    let allFindings = []
+    $divFindings.each(function (i, obj) {
+        let cui = $(obj).find('.selection-tag-cui').text()
+        let label = $(obj).find('.selection-tag-text').text()
+        let frequency = $(obj).find('.selection-tag-frequency').text()
+
+        if (!searchOptions.some(e => { if (e.info == cui && e.label == label) { return true } }) && label.toLowerCase().indexOf(contains.toLowerCase()) >= 0) {
+            searchOptions.push({
+                info: cui,
+                label: label,
+                apply: () => {
+                    view.dispatch({
+                        changes: {
+                            from: 0,
+                            to: view.state.doc.length,
+                            insert: ''
+                        }
+                    })
+                    createTag(divSelectedTerms, label, cui, frequency, "removeable selected", fetchDiseases)
+                }
+            })
+        }
+    })
+}
 
 function myCompletions(context: CompletionContext) {
 
     let word = view.state.doc.toString();       //get content of editor
 
-    if (word.length < 3 && curFindings.length == 0) {
-        searchOptions = []
-        return null
+    //cancel autocomplete if <3 characters entered and there are no tags in the selected terms div
+    if (word.length < 3) {
+        if ($('#suggestions-container .selection-tag').length > 0) {
+            fetchAutoCompleteFromDiseaseFindings(word)
+        }
+        else {
+            searchOptions = []
+            return null
+        }
     }
     else {
-        fetchAutoComplete(word)
+        fetchAutoCompleteFromAPI(word)
     }
 
 
@@ -147,11 +182,13 @@ async function fetchDiseases() {
     //write selected CUI tag elements into array
     let cuiArrayPromise = new Promise(function (resolve) {
         var cuis = []
+        //iterate through all the tags in the selected-terms div to get the cuis
         let $selectedTags = $('#selected-terms .selection-tag.selected:not(.d-none)')
         if ($selectedTags.length > 0) {
             $selectedTags.each(function (i, obj) {
                 cuis.push({
-                    CUI: $(obj).attr('id')
+                    CUI: $(obj).find('.selection-tag-cui').text()
+                    // CUI: $(obj).attr('id')
                     // CUI: "C0442874"
                 })
             })
@@ -186,14 +223,15 @@ async function fetchDiseases() {
 //create a findings tag with click event. This has a call back function to ensure api call is done only on completion of tag creation
 function createTag(parentElement, label, id, frequency, addClasses, callback) {
     // var htmlString = "<span class='finding-tag' id='" + info + "'>" + label + "</span><span class='close'></span>"
-    var $divTag = $('#selection-tag-template').clone().attr('id', id).removeClass('d-none')
+    var $divTag = $('#selection-tag-template').clone().removeAttr('id').removeClass('d-none')
 
     $divTag.children('.selection-tag-text').text(label)
+    $divTag.children('.selection-tag-cui').text(id)
     $divTag.children('.selection-tag-frequency').text(frequency)
     //add any additional classes
     $divTag.addClass(addClasses)
 
-    //add click event if this tag is selectable
+    //add click event to add/remove tag from selected-terms div and requery the database
     if ($divTag.hasClass('selectable')) {
         addTagTitle($divTag)
 
@@ -211,6 +249,7 @@ function createTag(parentElement, label, id, frequency, addClasses, callback) {
         })
     }
 
+    //add click event to'x' symbol to remove tag from selected-terms div and requery the database
     if ($divTag.hasClass('removeable')) {
         $divTag.find(".remove-tag").on("click", function () {
             $divTag.remove()
@@ -251,13 +290,15 @@ function showDiseases(data) {
     data.sort(function (a, b) {
         return (parseFloat(a.Disease_Probability) - parseFloat(b.Disease_Probability))
     })
-    let allFindings = []
-    curFindings = []
+    diseaseFindings = []
+    searchOptions = []
+    // curFindings = []
     // populate suggestion-template with disease data and add to suggestions-container div
     try {
         for (let arrIndex = 0; arrIndex < data.length; arrIndex++) {
             let diseaseItem = data[arrIndex]
-            let $divSuggestion = $('#suggestion-template').clone().attr('id', diseaseItem.Disease_CUI).removeClass('d-none')
+            let $divSuggestion = $('#suggestion-template').clone().removeAttr('id').removeClass('d-none')
+            // let $divSuggestion = $('#suggestion-template').clone().attr('id', diseaseItem.Disease_CUI).removeClass('d-none')
 
             $divSuggestion.find('.disease-name').text(diseaseItem.Disease)
 
@@ -302,39 +343,62 @@ function showDiseases(data) {
             })
 
             //populate findings div for diagnosis and associated findings div for top 3 diagnoses
-            allFindings = diseaseItem.Matched_Findings.concat(diseaseItem.Unmatched_Findings)
+            diseaseFindings = diseaseItem.Matched_Findings.concat(diseaseItem.Unmatched_Findings)
 
             // sort data by frequency
-            allFindings.sort(function (a, b) {
+            diseaseFindings.sort(function (a, b) {
                 return (parseFloat(b.Frequency) - parseFloat(a.Frequency))
             })
 
-            if (allFindings != null) {
-                for (let j = 0; j < allFindings.length; j++) {
-                    let obj = allFindings[j]
+            //eliminate duplicates
+
+            //iterate through findings
+            if (diseaseFindings != null) {
+                for (let j = 0; j < diseaseFindings.length; j++) {
+                    let obj = diseaseFindings[j]
                     let label = obj.Name
                     let cui = obj.CUI
                     let frequency = obj.Frequency
                     let addClasses = "";
-                    //if this is one on of the top 3 suggested diseases, add the tag to the associated findings div and populate data in curFindings array to include in search terms
-                    if (arrIndex < 3) {
-                        addClasses = "selectable "
-                        curFindings.push({
-                            "info": cui,
-                            "label": label
-                        })
-                    }
-                    //add 'matched' class if cui is in Matched_Findings array
+                    //if this is one on of the top 3 suggested diseases, populate autocomplete data using searchOptions array 
+                    // if (arrIndex < 3) {
+                    //     // curFindings.push({
+                    //     //     "info": cui,
+                    //     //     "label": label
+                    //     // })
+                    //     searchOptions.push({
+                    //         info: cui,
+                    //         label: label,
+                    //         apply: () => {
+                    //             view.dispatch({
+                    //                 changes: {
+                    //                     from: 0,
+                    //                     to: view.state.doc.length,
+                    //                     insert: ''
+                    //                 }
+                    //             })
+                    //             createTag(divSelectedTerms, label, cui, frequency, "removeable selected", fetchDiseases)
+
+                    //         }
+                    //     })
+                    // }
+                    //add 'selected' class if cui is returned in matched-findings array (ie it was used in the search terms )
+                    addClasses = "selectable "
                     if (diseaseItem.Matched_Findings.filter(function (item) { return item.CUI === cui; }).length > 0) {
                         addClasses += "selected"
                     }
+                    //add tag to the disease findings container
                     createTag($divSuggestion.find('.disease-findings'), label, cui, frequency, addClasses, null)
                 }
             }
 
+            //append this new div-suggestion to the parent container
             $('#suggestions-container').append($divSuggestion)
-            searchOptions = curFindings.slice()
+            // searchOptions = curFindings.slice()
+
         }
+        //populate autocomplete from disease findings
+        fetchAutoCompleteFromDiseaseFindings('')
     }
     catch (ex) {
         console.log(console.log(ex))
@@ -369,7 +433,16 @@ $(function () {
     $('#btnClearAll').on("click", function () {
         $('#selected-terms').empty()
         $('#suggestions-container').empty()
-        curFindings = []
+        // curFindings = []
+        //clear cm editor
+        view.dispatch({
+            changes: {
+                from: 0,
+                to: view.state.doc.length,
+                insert: ''
+            }
+        })
+
         view.focus()
         startCompletion
 
