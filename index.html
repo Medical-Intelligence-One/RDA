@@ -29,32 +29,39 @@
 </head>
 
 <body>
+    <!-- * * * templates * * *  -->
     <div id="templates" class="d-none">
-        <!-- template for suggestion header -->
+        <!-- template for findings tab -->
         <div id="selection-tag-template"
             class="selection-tag d-flex col-auto justify-content-start align-items-center me-2 d-none">
-            <span class="selection-tag-text">Demo Text</span>
-            <span class="selection-tag-frequency" title="Frequency">23%</span>
+            <span class="selection-tag-text"></span>
+            <span class="selection-tag-frequency" title="Frequency"></span>
+            <span class="remove-tag" title="Remove Finding from Search Criteria"></span>
         </div>
+        <!-- template for disease suggestion -->
         <div id="suggestion-template" class="div-suggestion">
-            <div class="section-container mb-auto">
-                <div class="suggestion-header d-flex">
-                    <span class="expand-contract" title="Expand/Contract Disease"></span>
+            <div class="section-container clickable mb-auto" title="Expand/Contract Disease">
+                <div class="suggestion-header d-flex align-items-center">
+                    <span class="expand-contract"></span>
                     <span class="disease-name me-auto">Disease Name</span>
                     <span class="disease-probability" title="Probability"></span>
                     <span class="disease-prevalence ms-2" title="Prevalence"></span>
                     <!-- <span class="associated-evidence ms-2 me-2" title="Associated Evidence" data-bs-toggle="tooltip"
                     data-bs-placement="bottom"></span> -->
                     <!-- <i class="disease-probability fas fa-circle" aria-hidden="true" data-bs-toggle="tooltip"></i> -->
+                    <i class="connected-papers fas fa-circle-nodes d-none" aria-hidden="true"
+                        title="Search Connected Papers"></i>
                 </div>
             </div>
             <div class="disease-addinfo mt-2">
                 <div class="disease-info mb-3"></div>
-                <div class="disease-evidence mb-3"></div>
+                <div class="disease-evidence mb-3 d-none"></div>
                 <div class="disease-findings d-flex flex-wrap"></div>
             </div>
         </div>
     </div>
+    <!-- * * * end of templates * * *  -->
+
     <div class="container-fluid  col-sm-12 col-xl-6">
         <div class="rda-title">MI-1 Rare Disease Application</div>
         <div class="_sticky-top" style="background-color:whitesmoke">
@@ -70,12 +77,12 @@
                 </div>
                 <!-- </div>
                 </div> -->
-                <div id="selected-terms" class="d-flex flex-wrap ms-2">
+                <div id="selected-terms" class="d-flex flex-wrap ms-2 mt-3">
                 </div>
             </div>
         </div>
-        <div class="div-rda-header">Associated Findings (Click to Add to Search Criteria)</div>
-        <div id="associated-findings" class="section-container d-flex flex-wrap"></div>
+        <div class="div-rda-header d-none">Associated Findings (Click to Add to Search Criteria)</div>
+        <div id="associated-findings" class="section-container d-flex flex-wrap d-none"></div>
         <div class="div-rda-header">Diseases</div>
         <div id="suggestions-container" class="section-container"></div>
     </div>

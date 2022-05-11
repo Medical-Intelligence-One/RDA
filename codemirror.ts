@@ -1,22 +1,27 @@
+// import * as CodeMirror from "codemirror"
+// import { } from "@codemirror/commands"
 import { basicSetup, EditorState, EditorView } from '@codemirror/basic-setup';
 import { keymap } from "@codemirror/view"
 import { indentWithTab } from "@codemirror/commands"
-import { autocompletion, CompletionContext } from "@codemirror/autocomplete"
+import { autocompletion, CompletionContext, startCompletion } from "@codemirror/autocomplete"
 import { StateField, EditorSelection } from "@codemirror/state"
 import { Tooltip, showTooltip } from "@codemirror/tooltip"
 import { indentUnit } from '@codemirror/language'
-import dataFromFile from '../mi1-rare-disease/rare-diseases.json'       //test data until api is working
+import rareDiseaseData from '../mi1-rare-disease/rare-diseases.json'       //test data until api is working
+import autocompleteRareDiseaseData from '../mi1-rare-disease/autocomplete_rareDz_findings.json'       //test data until api is working
 const axios = require('axios')
 const headers = {
     'Access-Control-Allow-Origin': '*'
 }
 var view
 var searchOptions = []
+var curFindings = []
+var myCodeMirror
 // var arrCUIs = []
 // var codemirror = $('#editor').nextAll('.CodeMirror')[0]
 
 var divSelectedTerms = $('#selected-terms')
-var divAssociatedFindings = $('#associated-findings')
+// var divAssociatedFindings = $('#associated-findings')
 
 let myTheme = EditorView.theme({
     "cm-editor": {
@@ -55,57 +60,66 @@ let myTheme = EditorView.theme({
     }
 }, { dark: false })
 
-
-
+//refresh autocomplete list for findings using startsWith phrase
 async function fetchAutoComplete(startsWith) {
 
-    const body = {
-        "startsWith":
-            [
-                {
-                    "startsWith": startsWith
-                }
-            ]
-    }
-
-    await axios.post('https://api.mi1.ai/api/autocomplete_rareDz_findings', body, { headers })
-        .then(function (response) {
-
-            if (response.data.length > 0) {
-                searchOptions = []
-            }
-
-            for (var i = 0; i <= response.data.length - 1; i++) {
-
-                let info = response.data[i].Clinical_Finding_CUI
-                let label = response.data[i].Clinical_Finding
-                let frequency = null
-                let addClasses = "selectable selected"
-                searchOptions.push({
-                    info: info,
-                    label: label,
-                    apply: () => {
-                        view.dispatch({
-                            changes: {
-                                from: 0,
-                                to: view.state.doc.length,
-                                insert: ''
-                            }
-                        })
-                        createTag(divSelectedTerms, label, info, frequency, addClasses, fetchDiseases)
-
+    let autoCompleteData = []
+    if (startsWith.length >= 3) {
+        const body = {
+            "startsWith":
+                [
+                    {
+                        "startsWith": startsWith
                     }
-                })
+                ]
+        }
 
-            }
+        // autoCompleteData = autocompleteRareDiseaseData
+        await axios.post('https://api.mi1.ai/api/autocomplete_rareDz_findings', body, { headers })
+            .then(function (response) {
+                let autoCompleteData = response.data
 
-        }).catch(function (error) { console.log(error) }).then(function () { })
+
+                // if (autoCompleteData.length > 0) {
+                //     searchOptions = []
+                //     searchOptions = searchOptions.concat(curFindings)
+                // }
+                searchOptions = curFindings.slice()
+                //add autoComplete API response to autocomplete list. On selection, add tag to selected-terms div and refresh disease data 
+                for (var i = 0; i <= autoCompleteData.length - 1; i++) {
+
+                    let cui = autoCompleteData[i].Clinical_Finding_CUI
+                    let name = autoCompleteData[i].Clinical_Finding
+                    let frequency = null
+                    let addClasses = "removeable selected"
+                    searchOptions.push({
+                        info: cui,
+                        label: name,
+                        apply: () => {
+                            view.dispatch({
+                                changes: {
+                                    from: 0,
+                                    to: view.state.doc.length,
+                                    insert: ''
+                                }
+                            })
+                            createTag(divSelectedTerms, name, cui, frequency, addClasses, fetchDiseases)
+
+                        }
+                    })
+
+                }
+
+            }).catch(function (error) { console.log(error) }).then(function () { })
+    }
 }
 
+
 function myCompletions(context: CompletionContext) {
+
     let word = view.state.doc.toString();       //get content of editor
 
-    if (word.length < 3) {
+    if (word.length < 3 && curFindings.length == 0) {
         searchOptions = []
         return null
     }
@@ -126,13 +140,14 @@ let state = EditorState.create({
     ]
 })
 
+
 //returns Diseases based on selected CUIS
 async function fetchDiseases() {
 
     //write selected CUI tag elements into array
     let cuiArrayPromise = new Promise(function (resolve) {
         var cuis = []
-        let $selectedTags = $('.selection-tag.selected:not(.d-none)')
+        let $selectedTags = $('#selected-terms .selection-tag.selected:not(.d-none)')
         if ($selectedTags.length > 0) {
             $selectedTags.each(function (i, obj) {
                 cuis.push({
@@ -158,7 +173,14 @@ async function fetchDiseases() {
             // $('.preloader').addClass('d-none')
         });
 
-    // showDiseases(dataFromFile);
+    // showDiseases(rareDiseaseData)
+    view.focus
+    try {
+        startCompletion
+    }
+    catch (ex) {
+        console.log(console.log(ex))
+    }
 }
 
 //create a findings tag with click event. This has a call back function to ensure api call is done only on completion of tag creation
@@ -178,17 +200,20 @@ function createTag(parentElement, label, id, frequency, addClasses, callback) {
         $divTag.on("click", function () {
             $divTag.toggleClass('selected')
             let selected = $divTag.hasClass('selected')
-            //if element is in associated findings, add/remove this from selected terms
-            if (($divTag).closest(divAssociatedFindings).length > 0) {
-                if (selected) {
-                    divSelectedTerms.append($divTag)
-                }
-                else {
-                    divSelectedTerms.find('#' + id).remove()
-                }
-
+            if (selected) {
+                divSelectedTerms.append($divTag)
+            }
+            else {
+                divSelectedTerms.find('#' + id).remove()
             }
             addTagTitle($divTag)
+            fetchDiseases()
+        })
+    }
+
+    if ($divTag.hasClass('removeable')) {
+        $divTag.find(".remove-tag").on("click", function () {
+            $divTag.remove()
             fetchDiseases()
         })
     }
@@ -207,14 +232,14 @@ function addTagTitle($divTag) {
         if ($divTag.hasClass('selected')) {
             title = 'Finding used in Search. Click to Remove'
         }
+        // else {
+        //     if (($divTag).closest(divAssociatedFindings).length > 0) {
+        //         title = "Click to add Finding to Search"
+        //     }
         else {
-            if (($divTag).closest(divAssociatedFindings).length > 0) {
-                title = "Click to add Finding to Search"
-            }
-            else {
-                title = 'Finding excluded from Search. Click to Add.'
-            }
+            title = 'Finding excluded from Search. Click to Add.'
         }
+        // }
     }
     $divTag.attr('title', title)
 }
@@ -222,31 +247,33 @@ function addTagTitle($divTag) {
 //display output from api call showing returned diseases with associated evidence displayed as tags
 function showDiseases(data) {
 
-    //sort data by probability 
-    // data.sort(function (a, b) {
-    //     return (parseFloat(a.Disease_Probability) - parseFloat(b.Disease_Probability))
-    // })
-
-    // var obj = JSON.parse(response.data)
+    // sort data by probability 
+    data.sort(function (a, b) {
+        return (parseFloat(a.Disease_Probability) - parseFloat(b.Disease_Probability))
+    })
+    let allFindings = []
+    curFindings = []
+    // populate suggestion-template with disease data and add to suggestions-container div
     try {
         for (let arrIndex = 0; arrIndex < data.length; arrIndex++) {
-            let obj = data[arrIndex]
-            let $divSuggestion = $('#suggestion-template').clone().attr('id', obj.Disease_CUI).removeClass('d-none')
+            let diseaseItem = data[arrIndex]
+            let $divSuggestion = $('#suggestion-template').clone().attr('id', diseaseItem.Disease_CUI).removeClass('d-none')
 
-            $divSuggestion.find('.disease-name').text(obj.Disease)
+            $divSuggestion.find('.disease-name').text(diseaseItem.Disease)
 
-            $divSuggestion.find('.disease-info').text(obj.Disease_Definition)
+            $divSuggestion.find('.disease-info').text(diseaseItem.Disease_Definition)
 
             // let probability = Math.round(Math.abs(obj.Disease_Probability)) + '%'
-            let probability = Math.round(obj.Disease_Probability)
+            let probability = Math.round(diseaseItem.Disease_Probability)
             $divSuggestion.find('.disease-probability').text(probability)
 
-            let prevalence = obj.Disease_Prevalence
+            let prevalence = diseaseItem.Disease_Prevalence
             let floatPrevalence = parseFloat(prevalence);
             if (!isNaN(floatPrevalence))
                 $divSuggestion.find('.disease-prevalence').text(floatPrevalence.toExponential())
 
-            let evidence = obj.Disease_Finding_Assoc_Evidence
+            //publications
+            let evidence = diseaseItem.Disease_Finding_Assoc_Evidence
             let publicationsHtmlString = '';
             if (evidence != null) {
                 for (let j = 0; j < evidence.length; j++) {
@@ -255,6 +282,13 @@ function showDiseases(data) {
                 }
                 publicationsHtmlString = "Publications:" + publicationsHtmlString
             }
+
+            //connected papers
+            $divSuggestion.find('.connected-papers').attr('title', 'Search Connected Papers for ' + diseaseItem.Disease)
+            $divSuggestion.find('.connected-papers').on("click", function (el) {
+                let url = "https://www.connectedpapers.com/search?q=" + diseaseItem.Disease
+                window.open(url, '_blank').focus();
+            })
             // $divSuggestion.find('.associated-evidence').attr('data-bs-original-title', publicationsHtmlString)
             if (publicationsHtmlString == '') {
                 $divSuggestion.find('.disease-evidence').hide()
@@ -263,47 +297,43 @@ function showDiseases(data) {
                 $divSuggestion.find('.disease-evidence').append(publicationsHtmlString)
             }
 
-            $divSuggestion.find('.expand-contract').on("click", function (e) {
-                // $(e.currentTarget).parents('.suggestions-container').toggleClass('contracted');
+            $divSuggestion.find('.section-container').on("click", function (e) {
                 $divSuggestion.toggleClass('contracted');
             })
 
-            //populate findings div for diaganosis and associated findings div for top 3 diagnoses
-            let matchedFindings = obj.Matched_Findings
-            let unMatchedFindings = obj.Unmatched_Findings
+            //populate findings div for diagnosis and associated findings div for top 3 diagnoses
+            allFindings = diseaseItem.Matched_Findings.concat(diseaseItem.Unmatched_Findings)
 
-            if (matchedFindings != null) {
-                for (let j = 0; j < matchedFindings.length; j++) {
-                    let obj = matchedFindings[j]
+            // sort data by frequency
+            allFindings.sort(function (a, b) {
+                return (parseFloat(b.Frequency) - parseFloat(a.Frequency))
+            })
+
+            if (allFindings != null) {
+                for (let j = 0; j < allFindings.length; j++) {
+                    let obj = allFindings[j]
                     let label = obj.Name
-                    let id = obj.CUI
+                    let cui = obj.CUI
                     let frequency = obj.Frequency
-                    let addClasses = "matched"
-                    createTag($divSuggestion.find('.disease-findings'), label, id, frequency, addClasses, null)
-                    //if this is one on of the top 3 suggested diseases, also add the tag to the associated findings div
-
-                }
-            }
-
-            if (unMatchedFindings != null) {
-                for (let j = 0; j < unMatchedFindings.length; j++) {
-                    let obj = unMatchedFindings[j]
-                    let label = obj.Name
-                    let id = obj.CUI
-                    let frequency = obj.Frequency
-                    let addClasses = ""
-
-                    createTag($divSuggestion.find('.disease-findings'), label, id, frequency, addClasses, null)
-                    //if this is one on of the top 3 suggested diseases, also add the tag to the associated findings div if not already in this or the 
-                    //selected terms div
-                    if (arrIndex < 3 && divAssociatedFindings.find('#' + id).length == 0 && divSelectedTerms.find('#' + id).length == 0) {
-                        addClasses = "selectable"
-                        createTag(divAssociatedFindings, label, id, frequency, addClasses, null)
+                    let addClasses = "";
+                    //if this is one on of the top 3 suggested diseases, add the tag to the associated findings div and populate data in curFindings array to include in search terms
+                    if (arrIndex < 3) {
+                        addClasses = "selectable "
+                        curFindings.push({
+                            "info": cui,
+                            "label": label
+                        })
                     }
-
+                    //add 'matched' class if cui is in Matched_Findings array
+                    if (diseaseItem.Matched_Findings.filter(function (item) { return item.CUI === cui; }).length > 0) {
+                        addClasses += "selected"
+                    }
+                    createTag($divSuggestion.find('.disease-findings'), label, cui, frequency, addClasses, null)
                 }
             }
+
             $('#suggestions-container').append($divSuggestion)
+            searchOptions = curFindings.slice()
         }
     }
     catch (ex) {
@@ -327,7 +357,6 @@ $(function () {
     })
 
     // Initialization of the EditorView
-
     view = new EditorView({
         parent: document.getElementById('editor'),
         state: initialState,
@@ -339,9 +368,10 @@ $(function () {
 
     $('#btnClearAll').on("click", function () {
         $('#selected-terms').empty()
-        $('#associated-findings').empty()
         $('#suggestions-container').empty()
+        curFindings = []
         view.focus()
+        startCompletion
 
     })
 

@@ -110,9 +110,12 @@ div.tooltip-inner {
     background: lightgray;
 }
 
-/* .suggestion-header {
-    padding: .7em .2em !important;
-} */
+
+
+.section-container.clickable:hover {
+    /* color: #0b5ed7; */
+    background-color: lightgoldenrodyellow;
+}
 
 .div-suggestion {
     margin: 1em;
@@ -123,7 +126,8 @@ div.tooltip-inner {
     box-shadow: 0.2em 0.2em darkslateblue;
 }
 
-.associated-evidence{
+/* .associated-evidence, .connected-papers */
+.clickable{
     cursor:pointer;
 }
 
@@ -145,6 +149,7 @@ div.tooltip-inner {
     padding: 0em .3em;
     border: solid .1em grey;
     border-radius: .3em;
+    display:none;
 }
 
 .disease-probability:before {
@@ -188,28 +193,34 @@ div.tooltip-inner {
     border: 1px solid #ddd;
     background-color: #f6f6f6;
     padding: .5em;
-    margin:.5em 0em;
+    margin:0em .5em ;
     font-size: .8em;
     color: black;
     width: fit-content;
     border-radius: 7px;
 }
 
-.selection-tag.selectable{
+.div-suggestion .selection-tag{
+    margin: .5em .5em;
+}
+.div-suggestion .selection-tag.selectable{
         cursor:pointer;
+}
+
+.div-suggestion .selection-tag.selectable .selection-tag-text:hover {
+    text-decoration: underline;
 }
 
 .selection-tag.selected {
     background-color: lightgoldenrodyellow;
+    border-color: gold;
 }
+
 .selection-tag.matched {
     background-color: darkblue;
     color:white;
 }
 
-.selection-tag.selectable .selection-tag-text:hover {
-    text-decoration: underline;
-}
 
 /* hide frequency for selected terms */
 #selected-terms .selection-tag-frequency {
@@ -226,21 +237,37 @@ div.tooltip-inner {
 }
 
 /* tick */
-#selected-terms .selection-tag.selected:after {         
+/* #selected-terms .selection-tag.selected:after {         
     font-family: "Font Awesome 5 Free";
     content: "\f058";
     padding-left: 1em;
     color: green;
-}
+} */
 
 /* cross */
-#selected-terms .selection-tag:after {
+/* #selected-terms .selection-tag:after {
     font-family: "Font Awesome 5 Free";
     content: "\f057";
     padding-left:1em;
     color: red;
+} */
+
+/* cross */
+#selected-terms .remove-tag:after {
+    font-family: "Font Awesome 5 Free";
+    content: "\f057";
+    padding-left: 1em;
+    color: grey;
+    cursor: pointer;
 }
 
+#selected-terms .remove-tag:hover:after {
+    color:red;
+}
+
+#selected-terms .selection-tag:not(.selected) {
+    display:none !important;   
+}
 
 .expand-contract {
     border: 2px solid darkblue;
@@ -253,6 +280,14 @@ div.tooltip-inner {
     margin-right: 1em;
 }
 
+
+/* span.expand-contract:hover:before {
+    color: #0b5ed7;
+}
+
+span.expand-contract:hover {
+    border-color: #0b5ed7;
+} */
 
 span.expand-contract:before {
     font-family: "Font Awesome 5 Free";
