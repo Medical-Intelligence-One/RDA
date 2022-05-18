@@ -33,16 +33,17 @@
     <div id="templates" class="d-none">
         <!-- template for findings tab -->
         <div id="selection-tag-template"
-            class="selection-tag d-flex col-auto justify-content-start align-items-center me-2 d-none">
+            class="selection-tag para2 d-flex col-auto justify-content-start align-items-center me-2">
             <span class="selection-tag-text"></span>
             <span class="selection-tag-cui d-none"></span>
             <span class="selection-tag-frequency" title="Frequency"></span>
             <span class="remove-tag" title="Remove Finding from Search Criteria"></span>
         </div>
+        <!-- template for 'more findings' link -->
         <!-- template for disease suggestion -->
-        <div id="suggestion-template" class="div-suggestion">
-            <div class="section-container clickable mb-auto" title="Expand/Contract Disease">
-                <div class="suggestion-header d-flex align-items-center">
+        <div id="suggestion-template" class="div-suggestion hide-findings">
+            <div class="section-container mb-auto">
+                <div class="suggestion-header clickable d-flex align-items-center h4" title="Expand/Contract Disease">
                     <span class="expand-contract"></span>
                     <span class="disease-name me-auto">Disease Name</span>
                     <span class="disease-probability" title="Probability"></span>
@@ -55,38 +56,66 @@
                 </div>
             </div>
             <div class="disease-addinfo mt-2">
-                <div class="disease-info mb-3"></div>
+                <div class="disease-info para2 mb-3"></div>
                 <div class="disease-evidence mb-3 d-none"></div>
+                <div class="more-findings">
+                    <label class="clickable btn-more-findings para3"></label>
+                </div>
                 <div class="disease-findings d-flex flex-wrap"></div>
             </div>
         </div>
     </div>
     <!-- * * * end of templates * * *  -->
 
-    <div class="container-fluid  col-sm-12 col-xl-6">
-        <div class="rda-title">MI-1 Rare Disease Application</div>
-        <div class="_sticky-top" style="background-color:whitesmoke">
-            <div class="d-flex align-items-center me-auto mb-3">
-                <label for="search-editor" class="div-rda-header">Findings used in Search</label>
-                <button id="btnClearAll" type="button" class="btn btn-primary ms-3">Clear All</button>
-            </div>
-            <div class="section-container">
-                <!-- <div class="code-mirror-app">
-                    <div class="code-mirror-wrapper"> -->
-                <div id="editor-container">
-                    <div class="search-editor" id="editor"></div>
-                </div>
-                <!-- </div>
-                </div> -->
-                <div id="selected-terms" class="d-flex flex-wrap ms-2 mt-3">
-                </div>
-            </div>
+    <header>
+        <div id="logo" style="display: inline-block; vertical-align: middle; text-align: left;">
+            <a href="https://www.mi1.ai/">
+                <img src="./assets/Original on Transparent.png" height="60px"
+                    alt="Medical Intelligence One home page" />
+            </a>
         </div>
-        <div class="div-rda-header d-none">Associated Findings (Click to Add to Search Criteria)</div>
-        <div id="associated-findings" class="section-container d-flex flex-wrap d-none"></div>
-        <div class="div-rda-header">Diseases</div>
-        <div id="suggestions-container" class="section-container"></div>
+        <!-- <div style="display: inline-block; align-items: center;">
+            <h1>Clinical Co-Pilot</h1>
+        </div> -->
+    </header>
+
+    <div class="container-fluid is-empty col-sm-12 col-xl-6">
+        <!-- <hr class="hr-1"> -->
+        <div class="primary-container">
+            <div class="row">
+                <!-- <span class="col-3"><img src="/assets/main-image.png" id="main-image" class="img-fluid"></span> -->
+                <span class="rda-title h2">Enola Rare Disease Search Demo</span>
+                <!-- <span class="col-3"></span> -->
+            </div>
+            <!-- <hr class="hr-1"> -->
+            <div class="_sticky-top">
+                <div class="d-flex align-items-center me-auto mb-3">
+                    <label for="search-editor" class="rda-header h3">Findings used in Search</label>
+                    <button id="btnClearAll" type="button" class="btn btn-primary ms-3">Clear All</button>
+                </div>
+                <div class="section-container">
+                    <!-- <div class="code-mirror-app">
+                    <div class="code-mirror-wrapper"> -->
+                    <div id="editor-container">
+                        <div class="search-editor" id="editor"></div>
+                    </div>
+                    <!-- </div>
+                </div> -->
+                    <div id="selected-terms" class="d-flex flex-wrap ms-2 mt-3">
+                    </div>
+                </div>
+            </div>
+            <div class="rda-header h3 d-none">Associated Findings (Click to Add to Search Criteria)</div>
+            <div id="associated-findings" class="section-container d-flex flex-wrap d-none"></div>
+            <div id="rda-header-diseases" class="rda-header h3">Diseases</div>
+            <div id="suggestions-container" class="section-container"></div>
+        </div>
     </div>
+    <div id="particles-js">
+    </div>
+
+    <script src="/node_modules/particles.js/particles.js"></script>
+    <script src="/node_modules/particles.js/demo/js/app.js"></script>
 </body>
 
 <script>

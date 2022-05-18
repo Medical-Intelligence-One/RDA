@@ -31,7 +31,7 @@ let myTheme = EditorView.theme({
         // minHeight: "600px",
         outline: 0,
         border: 0,
-        fontFamily: 'Verdana'
+        fontFamily: 'Rubik Light, Open Sans'
     },
     ".cm-content": {
         fontSize: "18px"
@@ -44,17 +44,17 @@ let myTheme = EditorView.theme({
     },
     ".cm-scroller": {
         // minHeight: "600px",
-        fontFamily: "Verdana"
+        fontFamily: 'Rubik Light, Open Sans'
     },
     ".cm-tooltip.cm-tooltip-autocomplete > ul > li": {
         lineHeight: 1.8,
-        fontFamily: "Verdana",
+        fontFamily: "Rubik Light, Open Sans",
         textAlign: "left"
 
     },
     ".cm-tooltip": {
         fontSize: "14px",
-        fontFamily: 'Verdana'
+        fontFamily: 'Rubik Light, Open Sans'
     },
     ".cm-lineWrapping": {
         // wordBreak: "break-all",
@@ -202,12 +202,15 @@ async function fetchDiseases() {
             $('#associated-findings').empty()
             $('#suggestions-container').empty()
 
-            showDiseases(response.data)
+            if (response.data.length > 0) {
+                showDiseases(response.data)
+            }
+            else {
+                clearScreen()
+            }
         }).catch(function (error) {
-            console.log('api error')
-            $('#associated-findings').empty()
-            $('#suggestions-container').empty()
-            // $('.preloader').addClass('d-none')
+            console.log('api error: ' + error)
+            clearScreen()
         });
 
     // showDiseases(rareDiseaseData)
@@ -292,6 +295,7 @@ function showDiseases(data) {
     })
     diseaseFindings = []
     searchOptions = []
+    $('.container-fluid').removeClass('is-empty')
     // curFindings = []
     // populate suggestion-template with disease data and add to suggestions-container div
     try {
@@ -338,7 +342,7 @@ function showDiseases(data) {
                 $divSuggestion.find('.disease-evidence').append(publicationsHtmlString)
             }
 
-            $divSuggestion.find('.section-container').on("click", function (e) {
+            $divSuggestion.find('.suggestion-header').on("click", function (e) {
                 $divSuggestion.toggleClass('contracted');
             })
 
@@ -360,37 +364,38 @@ function showDiseases(data) {
                     let cui = obj.CUI
                     let frequency = obj.Frequency
                     let addClasses = "";
-                    //if this is one on of the top 3 suggested diseases, populate autocomplete data using searchOptions array 
-                    // if (arrIndex < 3) {
-                    //     // curFindings.push({
-                    //     //     "info": cui,
-                    //     //     "label": label
-                    //     // })
-                    //     searchOptions.push({
-                    //         info: cui,
-                    //         label: label,
-                    //         apply: () => {
-                    //             view.dispatch({
-                    //                 changes: {
-                    //                     from: 0,
-                    //                     to: view.state.doc.length,
-                    //                     insert: ''
-                    //                 }
-                    //             })
-                    //             createTag(divSelectedTerms, label, cui, frequency, "removeable selected", fetchDiseases)
 
-                    //         }
-                    //     })
-                    // }
                     //add 'selected' class if cui is returned in matched-findings array (ie it was used in the search terms )
                     addClasses = "selectable "
                     if (diseaseItem.Matched_Findings.filter(function (item) { return item.CUI === cui; }).length > 0) {
-                        addClasses += "selected"
+                        addClasses += "selected "
                     }
+
+                    //add top-eight class for top 8 findings. These will always be displayed
+                    if (j < 8) {
+                        addClasses += "top-eight "
+                    }
+
                     //add tag to the disease findings container
                     createTag($divSuggestion.find('.disease-findings'), label, cui, frequency, addClasses, null)
                 }
             }
+
+            //attach click event for more-findings button
+            let btnMoreFindings = $divSuggestion.find('.btn-more-findings')
+            btnMoreFindings.on("click", function () {
+                $divSuggestion.toggleClass('show-findings hide-findings')
+                // if (btnMoreFindings.hasClass('show-findings')) {
+                //     btnMoreFindings.text('Show Fewer Findings ...')
+                //     btnMoreFindings.parents('.div-suggestion').find('.selection-tab:not(.top-eight)').addClass('d-none')
+                //     btnMoreFindings.removeClass('show-findings')
+                // }
+                // else {
+                //     btnMoreFindings.text('Show More Findings ...')
+                //     btnMoreFindings.parents('.div-suggestion').find('.selection-tab:not(.top-eight)').removeClass('d-none')
+                //     btnMoreFindings.addClass('show-findings')
+                // }
+            })
 
             //append this new div-suggestion to the parent container
             $('#suggestions-container').append($divSuggestion)
@@ -405,7 +410,31 @@ function showDiseases(data) {
     }
 }
 
+function clearScreen() {
+    $('#selected-terms').empty()
+    $('#suggestions-container').empty()
+    $('.container-fluid').addClass('is-empty')
+
+    // curFindings = []
+    //clear cm editor
+    view.dispatch({
+        changes: {
+            from: 0,
+            to: view.state.doc.length,
+            insert: ''
+        }
+    })
+
+    view.focus()
+    // startCompletion
+
+}
+
 $(function () {
+
+    // particlesJS('particles-js', '/assets/particlesjs.json', function () {
+    //     console.log('callback - particles-js config loaded');
+    // });
 
     const initialState = EditorState.create({
         doc: '',
@@ -431,21 +460,7 @@ $(function () {
     view.focus()
 
     $('#btnClearAll').on("click", function () {
-        $('#selected-terms').empty()
-        $('#suggestions-container').empty()
-        // curFindings = []
-        //clear cm editor
-        view.dispatch({
-            changes: {
-                from: 0,
-                to: view.state.doc.length,
-                insert: ''
-            }
-        })
-
-        view.focus()
-        startCompletion
-
+        clearScreen()
     })
 
 })

@@ -1,7 +1,31 @@
+/*
+Light Blue #03B8EA
+Dark Blue #5A99E2 
+White #FFFFFF 
+Black #000000 
+Red #F32E15
+*/
+
 body {
+    color: black !important;
     text-align: -webkit-center;
-    background-color: #1d3557;
+    background-color: black;
     font-family: 'Rubik Light', 'Open Sans';
+    /* background-image: url("/assets/background-image.jpg");
+    background-repeat: no-repeat;
+    background-size: cover; */
+}
+
+hr.hr-1 {
+    background: linear-gradient(to right, black, #03B8EA, white);
+    height: 20px !important;
+    margin-bottom: 2em;
+}
+
+hr.hr-2 {
+    background: linear-gradient(to right, white, #03B8EA, black);
+    height: 20px !important;
+    margin-bottom: 2em;
 }
 
 h1 {
@@ -50,30 +74,51 @@ h6 {
 .btn {
     min-width: 6em;
     height: fit-content;
-    background-color: #1d3557;
+    background-color: #F32E15;
+    border: none;
 }
 
+.btn:hover {
+    background-color: white;
+    color: black;
+}
 
-.container-fluid {
-    background-color: whitesmoke;
-    margin: 3em;
-    padding: 1em;
+/* .container-fluid.is-empty {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+} */
+
+.primary-container {
+    background-color: black;
+    /* margin-top: 1em; */
+    padding: 0 2em;
     text-align: -webkit-center;
-    border: solid .1em darkblue;
+    /* border: solid .1em darkblue; */
     display: flex;
     flex-direction: column;
-    width: 90%;
+    /* width: 90%; */
+    border-radius: 7px;
+}
+
+.primary-container.is-empty {
+
+    /* align-items: center; */
 }
 
 @media all and (min-width: 1200px) {
     .container-fluid {
-        width: 50%;
+        width: 80%;
+    }
+
+    .primary-container {
+        width: 90%;
     }
 }
 
 div.tooltip-inner {
-    border: solid .2rem darkblue;
-    background-color: cornflowerblue;
+    border: solid .2rem #F32E15;
+    background-color: black;
     color: white;
 }
 
@@ -82,9 +127,9 @@ div.tooltip-inner {
 }
 
 #mi1-toast {
-    color: #212b32;
-    background-color: #efefef;
-    border: 1px solid darkgrey;
+    color: white;
+    background-color: black;
+    border: 1px solid #F32E15;
     opacity: 1 !important;
     z-index: 99999;
     text-align: center;
@@ -99,11 +144,29 @@ div.tooltip-inner {
     height: 100vh;
 }
 
-#text-area-notes {
+
+.container-fluid.is-empty #rda-header-diseases {
+    display: none;
+}
+
+.container-fluid.is-empty #suggestions-container {
+    display: none;
+    /* height: 95%;
+    background-image: url("/assets/Black on Transparent.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-color: white;
+    filter: grayscale(); */
+}
+
+/* #main-image{
+    max-width: ;
+} */
+/* #text-area-notes {
     width: 100%;
     height: 80%;
     border: solid .2rem darkblue;
-}
+} */
 
 /* .div-header {
     text-align: center;
@@ -115,24 +178,40 @@ div.tooltip-inner {
     margin-bottom: 0.5rem;
 } */
 
+header {
+
+    background-color: black;
+    color: white;
+    text-align: left;
+}
+
+#logo {
+    padding: 30px;
+    /* margin: 30px 30px 30px; */
+}
+
 .rda-title {
     text-align: center;
     color: white;
-    background-color: #573F1D;
+    /* background-color: #5A99E2; */
     /* border: solid .2rem darkblue; */
-    font-size: 1.4em;
-    margin-bottom: 1.5em;
+    /* font-size: 1.4em; */
+    /* margin-bottom: .5em; */
     width: 100%;
     padding: .5em;
     border-radius: .5em;
+    /* background-image: url("/assets/main-image.png");
+    background-repeat: no-repeat;
+    background-size: contain; */
+    /* background-position: right; */
 }
 
-.div-rda-header {
+.rda-header {
     text-align: left;
-    color: darkblue;
+    color: white;
     /* background-color: cornflowerblue; */
     /* border: solid .2rem darkblue; */
-    font-size: 1.2rem;
+    /* font-size: 1.2rem; */
     padding: 0.5rem;
     margin-bottom: 0.1rem;
     /* width: 100%; */
@@ -143,35 +222,28 @@ div.tooltip-inner {
 }
 
 .section-container {
-    border: solid 0.2rem gray;
+    /* border: solid .2rem grey; */
     width: 100%;
     padding: 1em;
-    color: darkblue;
-    background-color: gainsboro;
+    /* color: darkblue; */
+    /* background-color: gainsboro; */
+    background-color: white;
     border-radius: 7px;
     text-align: left;
     min-height: 3em;
     margin-bottom: 2em;
 }
 
-.suggestions-container.is-empty {
-    background: lightgray;
-}
 
-
-
-.section-container.clickable:hover {
-    /* color: #0b5ed7; */
-    background-color: lightgoldenrodyellow;
-}
 
 .div-suggestion {
     margin: 1em;
     padding: .7em 1em !important;
-    border: solid 0.1rem darkblue;
+    border: solid 0.2rem #03B8EA;
     background-color: white;
-    color: darkblue;
-    box-shadow: 0.2em 0.2em darkslateblue;
+    color: black;
+    /* box-shadow: 0.4em 0.4em darkslateblue; */
+    border-radius: 7px;
 }
 
 /* .associated-evidence, .connected-papers */
@@ -193,7 +265,7 @@ div.tooltip-inner {
 
 .disease-prevalence,
 .disease-probability {
-    background-color: darkblue;
+    background-color: black;
     color: white;
     padding: 0em .3em;
     border: solid .1em grey;
@@ -219,7 +291,7 @@ div.tooltip-inner {
 .disease-score {
     display: inline-block;
     width: 7%;
-    color: green;
+    color: #F32E15;
     text-align-last: right;
 }
 
@@ -233,16 +305,16 @@ div.tooltip-inner {
 }
 
 .search-editor {
-    background-color: whitesmoke;
-    border: solid 3px grey;
+    background-color: white;
+    border: solid 3px #03B8EA;
     /* max-width: 80%;  */
     /* border-radius: 7px; */
 }
 
 
 .selection-tag {
-    border: 1px solid #ddd;
-    background-color: #f6f6f6;
+    border: 1px solid #5A99E2;
+    background-color: white;
     padding: .5em;
     margin: 0em .5em;
     font-size: .8em;
@@ -264,14 +336,16 @@ div.tooltip-inner {
 }
 
 .selection-tag.selected {
-    background-color: lightgoldenrodyellow;
-    border-color: gold;
+    /* background-color: lightgoldenrodyellow;
+    border-color: gold; */
+    color: white;
+    background-color: #5A99E2;
 }
 
-.selection-tag.matched {
+/* .selection-tag.matched {
     background-color: darkblue;
     color: white;
-}
+} */
 
 
 /* hide frequency for selected terms */
@@ -283,7 +357,7 @@ div.tooltip-inner {
     font-size: .8em;
     color: white;
     margin-left: 1em;
-    background-color: grey;
+    background-color: black;
     border-radius: .5em;
     padding: .1em .5em
 }
@@ -309,7 +383,7 @@ div.tooltip-inner {
     font-family: "Font Awesome 5 Free";
     content: "\f057";
     padding-left: 1em;
-    color: grey;
+    color: white;
     cursor: pointer;
 }
 
@@ -322,16 +396,27 @@ div.tooltip-inner {
 }
 
 .expand-contract {
-    border: 2px solid darkblue;
+    /* border: 2px solid #03B8EA; */
     /* background-color: cornflowerblue; */
-    color: darkblue;
-    min-width: 2em;
-    font-size: 1rem;
+    color: #03B8EA;
+    min-width: 1.5em;
+    font-size: 1.5rem;
     cursor: pointer;
     text-align: center;
     margin-right: 1em;
 }
 
+.suggestion-header:hover .expand-contract:before {
+    /* color: #0b5ed7; */
+    /* color: #5A99E2; */
+    /* background-color: #03B8EA; */
+    content: "\f078";
+
+}
+
+.div-suggestion.contracted .suggestion-header:hover .expand-contract:before {
+    content: "\f077";
+}
 
 /* span.expand-contract:hover:before {
     color: #0b5ed7;
@@ -343,14 +428,17 @@ span.expand-contract:hover {
 
 span.expand-contract:before {
     font-family: "Font Awesome 5 Free";
-    content: "\f068";
+    content: "\f077";
+    /* content: "\f068"; */
     /*-*/
     font-weight: bold;
 }
 
 .contracted span.expand-contract:before {
     font-family: "Font Awesome 5 Free";
-    content: "\2b";
+    content: "\f078";
+    /*down chevron*/
+    /* content: "\2b"; */
     /*+*/
     font-weight: bold;
 }
@@ -360,11 +448,16 @@ span.expand-contract:before {
 }
 
 .btn-more-findings {
-    font-size: 14px;
+    /* font-size: 14px; */
     text-decoration: underline;
     margin-bottom: 1em;
+    /* color: #5A99E2; */
     /* color: white;
     background-color: black; */
+}
+
+.btn-more-findings:hover {
+    color: #03B8EA
 }
 
 .hide-findings .selection-tag:not(.top-eight) {
@@ -376,5 +469,26 @@ span.expand-contract:before {
 }
 
 .hide-findings .btn-more-findings:before {
-    content: "Show More Findings ...";
+    content: "Show All Findings ...";
+}
+
+
+#particles-js canvas {
+    display: block;
+    vertical-align: bottom;
+    -webkit-transform: scale(1);
+    -ms-transform: scale(1);
+    transform: scale(1);
+    opacity: 1;
+    -webkit-transition: opacity .8s ease, -webkit-transform 1.4s ease;
+    transition: opacity .8s ease, transform 1.4s ease
+}
+
+#particles-js {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    z-index: -10;
+    top: 0;
+    left: 0
 }
