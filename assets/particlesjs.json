@@ -8,7 +8,7 @@
       }
     },
     "color": {
-      "value": "#03B8EA"
+      "value": "#03b8ea"
     },
     "shape": {
       "type": "circle",
@@ -75,10 +75,10 @@
         "mode": "repulse"
       },
       "onclick": {
-        "enable": false,
+        "enable": true,
         "mode": "push"
       },
-      "resize": false
+      "resize": true
     },
     "modes": {
       "grab": {
@@ -89,7 +89,7 @@
       },
       "bubble": {
         "distance": 400,
-        "size": 4,
+        "size": 40,
         "duration": 2,
         "opacity": 8,
         "speed": 3

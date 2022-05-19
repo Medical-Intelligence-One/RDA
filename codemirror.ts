@@ -431,9 +431,9 @@ function clearScreen() {
 
 $(function () {
 
-    // particlesJS('particles-js', '/assets/particlesjs.json', function () {
-    //     console.log('callback - particles-js config loaded');
-    // });
+    particlesJS.load('particles-js', 'particlesjs.json', function () {
+        console.log('callback - particles-js config loaded');
+    });
 
     const initialState = EditorState.create({
         doc: '',
