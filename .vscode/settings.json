@@ -1,4 +1,5 @@
 {
     "appService.defaultWebAppToDeploy": "/subscriptions/bd6671e0-7663-41bc-a818-465723d438d1/resourceGroups/appsvc_linux_centralus/providers/Microsoft.Web/sites/rda-mi1",
-    "appService.deploySubpath": "."
+    "appService.deploySubpath": ".",
+    "appService.showBuildDuringDeployPrompt": false
 }
