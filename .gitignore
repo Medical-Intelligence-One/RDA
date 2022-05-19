@@ -3,3 +3,4 @@ node_modules
 .parcel-cache
 .vscode
 dist
+!node_modules/particles.js/demo/particles.json

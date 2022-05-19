@@ -346,12 +346,21 @@ function showDiseases(data) {
                 $divSuggestion.toggleClass('contracted');
             })
 
-            //populate findings div for diagnosis and associated findings div for top 3 diagnoses
+            // * * populate findings div for diagnosis and associated findings div for top 3 diagnoses
+            //create isMatched property and concatenate matched and unmatched findings
+            diseaseItem.Matched_Findings.forEach(function (element) {
+                element.IsMatched = "true";
+                element.Rank = 1 + element.Frequency
+            });
+            diseaseItem.Unmatched_Findings.forEach(function (element) {
+                element.IsMatched = "false";
+                element.Rank = element.Frequency
+            });
             diseaseFindings = diseaseItem.Matched_Findings.concat(diseaseItem.Unmatched_Findings)
 
             // sort data by frequency
             diseaseFindings.sort(function (a, b) {
-                return (parseFloat(b.Frequency) - parseFloat(a.Frequency))
+                return (parseFloat(b.Rank) - parseFloat(a.Rank))
             })
 
             //eliminate duplicates
@@ -366,10 +375,10 @@ function showDiseases(data) {
                     let addClasses = "";
 
                     //add 'selected' class if cui is returned in matched-findings array (ie it was used in the search terms )
-                    addClasses = "selectable "
-                    if (diseaseItem.Matched_Findings.filter(function (item) { return item.CUI === cui; }).length > 0) {
-                        addClasses += "selected "
-                    }
+                    addClasses = "selectable " + (obj.IsMatched == "true" ? "selected " : "")
+                    // if (diseaseItem.Matched_Findings.filter(function (item) { return item.CUI === cui; }).length > 0) {
+                    //     addClasses += "selected "
+                    // }
 
                     //add top-eight class for top 8 findings. These will always be displayed
                     if (j < 8) {
@@ -385,16 +394,6 @@ function showDiseases(data) {
             let btnMoreFindings = $divSuggestion.find('.btn-more-findings')
             btnMoreFindings.on("click", function () {
                 $divSuggestion.toggleClass('show-findings hide-findings')
-                // if (btnMoreFindings.hasClass('show-findings')) {
-                //     btnMoreFindings.text('Show Fewer Findings ...')
-                //     btnMoreFindings.parents('.div-suggestion').find('.selection-tab:not(.top-eight)').addClass('d-none')
-                //     btnMoreFindings.removeClass('show-findings')
-                // }
-                // else {
-                //     btnMoreFindings.text('Show More Findings ...')
-                //     btnMoreFindings.parents('.div-suggestion').find('.selection-tab:not(.top-eight)').removeClass('d-none')
-                //     btnMoreFindings.addClass('show-findings')
-                // }
             })
 
             //append this new div-suggestion to the parent container
