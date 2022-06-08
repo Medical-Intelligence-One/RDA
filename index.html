@@ -34,10 +34,16 @@
         <!-- template for findings tab -->
         <div id="selection-tag-template"
             class="selection-tag para3 d-flex col-auto justify-content-start align-items-center me-2">
-            <span class="selection-tag-text"></span>
+            <!-- <span id="posneg-finding" class="posneg-finding" data-bs-toggle="popover" data-bs-html="true"
+                title="Add to Search" data-bs-placement="top" data-bs-trigger="hover"></span> -->
+            <span class="selection-tag-text" data-bs-toggle="popover" data-bs-html="true" title="Add to Search"
+                data-bs-placement="top" data-bs-trigger="hover"></span>
             <span class="selection-tag-cui d-none"></span>
-            <span class="selection-tag-frequency" title="Frequency"></span>
-            <span class="remove-tag" title="Remove Finding from Search Criteria"></span>
+            <span class="selection-tag-frequency d-none" title="Frequency"
+                style="background-color: rgba(0,0,0,1)"></span>
+            <span class="selection-tag-frequency-gradient" title="Frequency"></span>
+            <span class="empty-box" style="width:0px; margin-left:0px;" title="Frequency"></span>
+            <!-- <span class="remove-tag" title="Remove Finding from Search Criteria"></span> -->
         </div>
         <!-- template for 'more findings' link -->
         <!-- template for disease suggestion -->
@@ -47,6 +53,7 @@
                     <span class="expand-contract"></span>
                     <span class="disease-name me-auto">Disease Name</span>
                     <span class="disease-probability" title="Probability"></span>
+                    <!-- <span class="disease-prevalence ms-2" title="Prevalence" style="background-color: rgba(0,0,0,1)"></span> -->
                     <span class="disease-prevalence ms-2" title="Prevalence"></span>
                     <!-- <span class="associated-evidence ms-2 me-2" title="Associated Evidence" data-bs-toggle="tooltip"
                     data-bs-placement="bottom"></span> -->
@@ -64,8 +71,31 @@
                 <div class="disease-findings d-flex flex-wrap"></div>
             </div>
         </div>
+        <!-- template for posneg popover -->
     </div>
     <!-- * * * end of templates * * *  -->
+
+    <!-- modal popup-->
+    <div class="modal fade container-fluid" id="twoButtonDialogue" tabindex="-1" role="dialog" data-bs-backdrop="static"
+        aria-labelledby="twoButtonDialogueLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <!-- <span class="col-2"></span> -->
+                    <label class="modal-title" id="twoButtonDialogueLabel">Modal title</label>
+                </div>
+                <!-- message -->
+                <div class="modal-body">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btn-submit">OK</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal" id="btn-return">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <header>
         <div id="logo" style="display: inline-block; vertical-align: middle; text-align: left;">
@@ -88,10 +118,28 @@
                 <!-- <span class="col-3"></span> -->
             </div>
             <!-- <hr class="hr-1"> -->
-            <div class="_sticky-top">
-                <div class="d-flex align-items-center me-auto">
-                    <label for="search-editor" class="rda-header h3 mb-auto">Findings used in Search</label>
-                    <button id="btnClearAll" type="button" class="btn btn-primary ms-3">Clear All</button>
+            <div id="posneg-popover-template">
+                <span class='posneg-popover'>
+                    <i class='positive-finding fas fa-circle-plus'></i>
+                    <i class='negative-finding fas fa-circle-minus'></i>
+                </span>
+            </div>
+            <div id="search-section">
+                <div class="d-flex align-items-center justify-content-between me-auto">
+                    <span class="posneg-switch">
+                        <!-- <span class="d-inline-block fas fa-circle-minus me-2"></span> -->
+                        <label for="posneg-state" class="form-check-label fas fa-circle-minus me-2"></label>
+                        <span class="form-check form-switch d-inline-block mb-auto">
+                            <input type="checkbox" class="form-check-input" id="posneg-state" style="cursor: pointer;">
+                        </span>
+                        <label for="posneg-state" class="form-check-label fas fa-circle-plus"></label>
+                    </span>
+                    <span>
+                        <label for="search-editor" class="rda-header h3 mb-auto">Findings used in Search</label>
+                    </span>
+                    <span>
+                        <button id=" btnClearAll" type="button" class="btn btn-primary ms-5">Clear All</button>
+                    </span>
                 </div>
                 <div class="section-container">
                     <!-- <div class="code-mirror-app">
@@ -101,12 +149,13 @@
                     </div>
                     <!-- </div>
                 </div> -->
-                    <div id="selected-terms" class="d-flex flex-wrap ms-2 mt-3">
-                    </div>
                 </div>
             </div>
-            <div class="rda-header h3 d-none">Associated Findings (Click to Add to Search Criteria)</div>
-            <div id="associated-findings" class="section-container d-flex flex-wrap d-none"></div>
+            <!-- <div id="selected-terms" class="sticky-top d-flex flex-wrap ms-2 mt-3"> -->
+            <div id="selected-terms" class="sticky-top d-flex flex-wrap">
+            </div>
+            <!-- <div class="rda-header h3 d-none">Associated Findings (Click to Add to Search Criteria)</div>
+            <div id="associated-findings" class="section-container d-flex flex-wrap d-none"></div> -->
             <div id="rda-header-diseases" class="rda-header h3 mb-auto">Diseases</div>
             <div id="suggestions-container" class="section-container"></div>
         </div>
@@ -120,7 +169,18 @@
 
 <script>
     $(document).ready(function () {
-        $("body").tooltip({ selector: '[data-bs-toggle=tooltip]' });
-        $('[data-bs-toggle="popover"]').popover({ html: true });
+        // $("body").tooltip({ selector: '[data-bs-toggle=tooltip]' });
+        $('[data-toggle="tooltip"]').tooltip({ html: true });
+        $('[data-toggle="popover"]').popover({ html: true });
+        $('#posneg-state').change(function () {
+            if (this.checked) {
+                $('#search-section').addClass('positive-search')
+                $('#search-section').removeClass('negative-search')
+            }
+            else {
+                $('#search-section').addClass('negative-search')
+                $('#search-section').removeClass('positive-search')
+            }
+        });
     });
 </script>

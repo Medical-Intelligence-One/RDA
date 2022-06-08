@@ -61,10 +61,40 @@ let myTheme = EditorView.theme({
     }
 }, { dark: false })
 
+//add popover
+function addPosNegPopover($myTag) {
+
+    var $content
+    var myPopover = $myTag.children('.selection-tag-text')
+    $content = $('#posneg-popover-template').clone().removeAttr('id')
+
+    $(myPopover).popover("dispose")
+    $(myPopover).popover({
+        title: "title",
+        content: $content.html(),
+        trigger: "manual",
+        placement: "left"
+    }).on("mouseenter", function () {
+        var _this = this;
+        $(this).popover("show")
+        $(".popover").on("mouseleave", function () {
+            $(_this).popover('hide')
+        });
+    }).on("mouseleave", function () {
+        var _this = this;
+        setTimeout(function () {
+            if (!$(".popover:hover").length) {
+                $(_this).popover("hide")
+            }
+        }, 50)
+    })
+}
+
 //refresh autocomplete list for findings using startsWith phrase
 async function fetchAutoCompleteFromAPI(startsWith) {
 
     let autoCompleteData = []
+
     if (startsWith.length >= 3) {
         const body = {
             "startsWith":
@@ -92,7 +122,7 @@ async function fetchAutoCompleteFromAPI(startsWith) {
                     let cui = autoCompleteData[i].Clinical_Finding_CUI
                     let name = autoCompleteData[i].Clinical_Finding
                     let frequency = null
-                    let addClasses = "removeable selected"
+                    let addClasses = "removeable selected " + $('#search-section').hasClass('positive-search') ? 'positive-finding' : 'negative-finding'
                     searchOptions.push({
                         info: cui,
                         label: name,
@@ -181,19 +211,32 @@ async function fetchDiseases() {
 
     //write selected CUI tag elements into array
     let cuiArrayPromise = new Promise(function (resolve) {
-        var cuis = []
+        sortSearchTerms()
+        var matchedFindings = []
+        var negativeMatchedFindings = []
         //iterate through all the tags in the selected-terms div to get the cuis
         let $selectedTags = $('#selected-terms .selection-tag.selected:not(.d-none)')
         if ($selectedTags.length > 0) {
             $selectedTags.each(function (i, obj) {
-                cuis.push({
-                    CUI: $(obj).find('.selection-tag-cui').text()
-                    // CUI: $(obj).attr('id')
-                    // CUI: "C0442874"
-                })
+                if ($(obj).hasClass('positive-finding')) {
+                    matchedFindings.push({
+                        CUI: $(obj).find('.selection-tag-cui').text()
+                    })
+                }
+                else {
+                    negativeMatchedFindings.push({
+                        CUI: $(obj).find('.selection-tag-cui').text()
+                    })
+                }
             })
         }
-        resolve({ CUIs: cuis })
+        resolve(
+            {
+                CUIs: matchedFindings
+                // Matched_Findings: matchedFindings,
+                // Negative_Matched_Findings: negativeMatchedFindings
+            }
+        )
     })
 
     await axios.post('https://api.mi1.ai/api/rareDiseaseSearch', await (cuiArrayPromise), { headers })
@@ -231,35 +274,54 @@ function createTag(parentElement, label, id, frequency, addClasses, callback) {
     $divTag.children('.selection-tag-text').text(label)
     $divTag.children('.selection-tag-cui').text(id)
     $divTag.children('.selection-tag-frequency').text(frequency)
+
+    //set frequency shading and title
+    let objFrequency = getFrequencyScale(frequency)
+    $divTag.children('.selection-tag-frequency').css('background-color', 'rgba(0,0,0,' + (objFrequency.value) / 5 + ')')
+    // $divTag.children('.selection-tag-frequency').attr('title', objFrequency.description + ": " + objFrequency.range)
+    $divTag.children('.selection-tag-frequency-gradient').attr('title', objFrequency.description + ": " + objFrequency.range)
+    $divTag.children('.empty-box').attr('title', objFrequency.description + ": " + objFrequency.range)
+    // $divTag.children('.selection-tag-frequency-gradient').css('background-image', 'conic-gradient(white ' + objFrequency.range_floor + '%, #F32E15 ' + (objFrequency.range_floor) + '% ' + objFrequency.range_ceiling + '%, white ' + objFrequency.range_ceiling + '%')
+    // $divTag.children('.selection-tag-frequency-gradient').css
+    //     ('background-image', 'linear-gradient(to right, white, black ' + (objFrequency.range_floor) + '%, white ' + objFrequency.range_ceiling + '%)')
+    $divTag.children('.empty-box').css('width', (1 - frequency) * 50 + 'px')
+    $divTag.children('.empty-box').css('margin-left', (1 - frequency) * -50 + 'px')
+
     //add any additional classes
     $divTag.addClass(addClasses)
 
-    //add click event to add/remove tag from selected-terms div and requery the database
-    if ($divTag.hasClass('selectable')) {
-        addTagTitle($divTag)
 
-        $divTag.on("click", function () {
-            $divTag.toggleClass('selected')
-            let selected = $divTag.hasClass('selected')
-            if (selected) {
-                divSelectedTerms.append($divTag)
-            }
-            else {
-                divSelectedTerms.find('#' + id).remove()
-            }
-            addTagTitle($divTag)
-            fetchDiseases()
-        })
+    var myPopoverTrigger = $divTag.children('.selection-tag-text')
+    //add click event to add tag to selected-terms div and requery the database
+    if ($divTag.hasClass('selectable')) {
+        addPosNegPopover($divTag)
+        myPopoverTrigger.on('shown.bs.popover', function () {
+            $('.btn.positive-finding').on("click", function (e) { addTagToSearch($divTag, 'positive-finding', 'negative-finding') })
+            $('.btn.negative-finding').on("click", function (e) { addTagToSearch($divTag, 'negative-finding', 'positive-finding') })
+        });
+        // $divTag.children('.selection-tag-text').on("click", function () {
+        //     $divTag.removeClass('selectable top-eight')
+        //     $divTag.addClass('removeable selected sticky-top')
+
+        //     $divTag.children('.selection-tag-text').off("click");       //unbind click event before appending to selected terms div
+
+        //     divSelectedTerms.append($divTag)
+        //     updateTagTitle($divTag)
+        //     fetchDiseases()
+        // })
+    }
+    else {
+        myPopoverTrigger.popover("dispose")
     }
 
     //add click event to'x' symbol to remove tag from selected-terms div and requery the database
-    if ($divTag.hasClass('removeable')) {
-        $divTag.find(".remove-tag").on("click", function () {
-            $divTag.remove()
-            fetchDiseases()
-        })
-    }
+    $divTag.find(".remove-tag").on("click", function () {
+        $divTag.remove()
+        fetchDiseases()
+    })
+    // }
 
+    updateTagTitle($divTag)
     parentElement.append($divTag)
 
     if (callback) {
@@ -267,32 +329,72 @@ function createTag(parentElement, label, id, frequency, addClasses, callback) {
     }
 }
 
+//adds a tag to the search criteria as either a positive or negative finding
+function addTagToSearch($myTag, classToAdd, classToRemove) {
+
+    $myTag.removeClass('selectable top-eight ' + classToRemove)
+    $myTag.addClass('removeable selected sticky-top ' + classToAdd)
+
+    $myTag.children('.selection-tag-text').off("click");       //unbind click event before appending to selected terms div
+    $myTag.children('.selection-tag-text').popover("dispose");       //unbind click event before appending to selected terms div
+
+    divSelectedTerms.append($myTag)
+    updateTagTitle($myTag)
+    //hide popover
+    $myTag.children('.selection-tag-text').popover('hide');
+    //update diseases
+    fetchDiseases()
+
+}
 //adds a mouseover caption to a tag
-function addTagTitle($divTag) {
-    let title = ''
+function updateTagTitle($divTag) {
+    let textTitle = ''
+    let posNegTitle = ''
     if ($divTag.hasClass('selectable')) {
-        if ($divTag.hasClass('selected')) {
-            title = 'Finding used in Search. Click to Remove'
+        if (!$divTag.hasClass('selected')) {
+            textTitle = 'Finding excluded from Search. Click to Add.'
         }
-        // else {
-        //     if (($divTag).closest(divAssociatedFindings).length > 0) {
-        //         title = "Click to add Finding to Search"
-        //     }
         else {
-            title = 'Finding excluded from Search. Click to Add.'
+            textTitle = ''
         }
-        // }
     }
-    $divTag.attr('title', title)
+    if ($divTag.hasClass('positive-finding')) {
+        posNegTitle = 'Positive Finding. Click to change to Negative.'
+    }
+    else {
+        posNegTitle = 'Negative Finding. Click to change to Positive.'
+    }
+    $divTag.children('.selection-tag-text').attr('title', textTitle)
+}
+
+//sort search terms alphabetically
+function sortSearchTerms() {
+    var mylist = $('#selected-terms');
+    var posFindings = mylist.children('.selection-tag.positive-finding').get();
+    var negFindings = mylist.children('.selection-tag.negative-finding').get();
+
+    posFindings.sort(function (a, b) {
+        return $(a).children('.selection-tag-text').text().toUpperCase().localeCompare($(b).children('.selection-tag-text').text().toUpperCase());
+    })
+    $.each(posFindings, function (i, obj) {
+        mylist.append(obj);
+    });
+
+    negFindings.sort(function (a, b) {
+        return $(a).children('.selection-tag-text').text().toUpperCase().localeCompare($(b).children('.selection-tag-text').text().toUpperCase());
+    })
+    $.each(negFindings, function (i, obj) {
+        mylist.append(obj);
+    });
 }
 
 //display output from api call showing returned diseases with associated evidence displayed as tags
 function showDiseases(data) {
 
     // sort data by probability 
-    data.sort(function (a, b) {
-        return (parseFloat(a.Disease_Probability) - parseFloat(b.Disease_Probability))
-    })
+    // data.sort(function (a, b) {
+    //     return (parseFloat(a.Disease_Probability) - parseFloat(b.Disease_Probability))
+    // })
     diseaseFindings = []
     searchOptions = []
     $('.container-fluid').removeClass('is-empty')
@@ -313,10 +415,13 @@ function showDiseases(data) {
             $divSuggestion.find('.disease-probability').text(probability)
 
             let prevalence = diseaseItem.Disease_Prevalence
-            let floatPrevalence = parseFloat(prevalence);
-            if (!isNaN(floatPrevalence))
+            let floatPrevalence = parseFloat(prevalence)
+            if (!isNaN(floatPrevalence)) {
                 $divSuggestion.find('.disease-prevalence').text(floatPrevalence.toExponential())
-
+                let objPrevalence = getPrevalenceScale(floatPrevalence)
+                // $divSuggestion.find('.disease-prevalence').css('background-color', 'rgba(0,0,0,' + (objPrevalence.value) / 5 + ')')
+                // $divSuggestion.find('.disease-prevalence').attr('title', objPrevalence.description)
+            }
             //publications
             let evidence = diseaseItem.Disease_Finding_Assoc_Evidence
             let publicationsHtmlString = '';
@@ -350,13 +455,21 @@ function showDiseases(data) {
             //create isMatched property and concatenate matched and unmatched findings
             diseaseItem.Matched_Findings.forEach(function (element) {
                 element.IsMatched = "true";
-                element.Rank = 1 + element.Frequency
+                element.Rank = 2 + element.Frequency
+                element.TypeOfFinding = "Matched"
             });
             diseaseItem.Unmatched_Findings.forEach(function (element) {
                 element.IsMatched = "false";
                 element.Rank = element.Frequency
+                element.TypeOfFinding = "Unmatched"
             });
+            // diseaseItem.Negative_matched_findings.forEach(function (element) {
+            //     element.IsMatched = "false";
+            //     element.Rank = 1 + element.Frequency
+            //     element.TypeOfFinding = "NegativeMatched"
+            // });
             diseaseFindings = diseaseItem.Matched_Findings.concat(diseaseItem.Unmatched_Findings)
+            // diseaseFindings = diseaseItem.Matched_Findings.concat(diseaseItem.Unmatched_Findings).concat(diseaseItem.Negative_matched_findings)
 
             // sort data by frequency
             diseaseFindings.sort(function (a, b) {
@@ -372,13 +485,17 @@ function showDiseases(data) {
                     let label = obj.Name
                     let cui = obj.CUI
                     let frequency = obj.Frequency
-                    let addClasses = "";
+                    let addClasses = ""
+                    if (obj.TypeOfFinding == "NegativeMatched") {
+                        addClasses = "negative-finding "
+                    }
+                    else {
+                        addClasses = "positive-finding "
+                    }
 
                     //add 'selected' class if cui is returned in matched-findings array (ie it was used in the search terms )
-                    addClasses = "selectable " + (obj.IsMatched == "true" ? "selected " : "")
-                    // if (diseaseItem.Matched_Findings.filter(function (item) { return item.CUI === cui; }).length > 0) {
-                    //     addClasses += "selected "
-                    // }
+                    // addClasses += (obj.IsMatched == "true" ? "selected " : "selectable ")
+                    addClasses += (obj.TypeOfFinding == "Matched" ? "selected " : "selectable ")
 
                     //add top-eight class for top 8 findings. These will always be displayed
                     if (j < 8) {
@@ -427,6 +544,95 @@ function clearScreen() {
     view.focus()
     // startCompletion
 
+}
+
+//receives prevalance as input returns object representing prevalence on a scale from 1-5
+function getFrequencyScale(frequency) {
+    let frequency_description = ''
+    let frequency_value = 0
+    let frequency_range = ''
+    let frequency_range_floor = 0
+    let frequency_range_ceiling = 0
+
+    if (frequency <= .025) {
+        frequency_description = 'Very Rare'
+        frequency_value = 1
+        frequency_range_floor = 1
+        frequency_range_ceiling = 4
+        frequency_range = '1-4%'
+    }
+    else if (frequency <= 0.29) {
+        frequency_description = 'Occasional'
+        frequency_value = 2
+        frequency_range_floor = 5
+        frequency_range_ceiling = 29
+        frequency_range = '5-29%'
+    }
+    else if (frequency <= 0.79) {
+        frequency_description = 'Frequent'
+        frequency_value = 3
+        frequency_range_floor = 30
+        frequency_range_ceiling = 79
+        frequency_range = '30-79%'
+    }
+    else if (frequency <= (0.99)) {
+        frequency_description = 'Very Frequent'
+        frequency_value = 4
+        frequency_range_floor = 80
+        frequency_range_ceiling = 99
+        frequency_range = '80-99%'
+    }
+    else {
+        frequency_description = 'Obligate'
+        frequency_value = 5
+        frequency_range_floor = 100
+        frequency_range_ceiling = 100
+        frequency_range = '100%'
+    }
+
+    return {
+        'value': frequency_value,
+        'description': frequency_description,
+        'range': frequency_range,
+        'range_floor': frequency_range_floor,
+        'range_ceiling': frequency_range_ceiling
+    }
+}
+
+//receives prevalance as input returns object representing prevalence on a scale from 1-5
+function getPrevalenceScale(prevalence) {
+    let prevalence_description = ''
+    let prevalence_value = 0
+
+    if (prevalence < Math.pow(10, 6)) {
+        prevalence_description = 'Very Low Prevalence'
+        prevalence_value = 1
+    }
+    else if (prevalence < (1 + 9) / 2 * Math.pow(10, 6)) {
+        prevalence_description = 'Low Prevalence'
+        prevalence_value = 2
+    }
+    else if (prevalence < (1 + 9) / 2 * Math.pow(10, 5)) {
+        prevalence_description = 'Medium Prevalence'
+        prevalence_value = 3
+    }
+    else if (prevalence < (1 + 5) / 2 * Math.pow(10, 4)) {
+        prevalence_description = 'Medium Prevalence'
+        prevalence_value = 4
+    }
+    else if (prevalence < (6 + 9) / 2 * Math.pow(10, 4)) {
+        prevalence_description = 'High Prevalence'
+        prevalence_value = 5
+    }
+    else {
+        prevalence_description = 'Very High Prevalence'
+        prevalence_value = 6
+    }
+
+    return {
+        'value': prevalence_value,
+        'description': prevalence_description
+    }
 }
 
 $(function () {

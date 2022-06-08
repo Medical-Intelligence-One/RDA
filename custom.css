@@ -129,15 +129,15 @@ Red #F32E15
 
     #editor-container {
         text-align: left;
-        padding: 1em 1em 0 2em;
+        padding: .5em;
+        border-radius: 7px;
     }
 
     #selected-terms {
-        padding: 0 1em 0 1.5em;
-    }
-
-    .div-suggestion {
-        padding: 1.5em !important;
+        /* padding: 0 1em 0 1.5em; */
+        /* margin: 1em; */
+        /* background-color: rgba(211, 211, 211, .5); */
+        background-color: rgba(0, 0, 0, .7);
     }
 
     /* .suggestion-header {
@@ -152,7 +152,8 @@ Red #F32E15
 
     .selection-tag {
         padding: 1em;
-        margin-bottom: 1em;
+        margin: 1em;
+
     }
 
     /* .cm-editor,
@@ -349,7 +350,60 @@ header {
     /* min-height: 3em; */
 }
 
+.posneg-switch label {
+    font-size: 1.5em;
+    color: white;
+    cursor: pointer;
+}
 
+.posneg-switch .form-switch {
+    font-size: 1.5em;
+    color: #03B8EA;
+    cursor: pointer;
+    margin-top: auto;
+}
+
+#search-section.positive-search #editor-container {
+    background-color: #03B8EA;
+}
+
+#search-section.negative-search #editor-container {
+    background-color: #F32E15;
+}
+
+#search-section.negative-search .fa-circle-minus {
+    color: #F32E15;
+}
+
+#search-section.positive-search .fa-circle-plus {
+    color: #03B8EA;
+}
+
+/* 
+#search-section .form-check-input {
+    background-color: gray;
+} */
+
+#search-section .form-switch .form-check-input {
+    background-color: #F32E15;
+}
+
+#search-section.positive-search .form-switch .form-check-input:checked {
+    background-color: #03B8EA;
+}
+
+/* #search-section .form-check-input::before {
+    filter: hue-rotate(90deg)
+} */
+
+
+/* #search-section.negative-search .form-check-input {
+    background-color: #F32E15;
+}
+
+#search-section.positive-search .form-check-input {
+    background-color: #03B8EA;
+} */
 
 .div-suggestion {
     margin: 1em;
@@ -358,6 +412,7 @@ header {
     color: black;
     /* box-shadow: 0.4em 0.4em darkslateblue; */
     border-radius: 7px;
+    padding: 1.5em;
 }
 
 /* .associated-evidence, .connected-papers */
@@ -379,11 +434,15 @@ header {
 
 .disease-prevalence,
 .disease-probability {
-    background-color: black;
-    color: white;
+    background-color: white;
+    color: black;
     padding: 0em .3em;
     border: solid .1em grey;
     border-radius: .3em;
+    font-size: 0.7em;
+}
+
+.disease-probability {
     display: none;
 }
 
@@ -420,12 +479,11 @@ header {
 
 .search-editor {
     background-color: white;
-    border: solid 3px #03B8EA;
+    /* border: solid 3px #03B8EA; */
     /* max-width: 80%;  */
     /* border-radius: 7px; */
 }
 
-.cm-editor {}
 
 .selection-tag {
     border: 1px solid #5A99E2;
@@ -438,8 +496,13 @@ header {
     border-radius: 7px;
 }
 
-.div-suggestion .selection-tag {
-    /* margin: .5em .5em; */
+.selection-tag.selectable .posneg-finding {
+    color: white;
+    display: block;
+}
+
+.selection-tag.selectable:not(.negative-finding) .posneg-finding {
+    color: #5A99E2;
 }
 
 .div-suggestion .selection-tag.selectable {
@@ -448,6 +511,10 @@ header {
 
 .div-suggestion .selection-tag.selectable .selection-tag-text:hover {
     text-decoration: underline;
+}
+
+.div-suggestion .posneg-finding {
+    display: none;
 }
 
 .selection-tag.selected {
@@ -472,7 +539,7 @@ header {
     font-size: .8em;
     color: white;
     margin-left: 1em;
-    background-color: black;
+    /* background-color: black; */
     border-radius: .5em;
     padding: .1em .5em
 }
@@ -493,17 +560,86 @@ header {
     color: red;
 } */
 
-/* cross */
+.selection-tag .posneg-finding {
+    /* padding-left: 1em; */
+    padding-right: 1em;
+    /* color: white; */
+    cursor: pointer;
+}
+
+.selection-tag.negative-finding {
+    background-color: #F32E15;
+    color: white;
+}
+
+.selection-tag .posneg-finding:after {
+    font-family: "Font Awesome 6 Free";
+    cursor: pointer;
+}
+
+.selection-tag.positive-finding .posneg-finding:after {
+    content: "\f164";
+}
+
+.selection-tag.negative-finding .posneg-finding:after {
+    content: "\f165";
+}
+
+.posneg-popover {
+    cursor: pointer;
+    color: #03B8EA;
+    padding: .2em;
+    font-size: 2em;
+}
+
+
+.posneg-popover .btn.positive-finding {
+    background-color: #03B8EA;
+}
+
+.posneg-popover .btn.negative-finding {
+    background-color: #F32E15;
+}
+
+/* .btn.positive-finding:after {
+    content: "\f164";
+}
+
+.btn.negative-finding:after {
+    content: "\f165";
+} */
+
+.selection-tag .posneg-finding:hover:after {
+    color: lightgray;
+}
+
+#selected-terms .remove-tag {
+    cursor: pointer;
+}
+
+/* x mark */
 #selected-terms .remove-tag:after {
-    font-family: "Font Awesome 5 Free";
-    content: "\f057";
-    padding-left: 1em;
+    font-family: "Font Awesome 6 Free";
+    content: "\58";
+    font-size: 10px;
+    margin-left: 2em;
     color: white;
     cursor: pointer;
 }
 
 #selected-terms .remove-tag:hover:after {
-    color: red;
+    color: lightgray;
+    /* content: "\f057";
+    font-size: 14px;
+    margin-left: 1.5em;
+    padding-right: .2em;
+    background-color: #5A99E2; */
+    /* color: #03B8EA;
+    text-shadow: 0px 0px 20px gold;
+    -moz-transition: all 0.2s ease-in;
+    -o-transition: all 0.2s ease-in;
+    -webkit-transition: all 0.2s ease-in;
+    transition: all 0.2s ease-in; */
 }
 
 #selected-terms .selection-tag:not(.selected) {
@@ -585,6 +721,41 @@ span.expand-contract:before {
 
 .hide-findings .btn-more-findings:before {
     content: "Show All Findings ...";
+}
+
+.selection-tag-frequency-gradient {
+    width: 50px;
+    height: 10px;
+    /* background-image: conic-gradient(grey 64%, #F32E15 17%, grey); */
+    background-image: linear-gradient(to right, #03B8EA, black);
+    /* border-radius: 50%; */
+    border: solid 1px black;
+    margin-left: 1em;
+}
+
+.selection-tag.selected .selection-tag-frequency-gradient {
+    border: solid 1px white;
+}
+
+#selected-terms .selection-tag .selection-tag-frequency-gradient {
+    display: none;
+}
+
+#selected-terms .selection-tag .empty-box {
+    display: none;
+}
+
+.empty-box {
+    background-color: white;
+    height: 10px;
+    /* width: 50px;
+    margin-left: -36px; */
+    border: solid black;
+    border-width: 1px 1px 1px 0px;
+}
+
+.selection-tag.selected .empty-box {
+    border: solid 1px white;
 }
 
 
