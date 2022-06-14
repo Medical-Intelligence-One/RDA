@@ -440,39 +440,51 @@ function showDiseases(data) {
             let diseasePointPrevalence = diseaseItem.Disease_Point_Prevalence || 0
 
             let maxPrevalence = Math.max(diseasePrevalence, diseaseAnnualIncidence, diseaseBirthPrevalence, diseaseLifetimePrevalence, diseasePointPrevalence)
-            var floatPrevalence
+            var floatPrevalence, prevelanceRange
+
+            let objDiseasePrevalence = getPrevalenceScale(diseasePrevalence || 0)
+            let objDeaseAnnualIncidence = getPrevalenceScale(diseaseAnnualIncidence || 0)
+            let objDeaseBirthPrevalence = getPrevalenceScale(diseaseBirthPrevalence || 0)
+            let objDeaseLifetimePrevalence = getPrevalenceScale(diseaseLifetimePrevalence || 0)
+            let objDiseasePointPrevalence = getPrevalenceScale(diseasePointPrevalence || 0)
             // let floatPrevalence = parseFloat((maxPrevalence || 0).toExponential()).toString()
 
             // if (floatPrevalence == '0') { floatPrevalence = 'n/a' }
-            if (maxPrevalence == 0) { floatPrevalence = "n/a" }
-            else { floatPrevalence = maxPrevalence.toExponential().toString() }
+            // if (maxPrevalence == 0) { floatPrevalence = "n/a" }
+            // else { floatPrevalence = maxPrevalence.toExponential().toString() }
 
-            let prevalenceTitleContent =
-                formatPrevalenceLine('Prevalence', diseasePrevalence) +
-                formatPrevalenceLine('Annual Incidence', diseaseAnnualIncidence) +
-                formatPrevalenceLine('Point Prevalence', diseasePointPrevalence) +
-                formatPrevalenceLine('Birth Prevalence', diseaseBirthPrevalence) +
-                formatPrevalenceLine('Lifetime Prevalence', diseaseLifetimePrevalence)
+            if (maxPrevalence == 0) { prevelanceRange = "Prevalence Not Known" }
+            else {
+                let objPrevalence = getPrevalenceScale(maxPrevalence)
+                prevelanceRange = objPrevalence.range_numerator + ' / ' + objPrevalence.range_denominator.toLocaleString()
 
-            let $prevalence = $divSuggestion.find('.disease-prevalence')
-            // if (!isNaN(floatPrevalence)) {
-            $prevalence.text(floatPrevalence)
-            // let objPrevalence = getPrevalenceScale(floatPrevalence)
-            // $divSuggestion.find('.disease-prevalence').css('background-color', 'rgba(0,0,0,' + (objPrevalence.value) / 5 + ')')
-            // $prevalence.attr('title', prevalenceTitle)
-            $prevalence.popover("dispose")
-            $prevalence.popover({
-                title: "Prevalence",
-                content: prevalenceTitleContent,
-                trigger: "hover",
-                placement: "auto",
-                html: true,
-                customClass: "prevalence-title"
-                // template: '<div class="popover" role="tooltip">' +
-                //     '<div class="popover-arrow"> </div>' +
-                //     '<h3 class="popover-header"> </h3 >' +
-                //     '<div class="popover-body"> </div > </div > '
-            })
+
+                let prevalenceTitleContent =
+                    formatPrevalenceLine('Prevalence', objDiseasePrevalence) +
+                    formatPrevalenceLine('Annual Incidence', objDeaseAnnualIncidence) +
+                    formatPrevalenceLine('Point Prevalence', objDiseasePointPrevalence) +
+                    formatPrevalenceLine('Birth Prevalence', objDeaseBirthPrevalence) +
+                    formatPrevalenceLine('Lifetime Prevalence', objDeaseLifetimePrevalence)
+
+                let $prevalence = $divSuggestion.find('.disease-prevalence')
+                // if (!isNaN(floatPrevalence)) {
+                $prevalence.text(prevelanceRange)
+                // $divSuggestion.find('.disease-prevalence').css('background-color', 'rgba(0,0,0,' + (objPrevalence.value) / 5 + ')')
+                // $prevalence.attr('title', prevalenceTitle)
+                $prevalence.popover("dispose")
+                $prevalence.popover({
+                    title: "Prevalence",
+                    content: prevalenceTitleContent,
+                    trigger: "hover",
+                    placement: "left",
+                    html: true,
+                    customClass: "prevalence-title"
+                    // template: '<div class="popover" role="tooltip">' +
+                    //     '<div class="popover-arrow"> </div>' +
+                    //     '<h3 class="popover-header"> </h3 >' +
+                    //     '<div class="popover-body"> </div > </div > '
+                })
+            }
 
             // }
 
@@ -580,16 +592,20 @@ function showDiseases(data) {
         }
         //populate autocomplete from disease findings
         fetchAutoCompleteFromDiseaseFindings('')
+        $('.popover').hide()
     }
     catch (ex) {
         console.log(console.log(ex))
     }
 }
+
 //return a single line for the prevalence popover given the label and value
-function formatPrevalenceLine(label, value) {
-    if (value == 0) { value = "n/a" }
-    else { value = value.toExponential().toString() }
-    return label + '.'.repeat(25 - label.length - value.length) + value + "<br>"
+function formatPrevalenceLine(label, objValue) {
+    if (objValue.value == 0) { return '' }
+    else {
+        return label + '.'.repeat(35 - label.length - objValue.range_numerator.length - objValue.range_denominator.toLocaleString().length) +
+            objValue.range_numerator + ' / ' + objValue.range_denominator.toLocaleString() + "<br>"
+    }
 }
 
 //clear screen (clearing selected terms is optional)
@@ -670,35 +686,50 @@ function getFrequencyScale(frequency) {
 function getPrevalenceScale(prevalence) {
     let prevalence_description = ''
     let prevalence_value = 0
+    let prevalence_range_numerator = ''
+    let prevalence_range_denominator = 0
 
-    if (prevalence < Math.pow(10, 6)) {
-        prevalence_description = 'Very Low Prevalence'
+    if (prevalence == 0) {
+        prevalence_range_numerator = ''
+        prevalence_range_denominator = 0
+        prevalence_value = 0
+    }
+    else if (prevalence < Math.pow(10, 6)) {
+        prevalence_range_numerator = '<1-9'
+        prevalence_range_denominator = 1000000
         prevalence_value = 1
     }
     else if (prevalence < (1 + 9) / 2 * Math.pow(10, 6)) {
-        prevalence_description = 'Low Prevalence'
+        prevalence_range_numerator = '1-9'
+        prevalence_range_denominator = 1000000
         prevalence_value = 2
     }
     else if (prevalence < (1 + 9) / 2 * Math.pow(10, 5)) {
-        prevalence_description = 'Medium Prevalence'
+        prevalence_range_numerator = '1-9'
+        prevalence_range_denominator = 100000
         prevalence_value = 3
     }
     else if (prevalence < (1 + 5) / 2 * Math.pow(10, 4)) {
-        prevalence_description = 'Medium Prevalence'
+        prevalence_range_numerator = '1-5'
+        prevalence_range_denominator = 10000
         prevalence_value = 4
     }
     else if (prevalence < (6 + 9) / 2 * Math.pow(10, 4)) {
-        prevalence_description = 'High Prevalence'
+        prevalence_range_numerator = '6-9'
+        prevalence_range_denominator = 10000
         prevalence_value = 5
     }
     else {
-        prevalence_description = 'Very High Prevalence'
+        prevalence_range_numerator = '>1'
+        prevalence_range_denominator = 1000
         prevalence_value = 6
     }
 
     return {
         'value': prevalence_value,
-        'description': prevalence_description
+        'description': prevalence_description,
+        'range_denominator': prevalence_range_denominator,
+        'range_numerator': prevalence_range_numerator
     }
 }
 
@@ -729,7 +760,7 @@ $(function () {
 
     // let element: HTMLElement = $('#editor-container')[0] as HTMLElement
 
-    view.focus()
+    // view.focus()
 
     $('#btnClearAll').on("click", function () {
         clearScreen(true)
@@ -747,9 +778,13 @@ $(function () {
         view.focus()
     });
 
+    // $('.disease-prevalence').on('mouseleave', function () {
+    //     $('.popover').hide()
+    // })
+
     $('#page-info-popover').popover("dispose")
     $('#page-info-popover').popover({
-        title: "Prevalence",
+        title: "",
         content: $('#page-info-template').html(),
         trigger: "hover",
         placement: "auto",

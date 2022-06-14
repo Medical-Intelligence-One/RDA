@@ -70,7 +70,7 @@ Red #F32E15
     }
 
     .selection-tag {
-        padding: 1em;
+        /* padding: 1em; */
         margin-bottom: 1em;
     }
 }
@@ -146,7 +146,7 @@ Red #F32E15
     }
 
     .selection-tag {
-        padding: 1em;
+        /* padding: 1em; */
         margin: 1em;
 
     }
@@ -284,6 +284,7 @@ header {
     padding-left: 1em;
     color: #03B8EA;
     font-size: .7em;
+    display: none;
 }
 
 .posneg-switch label {
@@ -395,9 +396,9 @@ header {
     content: 'Pb: ';
 }
 
-.disease-prevalence:before {
+/* .disease-prevalence:before {
     content: 'Pr: ';
-}
+} */
 
 .disease-score {
     display: inline-block;
@@ -419,12 +420,23 @@ header {
     background-color: white;
 }
 
+.cm-editor:not(.cm-focused) .cm-activeLine:before {
+    content: "e.g. Thrombocytopenia, Occipital Encephalocele, Hypotonia";
+    font-style: italic;
+    color: grey;
+}
+
 .selection-tag {
     border: 1px solid #5A99E2;
     background-color: white;
     color: black;
     border-radius: 7px;
     height: 3.5em;
+    padding-right: 1em;
+}
+
+#selected-terms .selection-tag {
+    padding-right: 0;
 }
 
 .selection-tag.selectable .posneg-finding {
@@ -438,6 +450,10 @@ header {
 
 .selection-tag.selectable:not(.negative-finding) .posneg-finding {
     color: #5A99E2;
+}
+
+.selection-tag-text {
+    padding: 0em 1em;
 }
 
 .selection-tag:not(.selected) .selection-tag-text:hover,
