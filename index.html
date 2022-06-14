@@ -31,21 +31,30 @@
 <body>
     <!-- * * * templates * * *  -->
     <div id="templates" class="d-none">
-        <!-- template for findings tab -->
+
+        <!-- template for disease findings tag -->
         <div id="selection-tag-template"
             class="selection-tag para3 d-flex col-auto justify-content-start align-items-center me-2">
             <!-- <span id="posneg-finding" class="posneg-finding" data-bs-toggle="popover" data-bs-html="true"
                 title="Add to Search" data-bs-placement="top" data-bs-trigger="hover"></span> -->
-            <span class="selection-tag-text" data-bs-toggle="popover" data-bs-html="true" title="Add to Search"
-                data-bs-placement="top" data-bs-trigger="hover"></span>
+            <!-- <span class="selection-tag-text" data-bs-toggle="popover" data-bs-html="true" data-bs-placement="top"
+                data-bs-trigger="hover"></span> -->
+            <span class="selection-tag-hover-area">
+                <span class="selection-tag-text pe-3 py-3"></span>
+                <span class="selection-tag-posneg d-none">
+                    <i class="positive-finding fas fa-circle-plus"
+                        title="Click to Add to Search Terms as Positive Finding"></i>
+                    <i class="negative-finding fas fa-circle-minus"
+                        title="Click to add to Search Terms as Negative Finding"></i>
+                </span>
+            </span>
+            <span class="frequency-gradient gradient-bar" title="Frequency"></span>
+            <span class="frequency-gradient empty-box" style="width:0px; margin-left:0px;" title="Frequency"></span>
             <span class="selection-tag-cui d-none"></span>
             <span class="selection-tag-frequency d-none" title="Frequency"
                 style="background-color: rgba(0,0,0,1)"></span>
-            <span class="selection-tag-frequency-gradient" title="Frequency"></span>
-            <span class="empty-box" style="width:0px; margin-left:0px;" title="Frequency"></span>
             <!-- <span class="remove-tag" title="Remove Finding from Search Criteria"></span> -->
         </div>
-        <!-- template for 'more findings' link -->
         <!-- template for disease suggestion -->
         <div id="suggestion-template" class="div-suggestion hide-findings">
             <div class="section-container mb-auto">
@@ -54,7 +63,8 @@
                     <span class="disease-name me-auto">Disease Name</span>
                     <span class="disease-probability" title="Probability"></span>
                     <!-- <span class="disease-prevalence ms-2" title="Prevalence" style="background-color: rgba(0,0,0,1)"></span> -->
-                    <span class="disease-prevalence ms-2" title="Prevalence"></span>
+                    <span class="disease-prevalence ms-2" data-bs-toggle="popover" data-bs-html="true"
+                        data-bs-placement="auto" data-bs-trigger="hover" title="Prevalence"></span>
                     <!-- <span class="associated-evidence ms-2 me-2" title="Associated Evidence" data-bs-toggle="tooltip"
                     data-bs-placement="bottom"></span> -->
                     <!-- <i class="disease-probability fas fa-circle" aria-hidden="true" data-bs-toggle="tooltip"></i> -->
@@ -72,6 +82,24 @@
             </div>
         </div>
         <!-- template for posneg popover -->
+        <div id="posneg-popover-template">
+            <span class='posneg-popover'>
+                <i class='positive-finding fas fa-circle-plus mb-1'
+                    title="Click to add to Search as Positive Finding"></i>
+                <i class='negative-finding fas fa-circle-minus' title="Click to add to Search as Negative Finding"></i>
+            </span>
+        </div>
+
+        <!-- info template -->
+        <div id="page-info-template">
+            <span>The Mi1 Rare Disease Application uses Positive and Negative findings to output a list of the most
+                relevant Diseases.
+                For example, if you have known symptoms of <em>Elastomyofibrosis</em> and <em>Respiratory
+                    Insufficiency</em> but
+                definitely no <em>Premature Birth</em> finding,
+                you should add Elastomyofibrosis and Respiratory Insufficiency as Positive Findings (in blue) and
+                Premature Birth as a Negative Finding (in red) </span>
+        </div>
     </div>
     <!-- * * * end of templates * * *  -->
 
@@ -81,7 +109,6 @@
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <!-- <span class="col-2"></span> -->
                     <label class="modal-title" id="twoButtonDialogueLabel">Modal title</label>
                 </div>
                 <!-- message -->
@@ -96,7 +123,7 @@
         </div>
     </div>
 
-
+    <!-- Page Header -->
     <header>
         <div id="logo" style="display: inline-block; vertical-align: middle; text-align: left;">
             <a href="https://www.mi1.ai/">
@@ -109,49 +136,37 @@
         </div> -->
     </header>
 
+    <!-- Page Body -->
     <div class="container-fluid is-empty col-sm-12 col-xl-6">
-        <!-- <hr class="hr-1"> -->
         <div class="primary-container">
             <div class="row">
-                <!-- <span class="col-3"><img src="/assets/main-image.png" id="main-image" class="img-fluid"></span> -->
-                <span class="rda-title h2">Enola Rare Disease Search Demo</span>
-                <!-- <span class="col-3"></span> -->
+                <span class="rda-title h2">Enola Rare Disease Search Demo<i id="page-info-popover"
+                        class="fa-solid fa-circle-question page-info" data-bs-toggle="popover" data-bs-html="true"
+                        data-bs-placement="auto" data-bs-trigger="hover" title="How to use"></i></span>
             </div>
-            <!-- <hr class="hr-1"> -->
-            <div id="posneg-popover-template">
-                <span class='posneg-popover'>
-                    <i class='positive-finding fas fa-circle-plus'></i>
-                    <i class='negative-finding fas fa-circle-minus'></i>
-                </span>
-            </div>
-            <div id="search-section">
+            <div id="search-section" class="positive-search">
                 <div class="d-flex align-items-center justify-content-between me-auto">
-                    <span class="posneg-switch">
-                        <!-- <span class="d-inline-block fas fa-circle-minus me-2"></span> -->
-                        <label for="posneg-state" class="form-check-label fas fa-circle-minus me-2"></label>
+                    <span class="posneg-switch" title="Toggle between adding Positive and Negative Findings">
+                        <label for="posneg-state" class="form-check-label fas fa-circle-plus me-2"></label>
                         <span class="form-check form-switch d-inline-block mb-auto">
-                            <input type="checkbox" class="form-check-input" id="posneg-state" style="cursor: pointer;">
+                            <input type="checkbox" class="form-check-input" id="posneg-state">
                         </span>
-                        <label for="posneg-state" class="form-check-label fas fa-circle-plus"></label>
+                        <label for="posneg-state" class="form-check-label fas fa-circle-minus"></label>
                     </span>
                     <span>
                         <label for="search-editor" class="rda-header h3 mb-auto">Findings used in Search</label>
                     </span>
                     <span>
-                        <button id=" btnClearAll" type="button" class="btn btn-primary ms-5">Clear All</button>
+                        <button id="btnClearAll" type="button" class="btn btn-primary ms-5"
+                            title="Clear the Screen">Clear All</button>
                     </span>
                 </div>
-                <div class="section-container">
-                    <!-- <div class="code-mirror-app">
-                    <div class="code-mirror-wrapper"> -->
+                <div class="">
                     <div id="editor-container">
                         <div class="search-editor input-lg" id="editor"></div>
                     </div>
-                    <!-- </div>
-                </div> -->
                 </div>
             </div>
-            <!-- <div id="selected-terms" class="sticky-top d-flex flex-wrap ms-2 mt-3"> -->
             <div id="selected-terms" class="sticky-top d-flex flex-wrap">
             </div>
             <!-- <div class="rda-header h3 d-none">Associated Findings (Click to Add to Search Criteria)</div>
@@ -164,23 +179,11 @@
     </div>
 
     <script src="/node_modules/particles.js/particles.js"></script>
-    <!-- <script src="/node_modules/particles.js/demo/js/app.js"></script> -->
 </body>
 
 <script>
     $(document).ready(function () {
-        // $("body").tooltip({ selector: '[data-bs-toggle=tooltip]' });
         $('[data-toggle="tooltip"]').tooltip({ html: true });
         $('[data-toggle="popover"]').popover({ html: true });
-        $('#posneg-state').change(function () {
-            if (this.checked) {
-                $('#search-section').addClass('positive-search')
-                $('#search-section').removeClass('negative-search')
-            }
-            else {
-                $('#search-section').addClass('negative-search')
-                $('#search-section').removeClass('positive-search')
-            }
-        });
     });
 </script>
