@@ -1,35 +1,28 @@
 // import * as CodeMirror from "codemirror"
 // import { } from "@codemirror/commands"
 import { basicSetup, EditorState, EditorView } from '@codemirror/basic-setup';
-import { keymap } from "@codemirror/view"
-import { indentWithTab } from "@codemirror/commands"
+// import { keymap } from "@codemirror/view"
+// import { indentWithTab } from "@codemirror/commands"
 import { autocompletion, CompletionContext, startCompletion } from "@codemirror/autocomplete"
-import { StateField, EditorSelection } from "@codemirror/state"
-import { Tooltip, showTooltip } from "@codemirror/tooltip"
-import { indentUnit } from '@codemirror/language'
-import rareDiseaseData from '../mi1-rare-disease/rare-diseases.json'       //test data until api is working
-import autocompleteRareDiseaseData from '../mi1-rare-disease/autocomplete_rareDz_findings.json'       //test data until api is working
-import { typeOf } from 'react-is';
+// import { StateField, EditorSelection } from "@codemirror/state"
+// import { Tooltip, showTooltip } from "@codemirror/tooltip"
+// import { indentUnit } from '@codemirror/language'
+// import rareDiseaseData from '../mi1-rare-disease/rare-diseases.json'       //test data until api is working
+// import autocompleteRareDiseaseData from '../mi1-rare-disease/autocomplete_rareDz_findings.json'       //test data until api is working
+// import { typeOf } from 'react-is';
 const axios = require('axios')
 const headers = {
     'Access-Control-Allow-Origin': '*'
 }
 var view
 var searchOptions = []
-var diseaseFindings = []
-// var curFindings = []
-var myCodeMirror
-// var arrCUIs = []
-// var codemirror = $('#editor').nextAll('.CodeMirror')[0]
 
 var divSelectedTerms = $('#selected-terms')
-// var divAssociatedFindings = $('#associated-findings')
 
 let myTheme = EditorView.theme({
     "cm-editor": {
         fontSize: "18px",
         width: "100%",
-        // minHeight: "600px",
         outline: 0,
         border: 0,
         fontFamily: 'Rubik Light, Open Sans'
@@ -44,7 +37,6 @@ let myTheme = EditorView.theme({
         display: "none"
     },
     ".cm-scroller": {
-        // minHeight: "600px",
         fontFamily: 'Rubik Light, Open Sans'
     },
     ".cm-tooltip.cm-tooltip-autocomplete > ul > li": {
@@ -56,39 +48,8 @@ let myTheme = EditorView.theme({
     ".cm-tooltip": {
         fontSize: "14px",
         fontFamily: 'Rubik Light, Open Sans'
-    },
-    ".cm-lineWrapping": {
-        // wordBreak: "break-all",
     }
 }, { dark: false })
-
-// //add popover to tag
-// function addPosNegPopover($myTag) {
-
-//     var $content
-//     var myPopover = $myTag.find('.selection-tag-text')
-//     $content = $('#posneg-popover-template').clone().removeAttr('id')
-//     $(myPopover).popover("dispose")
-//     $(myPopover).popover({
-//         // title: "title",
-//         content: $content.html(),
-//         trigger: "manual",
-//         placement: "right"
-//     }).on("mouseenter", function (e) {
-//         var _this = this;
-//         $(this).popover("show")
-//         $(".popover").on("mouseleave", function () {
-//             $(_this).popover('hide')
-//         });
-//     }).on("mouseleave", function () {
-//         var _this = this;
-//         setTimeout(function () {
-//             if (!$(".popover:hover").length) {
-//                 $(_this).popover("hide")
-//             }
-//         }, 150)
-//     })
-// }
 
 //refresh autocomplete list for findings using startsWith phrase
 async function fetchAutoCompleteFromAPI(startsWith) {
@@ -133,9 +94,7 @@ async function fetchAutoCompleteFromAPI(startsWith) {
 
                         }
                     })
-
                 }
-
             }).catch(function (error) { console.log(error) }).then(function () { })
     }
 }
@@ -170,11 +129,12 @@ function fetchAutoCompleteFromDiseaseFindings(contains) {
     })
 }
 
+//overrides code mirror completion event (i.e. when autocomplete suggestion is selected)
 function myCompletions(context: CompletionContext) {
 
     let word = view.state.doc.toString();       //get content of editor
 
-    //cancel autocomplete if <3 characters entered and there are no tags in the selected terms div
+    //If <3 characters entered, populate autocomplete suggestions with unique list of findings associated with the current set of diseases
     if (word.length < 3) {
         if ($('#suggestions-container .selection-tag').length > 0) {
             fetchAutoCompleteFromDiseaseFindings(word)
@@ -184,10 +144,10 @@ function myCompletions(context: CompletionContext) {
             return null
         }
     }
+    //>=3 characters so get autocomplete suggestions from API
     else {
         fetchAutoCompleteFromAPI(word)
     }
-
 
     return {
         from: 0,
@@ -204,7 +164,7 @@ let state = EditorState.create({
 
 //returns Diseases based on selected CUIS
 async function fetchDiseases() {
-    //write selected CUI tag elements into array
+    //use rareDiseaseSearch as endpoint if there are no negative findings
     var endPoint = ''
     if ($('#selected-terms .selection-tag.selected.negative-finding').length > 0) {
         endPoint = "rareDiseaseSearchPosNeg"
@@ -213,11 +173,12 @@ async function fetchDiseases() {
         endPoint = "rareDiseaseSearch"
     }
 
-
+    //write selected CUI tag elements into array
     let cuiArrayPromise = new Promise(function (resolve) {
         sortSearchTerms()
         var matchedFindings = []
         var negativeMatchedFindings = []
+
         //iterate through all the tags in the selected-terms div to get the cuis
         let $selectedTags = $('#selected-terms .selection-tag.selected:not(.d-none)')
         if ($selectedTags.length > 0) {
@@ -234,6 +195,7 @@ async function fetchDiseases() {
                 }
             })
         }
+        //resolve promise with parameter values for either 
         if (negativeMatchedFindings.length > 0) {
             resolve(
                 {
@@ -251,10 +213,8 @@ async function fetchDiseases() {
             )
     })
 
-    // await axios.post('https://api.mi1.ai/api/rareDiseaseSearch', await (cuiArrayPromise), { headers })
+    //get API call response and display diseases
     await axios.post('https://api.mi1.ai/api/' + endPoint, await (cuiArrayPromise), { headers })
-
-        // await axios.post('https://api.mi1.ai/api/PotentialComorbidities', await (cuiArrayPromise), { headers })
         .then(async function (response) {
             $('#associated-findings').empty()
             $('#suggestions-container').empty()
@@ -270,7 +230,7 @@ async function fetchDiseases() {
             clearScreen()
         });
 
-    // showDiseases(rareDiseaseData)
+    // return focus to codemirror input
     view.focus
     try {
         startCompletion
@@ -282,73 +242,67 @@ async function fetchDiseases() {
 
 //create a findings tag with click event. This has a call back function to ensure api call is done only on completion of tag creation
 function createTag(parentElement, label, id, frequency, addClasses, callback) {
-    // var htmlString = "<span class='finding-tag' id='" + info + "'>" + label + "</span><span class='close'></span>"
-    var $divTag = $('#selection-tag-template').clone().removeAttr('id').removeClass('d-none')
+    //clone template to get new tag object
+    let $divTag = $('#selection-tag-template').clone().removeAttr('id').removeClass('d-none')
 
+    //populate tag with data
     $divTag.find('.selection-tag-text').text(label)
     $divTag.children('.selection-tag-cui').text(id)
     $divTag.children('.selection-tag-frequency').text(frequency)
 
-    //set frequency shading and title
+    //set frequency indicator by changing width and position of 'empty box' element which is designed to conceal a proportion of the gradient inversely related to the frequency
     let objFrequency = getFrequencyScale(frequency)
-    $divTag.children('.selection-tag-frequency').css('background-color', 'rgba(0,0,0,' + (objFrequency.value) / 5 + ')')
-    // $divTag.children('.selection-tag-frequency').attr('title', objFrequency.description + ": " + objFrequency.range)
+    // $divTag.children('.selection-tag-frequency').css('background-color', 'rgba(0,0,0,' + (objFrequency.value) / 5 + ')')
     $divTag.find('.gradient-bar').attr('title', objFrequency.description + ": " + objFrequency.range)
     $divTag.find('.empty-box').attr('title', objFrequency.description + ": " + objFrequency.range)
-    $divTag.find('.empty-box').css('width', (1 - frequency) * 50 + 'px')
-    $divTag.find('.empty-box').css('margin-left', (1 - frequency) * -50 + 'px')
+    $divTag.find('.empty-box').css('width', ((1 - frequency) * 4.5) + .0625 + 'em')
+    $divTag.find('.empty-box').css('margin-left', ((1 - frequency) * -4.5) - .0625 + 'em')  //make 1px adjustment to allow for border width
 
     //add any additional classes
     $divTag.addClass(addClasses)
 
-
-    var hoverArea = $divTag.children('.selection-tag-hover-area')
-
-    //add click event to add tag to selected-terms div and requery the database
+    //add events to non-matched disease findings tags
     if ($divTag.hasClass('selectable') && !$divTag.hasClass('selected')) {
-
-        $divTag.find('.selection-tag-posneg .positive-finding').on("click", function () { addTagToSearch($divTag, 'positive-finding', 'negative-finding') })
-        $divTag.find('.selection-tag-posneg .negative-finding').on("click", function () { addTagToSearch($divTag, 'negative-finding', 'positive-finding') })
-
-        hoverArea.on('mouseenter', function (e) {
+        //add click event to pos/neg option
+        $divTag.find('.selection-tag-posneg .positive-finding').on("click", function () { addTagToSearchAndRequery($divTag, 'positive-finding', 'negative-finding') })
+        $divTag.find('.selection-tag-posneg .negative-finding').on("click", function () { addTagToSearchAndRequery($divTag, 'negative-finding', 'positive-finding') })
+        //add mouseenter events to hover area to hide gradient and display pos/neg option
+        $divTag.children('.selection-tag-hover-area').on('mouseenter', function (e) {
             $divTag.find('.frequency-gradient').addClass('d-none')
             $divTag.find('.selection-tag-posneg').removeClass('d-none')
         });
 
-        hoverArea.on('mouseleave', function (e) {
+        //add mouseenter events to hover area to display gradient and hide pos/neg option
+        $divTag.children('.selection-tag-hover-area').on('mouseleave', function (e) {
             $divTag.find('.frequency-gradient').removeClass('d-none')
             $divTag.find('.selection-tag-posneg').addClass('d-none')
         });
-
     }
-    //if the tag is already a search term, remove tag and requery, otherwise add tag to search
+
+    //add click event to tag label text
     $divTag.find('.selection-tag-text').on('click', function (e) {
-        console.log('selection tag click')
+        //if the tag is already a search term, remove tag and requery, otherwise add tag to search and requery
         if ($divTag.parents('#selected-terms').length > 0) {
             $divTag.remove()
             fetchDiseases()
         }
         else if (!$divTag.hasClass('selected')) {
-            addTagToSearch($divTag, 'positive-finding', 'negative-finding')
+            addTagToSearchAndRequery($divTag, 'positive-finding', 'negative-finding')
         }
     });
 
-    // //add click event to'x' symbol to remove tag from selected-terms div and requery the database
-    // $divTag.find(".remove-tag").on("click", function () {
-    //     $divTag.remove()
-    //     fetchDiseases()
-    // })
-
+    //update popover caption
     updateTagTitle($divTag)
+    //append tag to either search terms on disease findings
     parentElement.append($divTag)
-
+    //perform callback where applicable
     if (callback) {
         callback()
     }
 }
 
 //adds a tag to the search criteria as either a positive or negative finding
-function addTagToSearch($myTag, classToAdd, classToRemove) {
+function addTagToSearchAndRequery($myTag, classToAdd, classToRemove) {
 
     $myTag.removeClass('selectable top-eight ' + classToRemove)
     $myTag.addClass('removeable selected ' + classToAdd)
@@ -362,14 +316,14 @@ function addTagToSearch($myTag, classToAdd, classToRemove) {
         fetchDiseases()
     })
 
-    // append tag
+    // append tag to search terms
     divSelectedTerms.append($myTag)
     updateTagTitle($myTag)
 
-    //update diseases
+    //requery
     fetchDiseases()
-
 }
+
 //adds a mouseover caption to the tag text
 function updateTagTitle($divTag) {
     let textTitle = ''
@@ -389,12 +343,14 @@ function updateTagTitle($divTag) {
     $divTag.find('.selection-tag-text').attr('title', textTitle)
 }
 
-//sort search terms alphabetically
+//sort search terms by pos/neg and then alphabetically
 function sortSearchTerms() {
+
     var mylist = $('#selected-terms');
     var posFindings = mylist.children('.selection-tag.positive-finding').get();
     var negFindings = mylist.children('.selection-tag.negative-finding').get();
 
+    //sort positive findings
     posFindings.sort(function (a, b) {
         return $(a).find('.selection-tag-text').text().toUpperCase().localeCompare($(b).find('.selection-tag-text').text().toUpperCase());
     })
@@ -402,6 +358,7 @@ function sortSearchTerms() {
         mylist.append(obj);
     });
 
+    // sort negative findings
     negFindings.sort(function (a, b) {
         return $(a).find('.selection-tag-text').text().toUpperCase().localeCompare($(b).find('.selection-tag-text').text().toUpperCase());
     })
@@ -413,8 +370,9 @@ function sortSearchTerms() {
 //display output from api call showing returned diseases with associated evidence displayed as tags
 function showDiseases(data) {
 
-    diseaseFindings = []
-    searchOptions = []
+    let diseaseFindings = []
+    searchOptions = []      //global array
+
     $('.container-fluid').removeClass('is-empty')
 
     // populate suggestion-template with disease data and add to suggestions-container div
@@ -432,27 +390,23 @@ function showDiseases(data) {
             let probability = Math.round(diseaseItem.Disease_Probability)
             $divSuggestion.find('.disease-probability').text(probability)
 
-            // prevalence
+            // prevalence measures
             let diseasePrevalence = diseaseItem.Disease_Prevalence || 0
             let diseaseAnnualIncidence = diseaseItem.Disease_Annual_Incidence || 0
             let diseaseBirthPrevalence = diseaseItem.Disease_Birth_Prevalence || 0
             let diseaseLifetimePrevalence = diseaseItem.Disease_Lifetime_Prevalence || 0
             let diseasePointPrevalence = diseaseItem.Disease_Point_Prevalence || 0
-
+            //display max of these prevalences in label
             let maxPrevalence = Math.max(diseasePrevalence, diseaseAnnualIncidence, diseaseBirthPrevalence, diseaseLifetimePrevalence, diseasePointPrevalence)
-            var floatPrevalence, prevelanceRange
 
             let objDiseasePrevalence = getPrevalenceScale(diseasePrevalence || 0)
             let objDeaseAnnualIncidence = getPrevalenceScale(diseaseAnnualIncidence || 0)
             let objDeaseBirthPrevalence = getPrevalenceScale(diseaseBirthPrevalence || 0)
             let objDeaseLifetimePrevalence = getPrevalenceScale(diseaseLifetimePrevalence || 0)
             let objDiseasePointPrevalence = getPrevalenceScale(diseasePointPrevalence || 0)
-            // let floatPrevalence = parseFloat((maxPrevalence || 0).toExponential()).toString()
 
-            // if (floatPrevalence == '0') { floatPrevalence = 'n/a' }
-            // if (maxPrevalence == 0) { floatPrevalence = "n/a" }
-            // else { floatPrevalence = maxPrevalence.toExponential().toString() }
-
+            let $prevalence = $divSuggestion.find('.disease-prevalence')
+            var prevelanceRange
             if (maxPrevalence == 0) { prevelanceRange = "Prevalence Not Known" }
             else {
                 let objPrevalence = getPrevalenceScale(maxPrevalence)
@@ -466,9 +420,7 @@ function showDiseases(data) {
                     formatPrevalenceLine('Birth Prevalence', objDeaseBirthPrevalence) +
                     formatPrevalenceLine('Lifetime Prevalence', objDeaseLifetimePrevalence)
 
-                let $prevalence = $divSuggestion.find('.disease-prevalence')
                 // if (!isNaN(floatPrevalence)) {
-                $prevalence.text(prevelanceRange)
                 // $divSuggestion.find('.disease-prevalence').css('background-color', 'rgba(0,0,0,' + (objPrevalence.value) / 5 + ')')
                 // $prevalence.attr('title', prevalenceTitle)
                 $prevalence.popover("dispose")
@@ -485,8 +437,7 @@ function showDiseases(data) {
                     //     '<div class="popover-body"> </div > </div > '
                 })
             }
-
-            // }
+            $prevalence.text(prevelanceRange)
 
             //publications
             let evidence = diseaseItem.Disease_Finding_Assoc_Evidence
@@ -550,7 +501,6 @@ function showDiseases(data) {
             diseaseFindings.sort(function (a, b) {
                 return (parseFloat(b.Rank) - parseFloat(a.Rank))
             })
-
 
             //iterate through findings
             if (diseaseFindings != null) {
@@ -624,9 +574,7 @@ function clearScreen(clearSelectedTerms = false) {
             insert: ''
         }
     })
-
     view.focus()
-
 }
 
 //receives frequency as input. Returns object representing prevalence on a scale from 1-5
@@ -695,7 +643,7 @@ function getPrevalenceScale(prevalence) {
         prevalence_value = 0
     }
     else if (prevalence < Math.pow(10, 6)) {
-        prevalence_range_numerator = '<1-9'
+        prevalence_range_numerator = '< 1'
         prevalence_range_denominator = 1000000
         prevalence_value = 1
     }
@@ -733,6 +681,7 @@ function getPrevalenceScale(prevalence) {
     }
 }
 
+//code fired after each page load
 $(function () {
 
     particlesJS.load('particles-js', 'particlesjs.json', function () {
@@ -758,14 +707,12 @@ $(function () {
         state: initialState,
     })
 
-    // let element: HTMLElement = $('#editor-container')[0] as HTMLElement
-
-    // view.focus()
-
+    //bind Clear All button click event
     $('#btnClearAll').on("click", function () {
         clearScreen(true)
     })
 
+    //bind pos/neg toggle change event
     $('#posneg-state').on("change", function () {
         if (this.checked) {
             $('#search-section').addClass('negative-search')
@@ -778,22 +725,15 @@ $(function () {
         view.focus()
     });
 
-    // $('.disease-prevalence').on('mouseleave', function () {
-    //     $('.popover').hide()
+    //page info popover
+    // $('#page-info-popover').popover("dispose")
+    // $('#page-info-popover').popover({
+    //     title: "",
+    //     content: $('#page-info-template').html(),
+    //     trigger: "hover",
+    //     placement: "auto",
+    //     html: true,
+    //     customClass: "prevalence-title"
     // })
-
-    $('#page-info-popover').popover("dispose")
-    $('#page-info-popover').popover({
-        title: "",
-        content: $('#page-info-template').html(),
-        trigger: "hover",
-        placement: "auto",
-        html: true,
-        customClass: "prevalence-title"
-        // template: '<div class="popover" role="tooltip">' +
-        //     '<div class="popover-arrow"> </div>' +
-        //     '<h3 class="popover-header"> </h3 >' +
-        //     '<div class="popover-body"> </div > </div > '
-    })
 })
 

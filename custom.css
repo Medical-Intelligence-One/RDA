@@ -369,7 +369,7 @@ header {
 .prevalence-title .popover-header {
     color: white;
     background-color: #03B8EA;
-    font-family: "Courier";
+    font-family: "Everson Mono";
     font-size: 1.2em;
     font-weight: bold;
     display: none;
@@ -633,7 +633,8 @@ span.expand-contract:before {
 }
 
 .selection-tag.selected .frequency-gradient {
-    border: solid 1px white;
+    /* border: solid 1px white; */
+    border-color: white;
 }
 
 #selected-terms .selection-tag .frequency-gradient {
@@ -652,7 +653,8 @@ span.expand-contract:before {
 }
 
 .selection-tag.selected .empty-box {
-    border: solid 1px white;
+    /* border: solid 1px white; */
+    border-color: white;
 }
 
 
