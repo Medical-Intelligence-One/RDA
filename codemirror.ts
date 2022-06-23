@@ -165,13 +165,13 @@ let state = EditorState.create({
 //returns Diseases based on selected CUIS
 async function fetchDiseases() {
     //use rareDiseaseSearch as endpoint if there are no negative findings
-    var endPoint = ''
-    if ($('#selected-terms .selection-tag.selected.negative-finding').length > 0) {
-        endPoint = "rareDiseaseSearchPosNeg"
-    }
-    else {
-        endPoint = "rareDiseaseSearch"
-    }
+    var endPoint = 'rareDiseaseSearchPosNeg'
+    // if ($('#selected-terms .selection-tag.selected.negative-finding').length > 0) {
+    //     endPoint = "rareDiseaseSearchPosNeg"
+    // }
+    // else {
+    //     endPoint = "rareDiseaseSearch"
+    // }
 
     //write selected CUI tag elements into array
     let cuiArrayPromise = new Promise(function (resolve) {
@@ -196,21 +196,21 @@ async function fetchDiseases() {
             })
         }
         //resolve promise with parameter values for either 
-        if (negativeMatchedFindings.length > 0) {
-            resolve(
-                {
-                    // CUIs: matchedFindings
-                    Matched_Findings: matchedFindings,
-                    Negative_Matched_Findings: negativeMatchedFindings
-                }
-            )
-        }
-        else
-            resolve(
-                {
-                    CUIs: matchedFindings
-                }
-            )
+        // if (negativeMatchedFindings.length > 0) {
+        resolve(
+            {
+                // CUIs: matchedFindings
+                Matched_Findings: matchedFindings,
+                Negative_Matched_Findings: negativeMatchedFindings
+            }
+        )
+        // }
+        // else
+        //     resolve(
+        //         {
+        //             CUIs: matchedFindings
+        //         }
+        //     )
     })
 
     //get API call response and display diseases
@@ -397,7 +397,8 @@ function showDiseases(data) {
             let diseaseLifetimePrevalence = diseaseItem.Disease_Lifetime_Prevalence || 0
             let diseasePointPrevalence = diseaseItem.Disease_Point_Prevalence || 0
             //display max of these prevalences in label
-            let maxPrevalence = Math.max(diseasePrevalence, diseaseAnnualIncidence, diseaseBirthPrevalence, diseaseLifetimePrevalence, diseasePointPrevalence)
+            // let maxPrevalence = Math.max(diseasePrevalence, diseaseAnnualIncidence, diseaseBirthPrevalence, diseaseLifetimePrevalence, diseasePointPrevalence)
+            let maxPrevalence = diseaseItem.Max_Prevalence_or_Incidence || 0
 
             let objDiseasePrevalence = getPrevalenceScale(diseasePrevalence || 0)
             let objDeaseAnnualIncidence = getPrevalenceScale(diseaseAnnualIncidence || 0)
@@ -553,8 +554,13 @@ function showDiseases(data) {
 function formatPrevalenceLine(label, objValue) {
     if (objValue.value == 0) { return '' }
     else {
-        return label + '.'.repeat(35 - label.length - objValue.range_numerator.length - objValue.range_denominator.toLocaleString().length) +
-            objValue.range_numerator + ' / ' + objValue.range_denominator.toLocaleString() + "<br>"
+        // return label + '.'.repeat(35 - label.length - objValue.range_numerator.length - objValue.range_denominator.toLocaleString().length) +
+        //     objValue.range_numerator + ' / ' + objValue.range_denominator.toLocaleString() + "<br>"
+        console.log("<span style='width:40px;text-align:left'>" + label + "</span><span style='width:20px;text-align:right'>" +
+            objValue.range_numerator + ' / ' + objValue.range_denominator.toLocaleString() + "</span>")
+        return "<div><span class='prevalence-label'>" + label + "</span><span class='prevalence-range'>" +
+            objValue.range_numerator + ' / ' + objValue.range_denominator.toLocaleString() + "</span></div>"
+
     }
 }
 
@@ -642,32 +648,34 @@ function getPrevalenceScale(prevalence) {
         prevalence_range_denominator = 0
         prevalence_value = 0
     }
-    else if (prevalence < Math.pow(10, 6)) {
+    // else if (prevalence = Math.pow(10, -6)) {
+    else if (prevalence <= 1 / 1000000) {
         prevalence_range_numerator = '< 1'
         prevalence_range_denominator = 1000000
         prevalence_value = 1
     }
-    else if (prevalence < (1 + 9) / 2 * Math.pow(10, 6)) {
+    // else if (prevalence = (1 + 9) / 2 * Math.pow(10, -6)) {
+    else if (prevalence <= (1 + 9) / 2 / 1000000) {
         prevalence_range_numerator = '1-9'
         prevalence_range_denominator = 1000000
         prevalence_value = 2
     }
-    else if (prevalence < (1 + 9) / 2 * Math.pow(10, 5)) {
+    else if (prevalence <= (1 + 9) / 2 / 100000) {
         prevalence_range_numerator = '1-9'
         prevalence_range_denominator = 100000
         prevalence_value = 3
     }
-    else if (prevalence < (1 + 5) / 2 * Math.pow(10, 4)) {
+    else if (prevalence <= (1 + 5) / 2 / 10000) {
         prevalence_range_numerator = '1-5'
         prevalence_range_denominator = 10000
         prevalence_value = 4
     }
-    else if (prevalence < (6 + 9) / 2 * Math.pow(10, 4)) {
+    else if (prevalence <= (6 + 9) / 2 / 10000) {
         prevalence_range_numerator = '6-9'
         prevalence_range_denominator = 10000
         prevalence_value = 5
     }
-    else {
+    else if (prevalence <= 1 / 1000) {
         prevalence_range_numerator = '>1'
         prevalence_range_denominator = 1000
         prevalence_value = 6

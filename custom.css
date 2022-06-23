@@ -160,7 +160,7 @@ body {
     font-family: 'Rubik Light', 'Open Sans';
 }
 
-hr.hr-1 {
+/* hr.hr-1 {
     background: linear-gradient(to right, black, #03B8EA, white);
     height: 20px !important;
     margin-bottom: 2em;
@@ -170,7 +170,7 @@ hr.hr-2 {
     background: linear-gradient(to right, white, #03B8EA, black);
     height: 20px !important;
     margin-bottom: 2em;
-}
+} */
 
 .h1,
 .h2,
@@ -252,6 +252,7 @@ header {
 
 #logo {
     padding: 30px;
+    /* margin-right: auto; */
     /* margin: 30px 30px 30px; */
 }
 
@@ -361,15 +362,16 @@ header {
 }
 
 .prevalence-title.popover {
-    max-width: 40em;
+    max-width: 100em;
     border-color: #03B8EA;
     border-width: .3em;
+    /* font-family: "Everson Mono", "Monaco", "Courier New"; */
 }
 
 .prevalence-title .popover-header {
     color: white;
     background-color: #03B8EA;
-    font-family: "Everson Mono";
+
     font-size: 1.2em;
     font-weight: bold;
     display: none;
@@ -383,9 +385,27 @@ header {
 .prevalence-title .popover-body {
     color: white;
     background-color: black;
-    font-family: "Courier";
+    /* font-family: "Courier"; */
     font-size: 1.2em;
     opacity: .8;
+}
+
+.prevalence-title .popover-body .prevalence-label {
+    width: 10em;
+    text-align: left;
+}
+
+.prevalence-title .popover-body div {
+    display: flex;
+    align-content: space-between;
+
+}
+
+.prevalence-title .popover-body .prevalence-range {
+    min-width: 50px;
+    text-align: right;
+    /* color: #03B8EA; */
+    margin-left: auto;
 }
 
 .disease-probability {
