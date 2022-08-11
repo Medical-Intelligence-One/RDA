@@ -30,5 +30,8 @@ node -v
 ### To run the mi1 rare disease app:
 
 npm install parcel
-cd [project root]
+cd [project root]\CodeMirror
 npm start
+
+### update particlesjs.json file in \dist directory
+if particles are not showing in background, copy over the contents of the \CodeMirror\particles.json file into \CodeMirror\dist\particlesjs.json.
