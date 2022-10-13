@@ -10,14 +10,17 @@ import { autocompletion, CompletionContext, startCompletion } from "@codemirror/
 // import rareDiseaseData from '../mi1-rare-disease/rare-diseases.json'       //test data until api is working
 // import autocompleteRareDiseaseData from '../mi1-rare-disease/autocomplete_rareDz_findings.json'       //test data until api is working
 // import { typeOf } from 'react-is';
+import bookmarkedDiseaseData from '../mi1-rare-disease/dx1.json'       //test data until api is working
+import searchHistoryData from '../mi1-rare-disease/searchHistory.json'       //test data until api is working
 const axios = require('axios')
 const headers = {
     'Access-Control-Allow-Origin': '*'
 }
-var view
-var searchOptions = []
+var view, inputVal
+var searchOptions: any[] = []
 
-var divSelectedTerms = $('#selected-terms')
+var $selectedTerms = $('#selected-terms')
+var $bookmarkedDiseasesContainer = $('#bookmarked-diseases-container')
 
 let myTheme = EditorView.theme({
     "cm-editor": {
@@ -67,7 +70,7 @@ async function fetchAutoCompleteFromAPI(startsWith) {
         }
 
         // autoCompleteData = autocompleteRareDiseaseData
-        await axios.post('https://api.mi1.ai/api/autocomplete_rareDz_findings', body, { headers })
+        await axios.post('https://dev_api.mi1.ai/api/autocomplete_rareDz_findings', body, { headers })
             .then(function (response) {
                 let autoCompleteData = response.data
                 searchOptions = []
@@ -78,10 +81,11 @@ async function fetchAutoCompleteFromAPI(startsWith) {
                     let cui = autoCompleteData[i].Clinical_Finding_CUI
                     let name = autoCompleteData[i].Clinical_Finding
                     let frequency = null
-                    let addClasses = "removeable selected " + ($('#search-section').hasClass('positive-search') ? 'positive-finding' : 'negative-finding')
+                    let addClasses = "mini removeable selected " + ($('#search-section').hasClass('positive-search') ? 'positive-finding' : 'negative-finding')
                     searchOptions.push({
-                        info: cui,
+                        // info: cui,
                         label: name,
+                        type: "finding",
                         apply: () => {
                             view.dispatch({
                                 changes: {
@@ -90,7 +94,8 @@ async function fetchAutoCompleteFromAPI(startsWith) {
                                     insert: ''
                                 }
                             })
-                            createTag(divSelectedTerms, name, cui, frequency, addClasses, fetchDiseases)
+                            createTag($selectedTerms, name, cui, frequency, addClasses, fetchDiseases)
+                            $('#div-selected-terms').toggleClass('d-none', false)
 
                         }
                     })
@@ -122,7 +127,7 @@ function fetchAutoCompleteFromDiseaseFindings(contains) {
                             insert: ''
                         }
                     })
-                    createTag(divSelectedTerms, label, cui, frequency, addClasses, fetchDiseases)
+                    createTag($selectedTerms, label, cui, frequency, addClasses, fetchDiseases)
                 }
             })
         }
@@ -166,18 +171,12 @@ let state = EditorState.create({
 async function fetchDiseases() {
     //use rareDiseaseSearch as endpoint if there are no negative findings
     var endPoint = 'rareDiseaseSearchPosNeg'
-    // if ($('#selected-terms .selection-tag.selected.negative-finding').length > 0) {
-    //     endPoint = "rareDiseaseSearchPosNeg"
-    // }
-    // else {
-    //     endPoint = "rareDiseaseSearch"
-    // }
 
     //write selected CUI tag elements into array
     let cuiArrayPromise = new Promise(function (resolve) {
         sortSearchTerms()
-        var matchedFindings = []
-        var negativeMatchedFindings = []
+        var matchedFindings: any[] = []
+        var negativeMatchedFindings: any[] = []
 
         //iterate through all the tags in the selected-terms div to get the cuis
         let $selectedTags = $('#selected-terms .selection-tag.selected:not(.d-none)')
@@ -196,7 +195,6 @@ async function fetchDiseases() {
             })
         }
         //resolve promise with parameter values for either 
-        // if (negativeMatchedFindings.length > 0) {
         resolve(
             {
                 // CUIs: matchedFindings
@@ -204,23 +202,16 @@ async function fetchDiseases() {
                 Negative_Matched_Findings: negativeMatchedFindings
             }
         )
-        // }
-        // else
-        //     resolve(
-        //         {
-        //             CUIs: matchedFindings
-        //         }
-        //     )
     })
 
     //get API call response and display diseases
-    await axios.post('https://api.mi1.ai/api/' + endPoint, await (cuiArrayPromise), { headers })
+    await axios.post('https://dev_api.mi1.ai/api/' + endPoint, await (cuiArrayPromise), { headers })
         .then(async function (response) {
             $('#associated-findings').empty()
             $('#suggestions-container').empty()
 
             if (response.data.length > 0) {
-                showDiseases(response.data)
+                showDiseases(response.data, $('#suggestions-container'))
             }
             else {
                 clearScreen()
@@ -239,6 +230,32 @@ async function fetchDiseases() {
         console.log(console.log(ex))
     }
 }
+
+// //fetch and display bookmarked diseases
+// function fetchBookmarkedDiseases(bookmarkedDiseaseName) {
+
+//     $('#associated-findings').empty()
+//     $('#bookmarked-diseases-container').empty()
+
+//     if (bookmarkedDiseaseData.length > 0) {
+//         showDiseases(bookmarkedDiseaseData, $('#bookmarked-diseases-container'))
+//         $('#bookmarked-diseases-container').removeClass('d-none')
+//         showHideDiseasesUsingBookmarkedDiseases()
+//     }
+//     else {
+//         clearScreen()
+//     }
+
+//     // return focus to codemirror input
+//     view.focus
+//     try {
+//         startCompletion
+//     }
+//     catch (ex) {
+//         console.log(console.log(ex))
+//     }
+// }
+
 
 //create a findings tag with click event. This has a call back function to ensure api call is done only on completion of tag creation
 function createTag(parentElement, label, id, frequency, addClasses, callback) {
@@ -317,7 +334,7 @@ function addTagToSearchAndRequery($myTag, classToAdd, classToRemove) {
     })
 
     // append tag to search terms
-    divSelectedTerms.append($myTag)
+    $selectedTerms.append($myTag)
     updateTagTitle($myTag)
 
     //requery
@@ -346,7 +363,7 @@ function updateTagTitle($divTag) {
 //sort search terms by pos/neg and then alphabetically
 function sortSearchTerms() {
 
-    var mylist = $('#selected-terms');
+    var mylist = $selectedTerms;
     var posFindings = mylist.children('.selection-tag.positive-finding').get();
     var negFindings = mylist.children('.selection-tag.negative-finding').get();
 
@@ -368,7 +385,7 @@ function sortSearchTerms() {
 }
 
 //display output from api call showing returned diseases with associated evidence displayed as tags
-function showDiseases(data) {
+function showDiseases(data, $parentContainer) {
 
     let diseaseFindings = []
     searchOptions = []      //global array
@@ -379,7 +396,8 @@ function showDiseases(data) {
     try {
         for (let arrIndex = 0; arrIndex < data.length; arrIndex++) {
             let diseaseItem = data[arrIndex]
-            let $divSuggestion = $('#suggestion-template').clone().removeAttr('id').removeClass('d-none')
+            let diseaseTag = diseaseItem.Disease.replaceAll(' ', '_')
+            let $divSuggestion = $('#suggestion-template').clone().removeAttr('id').removeClass('d-none').addClass(diseaseTag)
             // let $divSuggestion = $('#suggestion-template').clone().attr('id', diseaseItem.Disease_CUI).removeClass('d-none')
 
             $divSuggestion.find('.disease-name').text(diseaseItem.Disease)
@@ -465,8 +483,35 @@ function showDiseases(data) {
                 $divSuggestion.find('.disease-evidence').append(publicationsHtmlString)
             }
 
-            $divSuggestion.find('.suggestion-header').on("click", function (e) {
+            $divSuggestion.find('.expand-contract').on("click", function (e) {
                 $divSuggestion.toggleClass('contracted');
+            })
+
+            //add/remove suggestion to bookmark list when bookmark selected/deselected
+            $divSuggestion.find('.disease-bookmark').on("click", function (e) {
+                var $bookmarkIcon = $('.' + diseaseTag + ' .disease-bookmark')      //include suggestions in both the bookmarked list and diseases list
+
+                $bookmarkIcon.toggleClass('active')
+                $bookmarkIcon.toggleClass('far')
+                $bookmarkIcon.toggleClass('fas')
+
+                if ($bookmarkIcon.hasClass('active')) {
+                    let $divSuggestionClone = $divSuggestion.clone(true)        //clone elements and events
+                    $divSuggestionClone.find('.expand-contract').on("click", function (e) {
+                        $divSuggestionClone.toggleClass('contracted');
+                    })
+                    $bookmarkedDiseasesContainer.append($divSuggestionClone)
+                }
+                else {
+                    $bookmarkedDiseasesContainer.find('.' + diseaseTag).remove()
+                }
+                if ($('#bookmarked-diseases-container .div-suggestion').length == 0) {
+                    $bookmarkedDiseasesContainer.toggleClass('d-none', true)
+                }
+                else {
+                    $bookmarkedDiseasesContainer.toggleClass('d-none', false)
+                }
+
             })
 
             //populate findings div for diagnosis and associated findings div for top 3 diagnoses
@@ -499,14 +544,14 @@ function showDiseases(data) {
             }
 
             // sort data by rank
-            diseaseFindings.sort(function (a, b) {
+            diseaseFindings.sort(function (a: any, b: any) {
                 return (parseFloat(b.Rank) - parseFloat(a.Rank))
             })
 
             //iterate through findings
             if (diseaseFindings != null) {
                 for (let j = 0; j < diseaseFindings.length; j++) {
-                    let obj = diseaseFindings[j]
+                    let obj: any = diseaseFindings[j]
                     let label = obj.Name
                     let cui = obj.CUI
                     let frequency = obj.Frequency
@@ -538,7 +583,7 @@ function showDiseases(data) {
             })
 
             //append this new div-suggestion to the parent container
-            $('#suggestions-container').append($divSuggestion)
+            $parentContainer.append($divSuggestion)
 
         }
         //populate autocomplete from disease findings
@@ -567,10 +612,15 @@ function formatPrevalenceLine(label, objValue) {
 //clear screen (clearing selected terms is optional)
 function clearScreen(clearSelectedTerms = false) {
     if (clearSelectedTerms) {
-        $('#selected-terms').empty()
+        $selectedTerms.empty()
+        $('#div-selected-terms').toggleClass('d-none', true)
     }
+
     $('#suggestions-container').empty()
+    $('#bookmarked-diseases-container').empty()
     $('.container-fluid').addClass('is-empty')
+    $('.search-editor').toggleClass('d-none', false)
+    $('#search-history').toggleClass('d-none', true)
 
     //clear cm editor
     view.dispatch({
@@ -689,6 +739,74 @@ function getPrevalenceScale(prevalence) {
     }
 }
 
+// //show/hide items in disease list depending on whether they appear in bookmarked-disease list
+// function showHideDiseasesUsingBookmarkedDiseases() {
+//     var hideSuggestion
+//     $('#suggestions-container .div-suggestion').each(function (i1, s,) {
+//         hideSuggestion = false
+//         $('#bookmarked-diseases-container .div-suggestion').each(function (i2, d) {
+//             if ($(s).find('.disease-name').text() === $(d).find('.disease-name').text()) {
+//                 hideSuggestion = true
+//             }
+//         })
+//         $(s).toggleClass('d-none', hideSuggestion)
+//     })
+// }
+
+//show the search history
+function showSearchHistory(data) {
+    var $searchHistoryLine = $(), $divTag = $()
+    var searchDate, searchTime
+    var oldSearchDate
+
+    //remove existing history
+    $('#search-history .search-history-line-template').remove()
+
+    //iterate through json data
+    $(data.searchHistory).each(function (i, d) {
+        $searchHistoryLine = $('#search-history-line-template').clone().removeAttr('id')
+
+        searchDate = new Date(d.datetime).toLocaleDateString()
+        searchTime = new Date(d.datetime).toLocaleTimeString()
+
+        //hide date header if not applicable
+        $searchHistoryLine.find('.date-header').text(new Date(d.datetime).toLocaleDateString())
+        if (searchDate == oldSearchDate && oldSearchDate != undefined) {
+            $searchHistoryLine.find('.date-header').hide()
+        }
+        oldSearchDate = searchDate
+
+        $searchHistoryLine.find('.search-time').text(searchTime)
+
+        //make save icon invisible if not applicable
+        if (d.saved != "true") {
+            $searchHistoryLine.find('.save-icon').css('visibility', 'hidden')
+        }
+
+        //add findings tags
+        $(d.searchTerms).each(function (i2, d2) {
+            $divTag = $("<span class='tag'>" + d2.name + "</span>")
+            $divTag.data('cui', d2.cui)
+            $divTag.addClass(d2.posneg == 'pos' ? 'positive-search' : 'negative-search')
+            $searchHistoryLine.find('.search-history-line').append($divTag)
+        })
+
+        //append searchHistoryLine to div
+        $('#search-history').append($searchHistoryLine)
+    })
+
+    //add event to trigger search when line is clicked
+    $('#search-history .search-history-line').on("click", function (e) {
+        $selectedTerms.empty()
+        var addClasses
+        $(e.currentTarget).children('.tag').each(function (i, t) {
+            addClasses = "mini removeable selected " + ($(t).hasClass('positive-search') ? 'positive-finding' : 'negative-finding')
+            createTag($selectedTerms, $(t).text(), $(t).data("cui"), null, addClasses, fetchDiseases)
+        })
+        $('#div-selected-terms').toggleClass('d-none', false)
+    })
+}
+
 //code fired after each page load
 $(function () {
 
@@ -731,7 +849,51 @@ $(function () {
             $('#search-section').removeClass('negative-search')
         }
         view.focus()
+
     });
+
+    // $('#bookmarked-diseases-dropdown li').on('click', function (e) {
+    //     fetchBookmarkedDiseases('dx1')
+    //     inputVal = $(e.target).text()
+    //     $('#bookmarked-diseases-label').text(inputVal);
+
+    // })
+
+    // $('#new-bookmarked-disease-textbox').on("keypress", function (e) {
+    //     if (e.which == 13) {
+    //         inputVal = $(this).val()?.toString() + '';
+    //         $('#bookmarked-diseases-label').text(inputVal);
+    //         $('#bookmarked-diseases-dropdown .rda-dropdown-items').hide()
+    //     }
+    // })
+
+    //contract/expand all bookmarked diseases
+    $('#rda-header-bookmarked-diseases').on("click", function (e) {
+        $(e.currentTarget).toggleClass('contracted');
+        let isContracted = $(e.currentTarget).hasClass('contracted')
+        $(e.currentTarget).next().find('.div-suggestion').toggleClass('contracted', isContracted);
+    })
+
+    //show/hide search history
+    $('#btnSearchHistory, #imgSearchHistory').on("click", function () {
+        $('.search-editor').toggleClass('d-none')
+        $('#search-history').toggleClass('d-none')
+        if (!$('#search-history').hasClass('d-none')) {
+            showSearchHistory(searchHistoryData)
+        }
+    })
+
+    $('#close-search-history').on("click", function () {
+        $('.search-editor').toggleClass('d-none', false)
+        $('#search-history').toggleClass('d-none', true)
+    })
+
+    //contract/expand all diseases
+    $('#rda-header-diseases').on("click", function (e) {
+        $(e.currentTarget).toggleClass('contracted');
+        let isContracted = $(e.currentTarget).hasClass('contracted')
+        $(e.currentTarget).next().find('.div-suggestion').toggleClass('contracted', isContracted);
+    })
 
     //page info popover
     // $('#page-info-popover').popover("dispose")

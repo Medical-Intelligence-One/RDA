@@ -55,7 +55,7 @@ Red #F32E15
 
     #selected-terms {
         padding: 0 1em 0 .5em;
-        background-color: rgba(0, 0, 0, .7);
+        /* background-color: rgba(0, 0, 0, .7); */
         z-index: -1;
     }
 
@@ -63,7 +63,7 @@ Red #F32E15
         padding: 1em !important;
     }
 
-    .expand-contract {
+    .expand-contract-icon {
         font-size: 1.1rem;
         margin-right: 1em;
         min-width: 1em;
@@ -132,14 +132,15 @@ Red #F32E15
         text-align: left;
         padding: .5em;
         border-radius: 7px;
+        width: 100%
     }
 
     #selected-terms {
-        background-color: rgba(0, 0, 0, .7);
+        /* background-color: rgba(0, 0, 0, .7); */
         z-index: 1;
     }
 
-    .expand-contract {
+    .expand-contract-icon {
         font-size: 1.5rem;
         margin-right: 1em;
         min-width: 1.1em;
@@ -235,8 +236,8 @@ div.tooltip-inner {
 }
 
 
-.container-fluid.is-empty #rda-header-diseases {
-    display: none;
+.container-fluid.is-empty .hide-at-start {
+    display: none !important;
 }
 
 .container-fluid.is-empty #suggestions-container {
@@ -267,10 +268,44 @@ header {
 .rda-header {
     text-align: left;
     color: white;
-    padding: .65em;
-    margin-right: 1em;
+    padding: .65em 0 .65em .65em;
+    margin-top: 1em;
+
+    /* margin-right: 1em; */
 }
 
+.rda-dropdown-items {
+    text-align: center;
+    background-color: #5A99E2;
+}
+
+.rda-dropdown-items li {
+    padding-bottom: .5em;
+}
+
+.rda-dropdown-items li:hover {
+    background-color: white;
+}
+
+.rda-dropdown-items a {
+    color: white;
+    text-decoration: none;
+}
+
+.rda-dropdown-items li:hover a {
+    color: #5A99E2;
+}
+
+#new-bookmarked-disease-textbox {
+    margin: 0 1em;
+    padding: 0 .3em;
+    border: 2px solid lightgray;
+
+}
+
+#bookmarked-diseases-label {
+    color: #03B8EA;
+}
 
 .section-container {
     width: 100%;
@@ -350,6 +385,26 @@ header {
     /* padding-left: 1em; */
 }
 
+.disease-bookmark:before {
+    /* font-family: "Font Awesome 5 Free";
+    content: "\f02e"; */
+    margin-left: 1em;
+    color: #03B8EA;
+}
+
+/* .disease-bookmark.active:before {
+    color: gold;
+} */
+
+.search-history-bookmark:before {
+    color: #03B8EA;
+    font-size: 1.5em;
+    margin-right: 1em;
+}
+
+.search-history-bookmark.active:before {
+    color: gold;
+}
 
 .disease-prevalence,
 .disease-probability {
@@ -438,12 +493,32 @@ header {
 
 .search-editor {
     background-color: white;
+    width: 100%;
 }
 
 .cm-editor:not(.cm-focused) .cm-activeLine:before {
     content: "e.g. Thrombocytopenia, Occipital Encephalocele, Hypotonia";
     font-style: italic;
     color: grey;
+}
+
+/* .cm-completionIcon:before {
+    font-family: "Font Awesome 5 Free";
+    font-weight: bold;
+    border-radius: 20px;
+    border: 2px solid grey;
+    padding: 3px;
+    color: white;
+    background-color: grey;
+    font-size: 75%;
+}
+
+.cm-completionIcon-finding:before {
+    content: "\46";
+} */
+
+.cm-completionLabel {
+    padding-left: 15px;
 }
 
 .selection-tag {
@@ -455,7 +530,14 @@ header {
     padding-right: 1em;
 }
 
-#selected-terms .selection-tag {
+/* #div-selected-terms {
+    background-color: white;
+    border: 10px solid #5A99E2;
+    margin-top: 1em;
+    border-radius: 7px;
+} */
+
+.selection-tag.mini {
     padding-right: 0;
 }
 
@@ -500,7 +582,7 @@ header {
 }
 
 /* hide frequency for selected terms */
-#selected-terms .selection-tag-frequency {
+.selection-tag.mini .selection-tag-frequency {
     display: none;
 }
 
@@ -593,35 +675,48 @@ header {
     display: none !important;
 }
 
-.expand-contract {
+.expand-contract-icon {
     color: #03B8EA;
     cursor: pointer;
     text-align: center;
 }
 
-.suggestion-header:hover .expand-contract:before {
-    content: "\f139"
-}
-
-.div-suggestion.contracted .suggestion-header:hover .expand-contract:before {
-    content: "\f13a"
-}
-
-span.expand-contract:before {
+.expand-contract-icon:before {
     font-family: "Font Awesome 5 Free";
     content: "\f077";
     font-weight: bold;
 }
 
-.contracted span.expand-contract:before {
+.contracted .expand-contract-icon:before {
     font-family: "Font Awesome 5 Free";
     content: "\f078";
     font-weight: bold;
 }
 
-.contracted .disease-addinfo {
+.expand-contract:hover .expand-contract-icon:before,
+.expand-contract-icon:hover:before {
+    content: "\f139";
+    margin-right: -.12em;
+}
+
+.contracted .expand-contract:hover .expand-contract-icon:before,
+.contracted .expand-contract-icon:hover:before {
+    content: "\f13a"
+}
+
+.div-suggestion.contracted .disease-addinfo {
     display: none !important;
 }
+
+/* .div-suggestion.contracted .disease-addinfo,
+#rda-header-diseases.contracted+#suggestions-container .disease-addinfo {
+    display: none !important;
+}
+
+#rda-header-bookmarked-diseases.contracted+#bookmarked-diseases-container .disease-addinfo {
+    display: none !important;
+} */
+
 
 .btn-more-findings {
     text-decoration: underline;
@@ -657,11 +752,11 @@ span.expand-contract:before {
     border-color: white;
 }
 
-#selected-terms .selection-tag .frequency-gradient {
+.selection-tag.mini .frequency-gradient {
     display: none;
 }
 
-#selected-terms .selection-tag .empty-box {
+.selection-tag.mini .empty-box {
     display: none;
 }
 
@@ -677,6 +772,79 @@ span.expand-contract:before {
     border-color: white;
 }
 
+#imgSearchHistory {
+    margin: 0 1em;
+    color: white;
+    font-size: 1.3em;
+    background-color: #F32E15;
+    padding: .7em;
+    border-radius: 7px;
+}
+
+#imgSearchHistory:hover {
+    color: white;
+    cursor: pointer;
+}
+
+#search-history {
+    background-color: white;
+    color: #5A99E2;
+}
+
+#search-history .header-label {
+    color: white;
+    text-align: left;
+    width: 100%;
+    padding: .5em;
+    background-color: #03B8EA;
+    margin-bottom: .5em;
+}
+
+.search-history-line span {
+    padding: .15em .5em;
+    margin: .2em .5em .2em 0;
+}
+
+.search-history-line span.save-icon {
+    color: #03B8EA;
+    font-size: 1.2em;
+    margin: 0 .5em;
+}
+
+#search-history .date-header {
+    font-weight: bold;
+    margin-left: .5em;
+}
+
+.search-history-line:hover {
+    background-color: lightgrey;
+    cursor: pointer;
+}
+
+.search-history-line .tag {
+    border: 3px solid #5A99E2;
+    border-radius: 7px;
+    background-color: white;
+    color: #5A99E2;
+    padding: .15em .5em;
+    margin: .2em .5em;
+}
+
+.search-history-line .tag.negative-search {
+    border-color: #F32E15;
+    color: #F32E15;
+}
+
+#close-search-history:before {
+    cursor: pointer;
+    font-family: "Font Awesome 6 Free";
+    content: "\f057";
+    font-size: 1.4em;
+}
+
+#close-search-history:hover {
+    color: #F32E15
+}
 
 #particles-js canvas {
     display: block;

@@ -35,10 +35,6 @@
         <!-- template for disease findings tag -->
         <div id="selection-tag-template"
             class="selection-tag para3 d-flex col-auto justify-content-start align-items-center me-2">
-            <!-- <span id="posneg-finding" class="posneg-finding" data-bs-toggle="popover" data-bs-html="true"
-                title="Add to Search" data-bs-placement="top" data-bs-trigger="hover"></span> -->
-            <!-- <span class="selection-tag-text" data-bs-toggle="popover" data-bs-html="true" data-bs-placement="top"
-                data-bs-trigger="hover"></span> -->
             <span class="selection-tag-hover-area">
                 <span class="selection-tag-text"></span>
                 <span class="selection-tag-posneg d-none">
@@ -58,18 +54,24 @@
         <!-- template for disease suggestion -->
         <div id="suggestion-template" class="div-suggestion hide-findings">
             <div class="section-container mb-auto">
-                <div class="suggestion-header d-flex align-items-center h3 clickable" title="Expand/Contract Disease">
-                    <span class="expand-contract"></span>
-                    <span class="disease-name me-auto">Disease Name</span>
-                    <span class="disease-probability" title="Probability"></span>
-                    <!-- <span class="disease-prevalence ms-2" title="Prevalence" style="background-color: rgba(0,0,0,1)"></span> -->
-                    <span class="disease-prevalence ms-2" data-bs-toggle="popover" data-bs-html="true"
-                        data-bs-placement="auto" data-bs-trigger="hover" title="Prevalence"></span>
-                    <!-- <span class="associated-evidence ms-2 me-2" title="Associated Evidence" data-bs-toggle="tooltip"
-                    data-bs-placement="bottom"></span> -->
-                    <!-- <i class="disease-probability fas fa-circle" aria-hidden="true" data-bs-toggle="tooltip"></i> -->
-                    <i class="connected-papers fas fa-circle-nodes d-none" aria-hidden="true"
-                        title="Search Connected Papers"></i>
+                <div class="suggestion-header d-flex align-items-enter justify-content-between h3">
+                    <span class="expand-contract clickable" title="Expand/Contract Disease">
+                        <span class="expand-contract-icon"></span>
+                        <span class="me-auto">
+                            <span class="disease-name">Disease Name</span>
+                        </span>
+                    </span>
+                    <span>
+                        <span class="disease-probability" title="Probability"></span>
+                        <span class="disease-prevalence ms-2" data-bs-toggle="popover" data-bs-html="true"
+                            data-bs-placement="auto" data-bs-trigger="hover" title="Prevalence"></span>
+                        <!-- <span class="associated-evidence ms-2 me-2" title="Associated Evidence" data-bs-toggle="tooltip"
+                                            data-bs-placement="bottom"></span> -->
+                        <!-- <i class="disease-probability fas fa-circle" aria-hidden="true" data-bs-toggle="tooltip"></i> -->
+                        <i class="connected-papers fas fa-circle-nodes d-none" aria-hidden="true"
+                            title="Search Connected Papers"></i>
+                        <i class="far fa-bookmark disease-bookmark clickable" title="Add to Bookmarked Diseases"></i>
+                    </span>
                 </div>
             </div>
             <div class="disease-addinfo mt-3">
@@ -99,6 +101,15 @@
                 definitely no <em>Premature Birth</em> finding,
                 you should add Elastomyofibrosis and Respiratory Insufficiency as Positive Findings (in blue) and
                 Premature Birth as a Negative Finding (in red) </span>
+        </div>
+
+        <!-- search history template -->
+        <div id="search-history-line-template" class="search-history-line-template">
+            <div class="date-header"></div>
+            <div class="search-history-line d-flex justify-content-start align-items-center">
+                <span class="save-icon fas fa-floppy-disk"></span>
+                <span class="search-time"></span>
+            </div>
         </div>
     </div>
     <!-- * * * end of templates * * *  -->
@@ -139,6 +150,14 @@
     <!-- Page Body -->
     <div class="container-fluid is-empty col-sm-12 col-xl-6">
         <div class="primary-container">
+            <div class="d-flex justify-content-end align-items-center">
+                <button id="btnSave" type="button" class="btn btn-secondary ms-5" title="Save">Save</button>
+                <button id="btnSearchHistory" type="button" class="btn btn-secondary ms-5" title="View History">View
+                    History</button>
+                <button id="btnShare" type="button" class="btn btn-secondary ms-5" title="Share Results">Share
+                    Results</button>
+
+            </div>
             <div class="row">
                 <span class="rda-title h2">Enola Rare Disease Search Prototype<i id="page-info-popover"
                         class="fa-solid fa-circle-question page-info" data-bs-toggle="popover" data-bs-html="true"
@@ -161,17 +180,52 @@
                             title="Clear the Screen">Clear All</button>
                     </span>
                 </div>
-                <div class="">
+                <div class="d-flex w-100">
+                    <i id="imgSearchHistory" class="fa-solid fa-clock-rotate-left d-none"></i>
                     <div id="editor-container">
                         <div class="search-editor input-lg" id="editor"></div>
+                        <div id="search-history" class="d-none">
+                            <div class="header-label d-flex">
+                                <span class="h3">Search History</span>
+                                <span id="close-search-history" class="ms-auto"></span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div id="selected-terms" class="sticky-top d-flex flex-wrap">
+            <div id="div-selected-terms" class="d-flex justify-content-between align-items-center d-none">
+                <span id="selected-terms" class="sticky-top d-flex flex-wrap ">
+                </span>
+                <!-- <i id="search-history-bookmark" class="fa-book-bookmark search-history-bookmark clickable"
+                    title="Bookmark Search"></i> -->
             </div>
             <!-- <div class="rda-header h3 d-none">Associated Findings (Click to Add to Search Criteria)</div>
             <div id="associated-findings" class="section-container d-flex flex-wrap d-none"></div> -->
-            <div id="rda-header-diseases" class="rda-header h3 mb-auto">Diseases</div>
+            <div id="rda-header-bookmarked-diseases" class="rda-header hide-at-start h3 d-flex justify-content-between">
+                <span>
+                    <span class="expand-contract-icon"></span>
+                    <span>Bookmarked Diseases</span>
+                </span>
+                <!-- <span id="bookmarked-diseases-label"></span> -->
+                <!-- <span class="dropdown" id="bookmarked-diseases-dropdown"><button class="btn btn-primary dropdown-toggle"
+                        type="button" data-bs-toggle="dropdown">Add/View
+                        bookmarked-diseases
+                        <span class="caret"></span></button>
+                    <ul class="dropdown-menu rda-dropdown-items">
+                        <li><a href="#">Dx1</a></li>
+                        <li><a href="#">Dx2</a></li>
+                        <li><a href="#">Dx3</a></li>
+                        <input type="textbox" id="new-bookmarked-disease-textbox"
+                            placeholder="New bookmarked-disease...">
+                    </ul>
+                </span> -->
+                <!-- <input type="textbox" id="test1"> -->
+            </div>
+            <div id="bookmarked-diseases-container" class="section-container d-none"></div>
+            <div id="rda-header-diseases" class="rda-header hide-at-start h3 mb-auto">
+                <span class="expand-contract-icon"></span>
+                <span>Diseases</span>
+            </div>
             <div id="suggestions-container" class="section-container"></div>
         </div>
     </div>
