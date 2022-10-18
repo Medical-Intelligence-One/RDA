@@ -24,7 +24,9 @@
   },
   "staticFiles": {
     "staticPath": [
-      "assets/particlesjs.json"
+      "assets/particlesjs.json",
+      "assets/searchHistory.json",
+      "assets/rare-diseases.json"
     ]
   }
 }

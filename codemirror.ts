@@ -11,7 +11,7 @@ import { autocompletion, CompletionContext, startCompletion } from "@codemirror/
 // import autocompleteRareDiseaseData from '../mi1-rare-disease/autocomplete_rareDz_findings.json'       //test data until api is working
 // import { typeOf } from 'react-is';
 import bookmarkedDiseaseData from '../mi1-rare-disease/dx1.json'       //test data until api is working
-import searchHistoryData from '../mi1-rare-disease/searchHistory.json'       //test data until api is working
+// import searchHistoryData from '../mi1-rare-disease/searchHistory.json'       //test data until api is working
 const axios = require('axios')
 const headers = {
     'Access-Control-Allow-Origin': '*'
@@ -24,14 +24,14 @@ var $bookmarkedDiseasesContainer = $('#bookmarked-diseases-container')
 
 let myTheme = EditorView.theme({
     "cm-editor": {
-        fontSize: "18px",
+        // fontSize: "18px",
         width: "100%",
         outline: 0,
         border: 0,
         fontFamily: 'Rubik Light, Open Sans'
     },
     ".cm-content": {
-        fontSize: "18px"
+        // fontSize: "18px"
     },
     ".cm-activeLine": {
         backgroundColor: "initial"
@@ -49,7 +49,7 @@ let myTheme = EditorView.theme({
 
     },
     ".cm-tooltip": {
-        fontSize: "14px",
+        // fontSize: "14px",
         fontFamily: 'Rubik Light, Open Sans'
     }
 }, { dark: false })
@@ -426,7 +426,10 @@ function showDiseases(data, $parentContainer) {
 
             let $prevalence = $divSuggestion.find('.disease-prevalence')
             var prevelanceRange
-            if (maxPrevalence == 0) { prevelanceRange = "Prevalence Not Known" }
+            if (maxPrevalence == 0) {
+                $prevalence.addClass('not-known')
+                // prevelanceRange = "Prevalence Not Known"
+            }
             else {
                 let objPrevalence = getPrevalenceScale(maxPrevalence)
                 prevelanceRange = objPrevalence.range_numerator + ' / ' + objPrevalence.range_denominator.toLocaleString()
@@ -455,8 +458,8 @@ function showDiseases(data, $parentContainer) {
                     //     '<h3 class="popover-header"> </h3 >' +
                     //     '<div class="popover-body"> </div > </div > '
                 })
+                $prevalence.text(prevelanceRange)
             }
-            $prevalence.text(prevelanceRange)
 
             //publications
             let evidence = diseaseItem.Disease_Finding_Assoc_Evidence
@@ -599,13 +602,8 @@ function showDiseases(data, $parentContainer) {
 function formatPrevalenceLine(label, objValue) {
     if (objValue.value == 0) { return '' }
     else {
-        // return label + '.'.repeat(35 - label.length - objValue.range_numerator.length - objValue.range_denominator.toLocaleString().length) +
-        //     objValue.range_numerator + ' / ' + objValue.range_denominator.toLocaleString() + "<br>"
-        console.log("<span style='width:40px;text-align:left'>" + label + "</span><span style='width:20px;text-align:right'>" +
-            objValue.range_numerator + ' / ' + objValue.range_denominator.toLocaleString() + "</span>")
         return "<div><span class='prevalence-label'>" + label + "</span><span class='prevalence-range'>" +
             objValue.range_numerator + ' / ' + objValue.range_denominator.toLocaleString() + "</span></div>"
-
     }
 }
 
@@ -619,7 +617,7 @@ function clearScreen(clearSelectedTerms = false) {
     $('#suggestions-container').empty()
     $('#bookmarked-diseases-container').empty()
     $('.container-fluid').addClass('is-empty')
-    $('.search-editor').toggleClass('d-none', false)
+    $('.search-editor, #search-history-icon').toggleClass('d-none', false)
     $('#search-history').toggleClass('d-none', true)
 
     //clear cm editor
@@ -767,10 +765,10 @@ function showSearchHistory(data) {
         $searchHistoryLine = $('#search-history-line-template').clone().removeAttr('id')
 
         searchDate = new Date(d.datetime).toLocaleDateString()
-        searchTime = new Date(d.datetime).toLocaleTimeString()
+        searchTime = new Date(d.datetime).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit", hour12: "true" })
 
         //hide date header if not applicable
-        $searchHistoryLine.find('.date-header').text(new Date(d.datetime).toLocaleDateString())
+        $searchHistoryLine.find('.date-header').text(new Date(d.datetime).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "2-digit", year: "numeric" }))
         if (searchDate == oldSearchDate && oldSearchDate != undefined) {
             $searchHistoryLine.find('.date-header').hide()
         }
@@ -778,10 +776,15 @@ function showSearchHistory(data) {
 
         $searchHistoryLine.find('.search-time').text(searchTime)
 
-        //make save icon invisible if not applicable
-        if (d.saved != "true") {
-            $searchHistoryLine.find('.save-icon').css('visibility', 'hidden')
+        //make save icon solid if not applicable
+        if (d.saved == "true") {
+            // $searchHistoryLine.find('.save-icon').css('visibility', 'hidden')
+            $searchHistoryLine.find('.save-icon').toggleClass('fas')
+            $searchHistoryLine.find('.save-icon').toggleClass('far')
         }
+        // else {
+        //     $searchHistoryLine.find('.save-icon').addClass('far')
+        // }
 
         //add findings tags
         $(d.searchTerms).each(function (i2, d2) {
@@ -805,6 +808,11 @@ function showSearchHistory(data) {
         })
         $('#div-selected-terms').toggleClass('d-none', false)
     })
+    $('#search-history .save-icon').on('click', function (e) {
+        $(e.currentTarget).toggleClass('fas')
+        $(e.currentTarget).toggleClass('far')
+    })
+
 }
 
 //code fired after each page load
@@ -834,7 +842,7 @@ $(function () {
     })
 
     //bind Clear All button click event
-    $('#btnClearAll').on("click", function () {
+    $('#btnClearAll, #clear-all-icon').on("click", function () {
         clearScreen(true)
     })
 
@@ -875,17 +883,19 @@ $(function () {
     })
 
     //show/hide search history
-    $('#btnSearchHistory, #imgSearchHistory').on("click", function () {
-        $('.search-editor').toggleClass('d-none')
-        $('#search-history').toggleClass('d-none')
+    $('#btnSearchHistory, #search-history-icon').on("click", function () {
+        $('.search-editor, #search-history-icon, #search-history, #editor-container .buttons, #search-section-header, #clear-all-icon').toggleClass('d-none')
+        // $('#search-history').toggleClass('d-none')
+
         if (!$('#search-history').hasClass('d-none')) {
-            showSearchHistory(searchHistoryData)
+            $.getJSON('/searchHistory.json', function (data) {
+                showSearchHistory(data)
+            })
         }
     })
 
     $('#close-search-history').on("click", function () {
-        $('.search-editor').toggleClass('d-none', false)
-        $('#search-history').toggleClass('d-none', true)
+        $('.search-editor, #search-history-icon, #search-history, #editor-container .buttons, #search-section-header, #clear-all-icon').toggleClass('d-none')
     })
 
     //contract/expand all diseases

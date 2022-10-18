@@ -34,9 +34,9 @@
 
         <!-- template for disease findings tag -->
         <div id="selection-tag-template"
-            class="selection-tag para3 d-flex col-auto justify-content-start align-items-center me-2">
+            class="selection-tag para3 d-flex col-auto justify-content-start align-items-center me-2 mt-2">
             <span class="selection-tag-hover-area">
-                <span class="selection-tag-text"></span>
+                <span class="selection-tag-text text-truncate"></span>
                 <span class="selection-tag-posneg d-none">
                     <i class="positive-finding fas fa-circle-plus"
                         title="Click to Add to Search Terms as Positive Finding"></i>
@@ -54,16 +54,16 @@
         <!-- template for disease suggestion -->
         <div id="suggestion-template" class="div-suggestion hide-findings">
             <div class="section-container mb-auto">
-                <div class="suggestion-header d-flex align-items-enter justify-content-between h3">
+                <div class="suggestion-header d-flex align-items-center justify-content-between h3">
                     <span class="expand-contract clickable" title="Expand/Contract Disease">
                         <span class="expand-contract-icon"></span>
                         <span class="me-auto">
                             <span class="disease-name">Disease Name</span>
                         </span>
                     </span>
-                    <span>
+                    <span class="d-flex justify-content-between" style="white-space:nowrap;">
                         <span class="disease-probability" title="Probability"></span>
-                        <span class="disease-prevalence ms-2" data-bs-toggle="popover" data-bs-html="true"
+                        <span class="disease-prevalence me-2" data-bs-toggle="popover" data-bs-html="true"
                             data-bs-placement="auto" data-bs-trigger="hover" title="Prevalence"></span>
                         <!-- <span class="associated-evidence ms-2 me-2" title="Associated Evidence" data-bs-toggle="tooltip"
                                             data-bs-placement="bottom"></span> -->
@@ -104,11 +104,14 @@
         </div>
 
         <!-- search history template -->
-        <div id="search-history-line-template" class="search-history-line-template">
+        <div id="search-history-line-template" class="search-history-line-template para3 mb-1">
             <div class="date-header"></div>
-            <div class="search-history-line d-flex justify-content-start align-items-center">
-                <span class="save-icon fas fa-floppy-disk"></span>
+            <div class="search-history-line-header d-flex align-items-center">
                 <span class="search-time"></span>
+                <span class="save-icon far fa-star me-3"></span>
+                <span class="share-icon fas fa-share-nodes shadow-animation"></span>
+            </div>
+            <div class="search-history-line d-flex flex-wrap align-items-center">
             </div>
         </div>
     </div>
@@ -150,11 +153,13 @@
     <!-- Page Body -->
     <div class="container-fluid is-empty col-sm-12 col-xl-6">
         <div class="primary-container">
-            <div class="d-flex justify-content-end align-items-center">
-                <button id="btnSave" type="button" class="btn btn-secondary ms-5" title="Save">Save</button>
-                <button id="btnSearchHistory" type="button" class="btn btn-secondary ms-5" title="View History">View
+            <div class="d-flex justify-content-end align-items-center d-none d-sm-block">
+                <button id="btnClearAll" type="button" class="btn btn-primary ms-5" title="Clear the Screen">Clear
+                    All</button>
+                <button id="btnSave" type="button" class="btn btn-primary ms-5" title="Save">Save</button>
+                <button id="btnSearchHistory" type="button" class="btn btn-primary ms-5" title="View History">View
                     History</button>
-                <button id="btnShare" type="button" class="btn btn-secondary ms-5" title="Share Results">Share
+                <button id="btnShare" type="button" class="btn btn-primary ms-5" title="Share Results">Share
                     Results</button>
 
             </div>
@@ -164,32 +169,37 @@
                         data-bs-placement="auto" data-bs-trigger="hover" title="How to use"></i></span>
             </div>
             <div id="search-section" class="positive-search">
-                <div class="d-flex align-items-center justify-content-between me-auto">
-                    <span class="posneg-switch" title="Toggle between adding Positive and Negative Findings">
-                        <label for="posneg-state" class="form-check-label fas fa-circle-plus me-2"></label>
-                        <span class="form-check form-switch d-inline-block mb-auto">
+                <div id="search-section-header" class="d-flex align-items-end justify-content-between me-auto mb-2">
+                    <span class="posneg-switch d-flex align-items-center"
+                        title="Toggle between adding Positive and Negative Findings">
+                        <label for="posneg-state"
+                            class="form-check-label fas fa-circle-plus me-2 shadow-animation"></label>
+                        <span class="form-check form-switch">
                             <input type="checkbox" class="form-check-input" id="posneg-state">
                         </span>
-                        <label for="posneg-state" class="form-check-label fas fa-circle-minus"></label>
+                        <label for="posneg-state" class="form-check-label fas fa-circle-minus shadow-animation"></label>
                     </span>
                     <span>
-                        <label for="search-editor" class="rda-header h3 mb-auto">Findings used in Search</label>
-                    </span>
-                    <span>
-                        <button id="btnClearAll" type="button" class="btn btn-primary ms-5"
-                            title="Clear the Screen">Clear All</button>
+                        <label for="search-editor" class="h3 mb-auto">Findings used in Search</label>
                     </span>
                 </div>
                 <div class="d-flex w-100">
-                    <i id="imgSearchHistory" class="fa-solid fa-clock-rotate-left d-none"></i>
-                    <div id="editor-container">
-                        <div class="search-editor input-lg" id="editor"></div>
-                        <div id="search-history" class="d-none">
-                            <div class="header-label d-flex">
-                                <span class="h3">Search History</span>
-                                <span id="close-search-history" class="ms-auto"></span>
+                    <div id="editor-container" class="d-flex w-100 align-items-center">
+                        <div class="search-editor input-lg w-100 " id="editor"></div>
+                        <div class="ms-auto d-flex buttons align-items-center">
+                            <span id="search-history-icon" class="fa-solid fa-clock-rotate-left shadow-animation"
+                                title="View Search History"></span>
+                            <span id="clear-all-icon" class="close-button shadow-animation"
+                                title="Clear the Screen"></span>
+                        </div>
+
+                        <div id="search-history" class="d-none w-100">
+                            <div class="header-label d-flex align-items-center">
+                                <span class="h4 mb-0">Search History</span>
+                                <span id="close-search-history" class="ms-auto close-button"></span>
                             </div>
                         </div>
+                        <!-- <div id="search-history-icon" class="fa-solid fa-clock-rotate-left"></div> -->
                     </div>
                 </div>
             </div>
