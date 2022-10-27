@@ -104,14 +104,16 @@
         </div>
 
         <!-- search history template -->
-        <div id="search-history-line-template" class="search-history-line-template para3 mb-1">
+        <div id="search-history-line-template" class="search-history-line-template para3">
             <div class="date-header"></div>
-            <div class="search-history-line-header d-flex align-items-center">
-                <span class="search-time"></span>
-                <span class="save-icon far fa-star me-3"></span>
-                <span class="share-icon fas fa-share-nodes shadow-animation"></span>
-            </div>
-            <div class="search-history-line d-flex flex-wrap align-items-center">
+            <div class="search-history-line-group d-flex">
+                <div class="search-history-line-header d-flex align-items-center">
+                    <span class="search-time"></span>
+                    <span class="save-icon far fa-star me-2"></span>
+                    <span class="share-icon fas fa-share-nodes shadow-animation me-3"></span>
+                </div>
+                <div class="search-history-line-findings d-flex flex-wrap align-items-center">
+                </div>
             </div>
         </div>
     </div>
@@ -145,98 +147,144 @@
                     alt="Medical Intelligence One home page" />
             </a>
         </div>
-        <!-- <div style="display: inline-block; align-items: center;">
-            <h1>Clinical Co-Pilot</h1>
-        </div> -->
     </header>
 
     <!-- Page Body -->
-    <div class="container-fluid is-empty col-sm-12 col-xl-6">
-        <div class="primary-container">
-            <div class="d-flex justify-content-end align-items-center d-none d-sm-block">
-                <button id="btnClearAll" type="button" class="btn btn-primary ms-5" title="Clear the Screen">Clear
-                    All</button>
-                <button id="btnSave" type="button" class="btn btn-primary ms-5" title="Save">Save</button>
-                <button id="btnSearchHistory" type="button" class="btn btn-primary ms-5" title="View History">View
-                    History</button>
-                <button id="btnShare" type="button" class="btn btn-primary ms-5" title="Share Results">Share
-                    Results</button>
 
+    <div id="main" class="d-flex justify-content-between">
+        <div id="left-navbar">
+            <!-- <div>Enola</div> -->
+            <div class="d-flex flex-column justify-content-center align-items-center stick-to-top">
+                <button id="clear-search" class="btn" title="Clear the Screen">
+                    <i class="far fa-circle-xmark"></i>
+                </button>
+                <button id="btnSearchHistory" class="btn btn-outline-dark" title="View History">
+                    <i class="fa-solid fa-clock-rotate-left" title="View History"></i>
+                </button>
+                <!-- <label class="image-description">
+                        Search History
+                    </label> -->
+                <button id="btnSave" class="btn btn-outline-dark" title="Save Search Results">
+                    <i class="far fa-star"></i>
+                </button>
+                <!-- <label class="image-description">
+                                        Save Search Results
+                                    </label> -->
+                <button id="btnShare" class="btn" title="Share Results">
+                    <i class="fas fa-share-nodes "></i>
+                </button>
+                <!-- <label class="image-description">
+                                            Search History
+                                        </label> -->
             </div>
+        </div>
+        <div id="primary-container" class="container-fluid is-empty" style="width:70%">
+            <!-- <div class="d-flex justify-content-between d-none d-lg-block">
+            <a href="https://www.mi1.ai/enola-feedback" class="footer screen-left">FEEDBACK</a>
+            <span class="footer screen-right">SHARE</span>
+        </div> -->
             <div class="row">
-                <span class="rda-title h2">Enola Rare Disease Search Prototype<i id="page-info-popover"
-                        class="fa-solid fa-circle-question page-info" data-bs-toggle="popover" data-bs-html="true"
-                        data-bs-placement="auto" data-bs-trigger="hover" title="How to use"></i></span>
-            </div>
-            <div id="search-section" class="positive-search">
-                <div id="search-section-header" class="d-flex align-items-end justify-content-between me-auto mb-2">
-                    <span class="posneg-switch d-flex align-items-center"
-                        title="Toggle between adding Positive and Negative Findings">
-                        <label for="posneg-state"
-                            class="form-check-label fas fa-circle-plus me-2 shadow-animation"></label>
-                        <span class="form-check form-switch">
-                            <input type="checkbox" class="form-check-input" id="posneg-state">
+                <div id="search-history-container" class="split col-4 d-none stick-to-top">
+                    <!-- <span id=" search-history-expand-contract" class="col-4 clickable">
+                <span class="expand-contract-icon"></span>
+                <span class="">Search History</span>
+                </span> -->
+                    <div class="rda-header h2 text-center">Search History</div>
+                    <div id="rda-header-search-history" class="d-flex rda-header h3 justify-content-between">
+                        <span class="invisible">
+                            <button id="show-favourites" class="btn">
+                                <i class="ms-auto save-icon clickable far fa-star"></i>
+                            </button>
                         </span>
-                        <label for="posneg-state" class="form-check-label fas fa-circle-minus shadow-animation"></label>
-                    </span>
-                    <span>
-                        <label for="search-editor" class="h3 mb-auto">Findings used in Search</label>
-                    </span>
-                </div>
-                <div class="d-flex w-100">
-                    <div id="editor-container" class="d-flex w-100 align-items-center">
-                        <div class="search-editor input-lg w-100 " id="editor"></div>
-                        <div class="ms-auto d-flex buttons align-items-center">
-                            <span id="search-history-icon" class="fa-solid fa-clock-rotate-left shadow-animation"
-                                title="View Search History"></span>
-                            <span id="clear-all-icon" class="close-button shadow-animation"
-                                title="Clear the Screen"></span>
-                        </div>
+                        <span class="text-center align-middle">
+                            <button id="previous-record" class="btn">
+                                <i class="previous-record-icon clickable fas fa-square-caret-left"></i></button>
+                            <label id="search-history-navbar"></label>
+                            <button id="next-record" class="btn">
+                                <i class="next-record-icon clickable fas fa-square-caret-right"></i></button>
+                        </span>
+                        <span class="text-end">
+                            <button id="show-favourites" class="btn">
+                                <i class="ms-auto save-icon clickable far fa-star"></i>
+                            </button>
+                        </span>
+                    </div>
+                    <!-- <div id="search-history-filters" class="d-flex">
+                                <span id="search-filter-findings" class="search-history-line"></span>
+                            </div> -->
+                    <div id="search-history">
+                        <div id="search-history-lines">
 
-                        <div id="search-history" class="d-none w-100">
-                            <div class="header-label d-flex align-items-center">
-                                <span class="h4 mb-0">Search History</span>
-                                <span id="close-search-history" class="ms-auto close-button"></span>
-                            </div>
                         </div>
-                        <!-- <div id="search-history-icon" class="fa-solid fa-clock-rotate-left"></div> -->
                     </div>
                 </div>
-            </div>
-            <div id="div-selected-terms" class="d-flex justify-content-between align-items-center d-none">
-                <span id="selected-terms" class="sticky-top d-flex flex-wrap ">
-                </span>
-                <!-- <i id="search-history-bookmark" class="fa-book-bookmark search-history-bookmark clickable"
+                <div id="results-container" class="split col">
+                    <div class="stick-to-top">
+                        <div class="d-flex justify-content-center stick-to-top">
+                            <span class="rda-title h2">Enola<i id="page-info-popover"
+                                    class="fa-solid fa-circle-question page-info" data-bs-toggle="popover"
+                                    data-bs-html="true" data-bs-placement="auto" data-bs-trigger="hover"
+                                    title="How to use"></i></span>
+                        </div>
+                        <div id="search-section" class="positive-search">
+                            <div id="search-section-header"
+                                class="d-flex align-items-end justify-content-between me-auto mb-2">
+                                <span class="posneg-switch d-flex align-items-center"
+                                    title=" Toggle between adding Positive and Negative Findings">
+                                    <label for="posneg-state" class="form-check-label fas fa-circle-plus me-2"></label>
+                                    <span class="form-check form-switch">
+                                        <input type="checkbox" class="form-check-input shadow-animation white-shadow"
+                                            id="posneg-state">
+                                    </span>
+                                    <label for="posneg-state" class="form-check-label fas fa-circle-minus"></label>
+                                </span>
+                                <span class="d-flex justify-content-end align-items-center gap-3 d-none">
+                                    <button id="btnSave" class="btn" title="Save Search Results">
+                                        <i class="far fa-star"></i>
+                                    </button>
+                                    <button id="btnSearchHistory" class="btn" title="View History">
+                                        <i class="fa-solid fa-clock-rotate-left"></i>
+                                    </button>
+                                    <button id="btnShare" class="btn" title="Share Results">
+                                        <i class="fas fa-share-nodes "></i>
+                                    </button>
+                                </span>
+                            </div>
+                            <div class="d-flex w-100">
+                                <div id="editor-container" class="d-flex w-100 align-items-center">
+                                    <div class="search-editor input-lg w-100" id="editor"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="div-selected-terms" class="d-flex justify-content-between align-items-center">
+                            <span id="selected-terms" class="d-flex flex-wrap ">
+                            </span>
+                            <!-- <span class="ms-auto">
+                                <button id="btnClearAll" class="btn" title="Clear the Screen">
+                                    <i class="far fa-circle-xmark"></i>
+                                </button>
+                            </span> -->
+                            <!-- <i id="search-history-bookmark" class="fa-book-bookmark search-history-bookmark clickable"
                     title="Bookmark Search"></i> -->
-            </div>
-            <!-- <div class="rda-header h3 d-none">Associated Findings (Click to Add to Search Criteria)</div>
+                        </div>
+                    </div>
+                    <!-- <div class="rda-header h3 d-none">Associated Findings (Click to Add to Search Criteria)</div>
             <div id="associated-findings" class="section-container d-flex flex-wrap d-none"></div> -->
-            <div id="rda-header-bookmarked-diseases" class="rda-header hide-at-start h3 d-flex justify-content-between">
-                <span>
-                    <span class="expand-contract-icon"></span>
-                    <span>Bookmarked Diseases</span>
-                </span>
-                <!-- <span id="bookmarked-diseases-label"></span> -->
-                <!-- <span class="dropdown" id="bookmarked-diseases-dropdown"><button class="btn btn-primary dropdown-toggle"
-                        type="button" data-bs-toggle="dropdown">Add/View
-                        bookmarked-diseases
-                        <span class="caret"></span></button>
-                    <ul class="dropdown-menu rda-dropdown-items">
-                        <li><a href="#">Dx1</a></li>
-                        <li><a href="#">Dx2</a></li>
-                        <li><a href="#">Dx3</a></li>
-                        <input type="textbox" id="new-bookmarked-disease-textbox"
-                            placeholder="New bookmarked-disease...">
-                    </ul>
-                </span> -->
-                <!-- <input type="textbox" id="test1"> -->
+                    <div id="rda-header-bookmarked-diseases"
+                        class="rda-header d-none h3 d-flex justify-content-between clickable">
+                        <span>
+                            <span class=" expand-contract-icon"></span>
+                            <span>Bookmarked Diseases</span>
+                        </span>
+                    </div>
+                    <div id="bookmarked-diseases-container" class="section-container d-none"></div>
+                    <div id="rda-header-diseases" class="rda-header hide-at-start h3 mb-auto clickable">
+                        <span class="expand-contract-icon"></span>
+                        <span>Diseases</span>
+                    </div>
+                    <div id="suggestions-container" class="section-container"></div>
+                </div>
             </div>
-            <div id="bookmarked-diseases-container" class="section-container d-none"></div>
-            <div id="rda-header-diseases" class="rda-header hide-at-start h3 mb-auto">
-                <span class="expand-contract-icon"></span>
-                <span>Diseases</span>
-            </div>
-            <div id="suggestions-container" class="section-container"></div>
         </div>
     </div>
     <div id="particles-js">
