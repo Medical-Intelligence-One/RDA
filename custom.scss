@@ -1,21 +1,73 @@
 $colorLightBlue: rgb(3, 184, 234);
 $colorDarkBlue: #5a99e2;
 $colorWhite: #ffffff;
-$colorBlack: Black #000000;
+$colorBlack: #000000;
 $colorRed: #f32e15;
-$colorTransparentWhite: rgba(3, 184, 234, 0.5);
+
+@mixin white-shadow($shadow-spread) {
+  //   opacity: 0.8;
+  //   background-color: inherit;
+  color: rgba($colorWhite, 1);
+  border-radius: 7px;
+  box-shadow: 0px 0px 5px $shadow-spread rgba($colorWhite, 0.3);
+  border-color: rgba($colorWhite, 1);
+  transition: 0.3s !important;
+  cursor: pointer;
+}
+
+@mixin black-shadow($shadow-spread) {
+  border-radius: 7px;
+  box-shadow: 0px 0px 5px $shadow-spread rgba($colorBlack, 0.3);
+  transition: 0.3s !important;
+  cursor: pointer;
+}
+
+@mixin font-grow($scale: 1.2) {
+  -webkit-transform: scale($scale);
+  transition: 0.3s;
+}
+
+@mixin button-style {
+  color: $colorLightBlue;
+  padding: 0.3em;
+  font-size: 2em;
+  border-radius: 7px;
+  background-color: black;
+  border: 1px solid rgba($colorWhite, 0);
+  width: 55px;
+  height: 55px;
+
+  &:hover {
+    @include white-shadow(5px);
+  }
+}
+
+.white-shadow {
+  @include white-shadow(5px);
+}
+
+.black-shadow {
+  @include black-shadow(5px);
+}
+
+.toggle-button-shadow {
+  @include white-shadow(10px);
+}
 
 @media only screen and (max-width: 896px) {
   .h1 {
     font-size: 40px;
+    margin-bottom: 0;
   }
 
   .h2 {
     font-size: 28px;
+    margin-bottom: 0;
   }
 
   .h3 {
     font-size: 18px;
+    margin-bottom: 0;
   }
 
   .h4 {
@@ -80,14 +132,17 @@ $colorTransparentWhite: rgba(3, 184, 234, 0.5);
 
   .h1 {
     font-size: 64px;
+    margin-bottom: 0;
   }
 
   .h2 {
     font-size: 40px;
+    margin-bottom: 0;
   }
 
   .h3 {
     font-size: 24px;
+    margin-bottom: 0;
   }
 
   .h4 {
@@ -118,7 +173,8 @@ $colorTransparentWhite: rgba(3, 184, 234, 0.5);
     margin-bottom: 2em;
   }
 
-  #suggestions-container {
+  #suggestions-container,
+  #bookmarked-diseases-container {
     padding: 1em;
   }
 
@@ -149,29 +205,16 @@ body {
   font-family: "Rubik Light", "Open Sans";
 }
 
-#main {
-  border: 15px solid $colorTransparentWhite;
-  border-left: 0;
-  border-radius: 7px;
-}
 #left-navbar {
   width: 80px;
-  background-color: $colorTransparentWhite;
-  min-height: calc(100vh - 150px);
+  background-color: $colorBlack;
+  min-height: calc(100vh - 245px);
   color: $colorLightBlue;
   padding: 2em 0;
+  top: 130px;
 
-  //   .image-description.hide {
-  //     display: none;
-  //   }
   i {
-    color: $colorLightBlue;
-    // border: 1px solid $colorLightBlue;
-    padding: 0.5em;
-    font-size: 1.5em;
-    border: 1px solid white;
-    border-radius: 7px;
-    background-color: black;
+    @include button-style();
   }
 
   button {
@@ -179,6 +222,17 @@ body {
   }
   :hover {
     width: fit-content;
+  }
+}
+
+#search-history-title i {
+  color: white;
+  background-color: $colorRed;
+  padding: 0.25em;
+  border-radius: 7px;
+  margin: 0.6em 0.2em;
+  &:hover {
+    @include white-shadow(5px);
   }
 }
 .stick-to-top {
@@ -191,11 +245,12 @@ body {
     font-size: 1.5em;
     color: $colorLightBlue;
   }
-}
-
-#results-container .stick-to-top {
   background-color: black;
 }
+
+// #results-container .stick-to-top {
+//   background-color: black;
+// }
 
 /* hr.hr-1 {
     background: linear-gradient(to right, black, $colorLightBlue, white);
@@ -250,11 +305,6 @@ hr.hr-2 {
     color: black;
 } */
 
-.btn:hover {
-  opacity: 0.8;
-  background-color: inherit;
-}
-
 #primary-container {
   background-color: rgba(0, 0, 0, 0.1);
   text-align: -webkit-center;
@@ -263,9 +313,10 @@ hr.hr-2 {
   border-radius: 7px;
 }
 
-// #results-container {
-//   overflow-y: scroll;
-// }
+#results-container {
+  margin: 0 2em;
+}
+
 #editor-container {
   text-align: left;
   padding: 0.5em;
@@ -315,31 +366,40 @@ header {
 
 #logo {
   padding: 30px;
-
+  display: inline-block;
+  vertical-align: middle;
+  text-align: left;
   /* margin-right: auto; */
   /* margin: 30px 30px 30px; */
 }
+
 #search-history-container {
-  color: $colorDarkBlue;
+  color: $colorLightBlue;
   //   border-right: 7px solid $colorDarkBlue;
-  height: calc(100vh - 150px);
-  //   background-color: $colorWhite;
+  height: calc(100vh - 122px);
+  overflow: auto;
+  overflow-y: clip;
 }
 
 .rda-title {
   text-align: center;
   font-weight: bold;
-  color: rgba(0, 0, 0, 0.75);
-  width: 50%;
+  //   color: rgba(0, 0, 0, 0.75);
+  color: white;
+  width: 75%;
   padding: 0.1em 0em;
-  border-radius: 0.6em;
-  background-image: linear-gradient(
-    to right,
-    rgb(3, 184, 234),
-    white,
-    rgb(3, 184, 234)
-  );
-  margin: 0.5em 0;
+  min-height: 104px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  //   border-radius: 0.6em;
+  //   background-image: linear-gradient(
+  //     to right,
+  //     rgb(3, 184, 234),
+  //     white,
+  //     rgb(3, 184, 234)
+  //   );
+  //   margin: 0.5em 0;
 }
 
 @keyframes pulse {
@@ -360,7 +420,7 @@ header {
   text-align: left;
   color: white;
   padding: 0.65em;
-
+  font-weight: bold;
   /* margin-top: 1em; */
   /* margin-right: 1em; */
 }
@@ -414,17 +474,17 @@ header {
 }
 
 .posneg-switch {
-  label {
-    font-size: 1.5em;
-    color: white;
+  label,
+  .form-switch {
+    font-size: 1.8em;
     cursor: pointer;
+  }
+  label {
+    color: white;
   }
 
   .form-switch {
-    font-size: 1.5em;
     color: $colorDarkBlue;
-    cursor: pointer;
-    margin-top: auto;
   }
 }
 
@@ -450,6 +510,7 @@ header {
   .form-switch .form-check-input {
     cursor: pointer;
     margin-top: 0;
+    border-color: rgba($colorBlack, 0);
   }
 }
 
@@ -486,11 +547,13 @@ header {
   /* padding-left: 1em; */
 }
 
-.disease-bookmark:before {
-  /* font-family: "Font Awesome 5 Free";
-  content: "\f02e"; */
-  /* margin-left: 1em; */
-  color: $colorLightBlue;
+.disease-bookmark {
+  &:before {
+    color: $colorLightBlue;
+  }
+  &:hover {
+    @include font-grow();
+  }
 }
 
 /* .disease-bookmark.active:before {
@@ -658,6 +721,7 @@ header {
   height: 3.5em;
   padding: 1em;
   max-width: 100%;
+  margin: 0.5em 0;
 
   /* margin: 1em; */
 
@@ -945,8 +1009,17 @@ header {
 //   display: none;
 // }
 
+.search-history-line-group {
+  &:nth-child(odd) {
+    background-color: lightgray;
+  }
+  &:nth-child(even) {
+    background-color: white;
+  }
+}
+
 #search-history {
-  border: 7px solid $colorLightBlue;
+  border: 7px solid $colorDarkBlue;
   border-radius: 7px;
 
   &.contracted {
@@ -968,11 +1041,11 @@ header {
     font-weight: bold;
 
     /* margin-left: .5em; */
-    text-align: center;
-    background-color: $colorLightBlue;
+    text-align: left;
     color: white;
     padding: 1em;
-    margin-bottom: 1em;
+    // margin-bottom: 0.3em;
+    background-color: $colorLightBlue;
   }
 
   .search-time {
@@ -981,9 +1054,9 @@ header {
     white-space: nowrap;
 
     /* background-color: $colorDarkBlue; */
-    color: $colorDarkBlue;
     padding: 0.5em;
     border-radius: 7px;
+    min-width: 75px;
   }
 }
 
@@ -997,11 +1070,20 @@ header {
   background-color: white;
   color: $colorDarkBlue;
 }
-#rda-header-search-history i {
-  color: $colorLightBlue;
-  font-size: 2em;
-}
 
+#rda-header-search-history i,
+#search-section-header i,
+#btnClearAll i {
+  //   color: $colorLightBlue;
+  //   font-size: 2em;
+  @include button-style();
+}
+#rda-header-search-history {
+  .btn {
+    padding: 0;
+    border: none;
+  }
+}
 #close-search-history {
   font-size: 1.3em;
 }
@@ -1011,80 +1093,54 @@ header {
   margin: 0.2em 0.25em 0.2em 0.25em;
 }
 
-.search-history-line-header span {
-  &.save-icon,
-  &.share-icon {
-    color: $colorLightBlue;
-    font-size: 1rem;
-    padding: 0.25em 0.5em;
-    cursor: pointer;
-    margin: 0 0.5em;
-  }
-
-  &.save-icon:hover {
-    color: $colorDarkBlue;
-  }
+.search-history-line-group {
+  color: $colorLightBlue;
 }
 
-.shadow-animation {
-  /* box-shadow: 1px 2px 4px 2px rgb(0 0 0 / 15%); */
-  /* position: relative; */
-  border-radius: 5px;
-  transition: box-shadow 0.5s;
-  //   padding: 0 0.3em;
+// .search-history-line-header span {
+//   &.save-icon,
+//   &.share-icon {
+//     font-size: 1rem;
+//     padding: 0.25em 0.5em;
+//     cursor: pointer;
+//     margin: 0 0.5em;
+//   }
 
-  /* -webkit-transform: translateY(0);
-  transition: all .6s cubic-bezier(0.165, 0.84, 0.44, 1); */
+//   &.save-icon:hover {
+//     color: $colorDarkBlue;
+//   }
+// }
+
+.search-history-line-header i {
+  font-size: 1.5rem;
+  padding: 0.25em 0em;
+  margin: 0 0.5em;
+  cursor: pointer;
 
   &:hover {
-    cursor: pointer;
-    box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.15);
-  }
-  &.black-shadow:hover {
-    /* transform: scale(1.25, 1.25); */
-    box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.15);
-  }
-  &.white-shadow:hover {
-    /* transform: scale(1.25, 1.25); */
-    box-shadow: 0px 0px 5px 5px rgba(255, 255, 255, 0.5);
+    @include font-grow();
   }
 }
-
-/* .shadow-animation:after {
-    content: "";
-    border-radius: 5px;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    opacity: 0;
-    transition: all .6s cubic-bezier(0.165, 0.84, 0.44, 1);
-} */
-/* .search-history-line-findings span.save-icon.selected:before {
-    cursor: pointer;
-    font-family: "Font Awesome 6 Free";
-    content: "\f005";
-    font-size: 1.4em;
-} */
-
 #search-history-lines {
   //   max-height: 50vh;
   //   overflow-y: scroll;
   background-color: white;
   .search-history-line-findings {
     &:hover {
-      background-color: lightgrey;
+      //   background-color: lightgrey;
       cursor: pointer;
+      .tag {
+        // box-shadow: 0 0 5px 5px rgba(0, 0, 0, 0.3);
+        // transition: 0.3s;
+        @include black-shadow(5px);
+      }
     }
   }
 
   .tag {
-    border: 0.1em solid $colorDarkBlue;
+    border: 0.1em solid;
     border-radius: 7px;
     background-color: white;
-    color: $colorDarkBlue;
     padding: 0.15em 0.5em;
     margin: 0.2em 0.5em;
 
@@ -1155,18 +1211,14 @@ header {
 .gutter.gutter-horizontal {
   float: left;
 }
+
 .gutter.gutter-horizontal {
   cursor: ew-resize;
   background-color: gray;
-  padding: 0 0.5em;
+  padding: 0 0.25em;
 
   flex-shrink: 0;
   height: auto;
-  background-color: $colorTransparentWhite;
-  //   border: solid $colorTransparentWhite;
-  //   border-width: 1px 0;
-  //   box-shadow: inset 0 0.5em 1.5em rgba(255, 255, 255, 0.1),
-  //     inset 0 0.125em 0.5em $colorTransparentWhite;
   &:hover {
     background-color: $colorWhite;
   }

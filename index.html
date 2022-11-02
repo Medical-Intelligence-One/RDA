@@ -34,7 +34,7 @@
 
         <!-- template for disease findings tag -->
         <div id="selection-tag-template"
-            class="selection-tag para3 d-flex col-auto justify-content-start align-items-center me-2 mt-2">
+            class="selection-tag para3 d-flex col-auto justify-content-start align-items-center me-2">
             <span class="selection-tag-hover-area">
                 <span class="selection-tag-text text-truncate"></span>
                 <span class="selection-tag-posneg d-none">
@@ -109,8 +109,8 @@
             <div class="search-history-line-group d-flex">
                 <div class="search-history-line-header d-flex align-items-center">
                     <span class="search-time"></span>
-                    <span class="save-icon far fa-star me-2"></span>
-                    <span class="share-icon fas fa-share-nodes shadow-animation me-3"></span>
+                    <i class="save-icon far fa-star me-2"></i>
+                    <i class="share-icon fas fa-share-nodes me-3"></span>
                 </div>
                 <div class="search-history-line-findings d-flex flex-wrap align-items-center">
                 </div>
@@ -141,7 +141,7 @@
 
     <!-- Page Header -->
     <header>
-        <div id="logo" style="display: inline-block; vertical-align: middle; text-align: left;">
+        <div id="logo">
             <a href="https://www.mi1.ai/">
                 <img src="./assets/Original on Transparent.png" height="60px"
                     alt="Medical Intelligence One home page" />
@@ -152,61 +152,59 @@
     <!-- Page Body -->
 
     <div id="main" class="d-flex justify-content-between">
-        <div id="left-navbar">
+        <div>
             <!-- <div>Enola</div> -->
-            <div class="d-flex flex-column justify-content-center align-items-center stick-to-top">
-                <button id="clear-search" class="btn" title="Clear the Screen">
+            <div id="left-navbar" class="d-none flex-column align-items-center stick-to-top">
+                <span id="btnClearAllLeft" title="Clear the Screen">
                     <i class="far fa-circle-xmark"></i>
-                </button>
-                <button id="btnSearchHistory" class="btn btn-outline-dark" title="View History">
+                </span>
+                <span id="btnSearchHistoryLeft" title="View History">
                     <i class="fa-solid fa-clock-rotate-left" title="View History"></i>
-                </button>
+                </span>
                 <!-- <label class="image-description">
                         Search History
                     </label> -->
-                <button id="btnSave" class="btn btn-outline-dark" title="Save Search Results">
+                <span id="btnSaveLeft" title="Save Search Results">
                     <i class="far fa-star"></i>
-                </button>
+                </span>
                 <!-- <label class="image-description">
                                         Save Search Results
                                     </label> -->
-                <button id="btnShare" class="btn" title="Share Results">
-                    <i class="fas fa-share-nodes "></i>
-                </button>
+                <span id="btnShareLeft" title="Share Results">
+                    <i class="fas fa-share-nodes"></i>
+                </span>
                 <!-- <label class="image-description">
                                             Search History
                                         </label> -->
             </div>
         </div>
-        <div id="primary-container" class="container-fluid is-empty" style="width:70%">
+        <div id="primary-container" class="container-fluid is-empty" style="width:100%">
             <!-- <div class="d-flex justify-content-between d-none d-lg-block">
             <a href="https://www.mi1.ai/enola-feedback" class="footer screen-left">FEEDBACK</a>
             <span class="footer screen-right">SHARE</span>
         </div> -->
-            <div class="row">
-                <div id="search-history-container" class="split col-4 d-none stick-to-top">
-                    <!-- <span id=" search-history-expand-contract" class="col-4 clickable">
-                <span class="expand-contract-icon"></span>
-                <span class="">Search History</span>
-                </span> -->
-                    <div class="rda-header h2 text-center">Search History</div>
-                    <div id="rda-header-search-history" class="d-flex rda-header h3 justify-content-between">
+            <div class="d-flex">
+                <div id="search-history-container" class="split col-4 stick-to-top slide-in d-none" style="width:0px">
+                    <div id="search-history-title" class="d-flex justify-content-between">
+                        <span><i class="invisible ms-auto clickable fas fa-arrow-left"></i></span>
+                        <span class="h2 rda-title stick-to-top">Search History</span>
+                        <span id="close-left-navbar"><i class="ms-auto clickable fas fa-arrow-left"></i></span>
+                    </div>
+                    <div id="rda-header-search-history" class="d-flex rda-header justify-content-between">
                         <span class="invisible">
-                            <button id="show-favourites" class="btn">
+                            <button class="btn">
                                 <i class="ms-auto save-icon clickable far fa-star"></i>
                             </button>
                         </span>
-                        <span class="text-center align-middle">
+                        <span class="text-center align-middle h3">
                             <button id="previous-record" class="btn">
                                 <i class="previous-record-icon clickable fas fa-square-caret-left"></i></button>
                             <label id="search-history-navbar"></label>
                             <button id="next-record" class="btn">
                                 <i class="next-record-icon clickable fas fa-square-caret-right"></i></button>
                         </span>
-                        <span class="text-end">
-                            <button id="show-favourites" class="btn">
-                                <i class="ms-auto save-icon clickable far fa-star"></i>
-                            </button>
+                        <span class="d-flex align-self-center">
+                            <i id="show-favourites" class="ms-auto save-icon clickable far fa-star"></i>
                         </span>
                     </div>
                     <!-- <div id="search-history-filters" class="d-flex">
@@ -218,54 +216,56 @@
                         </div>
                     </div>
                 </div>
+
                 <div id="results-container" class="split col">
                     <div class="stick-to-top">
-                        <div class="d-flex justify-content-center stick-to-top">
-                            <span class="rda-title h2">Enola<i id="page-info-popover"
-                                    class="fa-solid fa-circle-question page-info" data-bs-toggle="popover"
-                                    data-bs-html="true" data-bs-placement="auto" data-bs-trigger="hover"
-                                    title="How to use"></i></span>
-                        </div>
+                        <!-- <div class="d-flex justify-content-center stick-to-top"> -->
+                        <div class="rda-title h2">Enola Rare Disease Protoype<i id="page-info-popover"
+                                class="fa-solid fa-circle-question page-info" data-bs-toggle="popover"
+                                data-bs-html="true" data-bs-placement="auto" data-bs-trigger="hover"
+                                title="How to use"></i></div>
+                        <!-- </div> -->
                         <div id="search-section" class="positive-search">
-                            <div id="search-section-header"
-                                class="d-flex align-items-end justify-content-between me-auto mb-2">
-                                <span class="posneg-switch d-flex align-items-center"
+                            <!-- <div id="search-section-header"
+                                class="d-flex align-items-end justify-content-between me-auto mb-2"> -->
+                            <div id="search-section-header" class="d-flex rda-header justify-content-between">
+                                <span class="posneg-switch d-flex align-items-center gap-3"
                                     title=" Toggle between adding Positive and Negative Findings">
                                     <label for="posneg-state" class="form-check-label fas fa-circle-plus me-2"></label>
                                     <span class="form-check form-switch">
-                                        <input type="checkbox" class="form-check-input shadow-animation white-shadow"
-                                            id="posneg-state">
+                                        <input type="checkbox" class="form-check-input" id="posneg-state">
                                     </span>
                                     <label for="posneg-state" class="form-check-label fas fa-circle-minus"></label>
                                 </span>
-                                <span class="d-flex justify-content-end align-items-center gap-3 d-none">
-                                    <button id="btnSave" class="btn" title="Save Search Results">
+                                <span class="d-flex justify-content-end align-items-center gap-3">
+                                    <span id="btnSearchHistory" title="View History">
+                                        <i class="fas fa-clock-rotate-left"></i>
+                                    </span>
+                                    <span id="btnSave" title="Save Search Results">
                                         <i class="far fa-star"></i>
-                                    </button>
-                                    <button id="btnSearchHistory" class="btn" title="View History">
-                                        <i class="fa-solid fa-clock-rotate-left"></i>
-                                    </button>
-                                    <button id="btnShare" class="btn" title="Share Results">
+                                    </span>
+                                    <span id="btnShare" title="Share Results">
                                         <i class="fas fa-share-nodes "></i>
-                                    </button>
+                                    </span>
                                 </span>
                             </div>
-                            <div class="d-flex w-100">
+                            <div class="d-flex w-100 mb-2">
                                 <div id="editor-container" class="d-flex w-100 align-items-center">
                                     <div class="search-editor input-lg w-100" id="editor"></div>
                                 </div>
                             </div>
-                        </div>
-                        <div id="div-selected-terms" class="d-flex justify-content-between align-items-center">
-                            <span id="selected-terms" class="d-flex flex-wrap ">
-                            </span>
-                            <!-- <span class="ms-auto">
-                                <button id="btnClearAll" class="btn" title="Clear the Screen">
-                                    <i class="far fa-circle-xmark"></i>
-                                </button>
-                            </span> -->
-                            <!-- <i id="search-history-bookmark" class="fa-book-bookmark search-history-bookmark clickable"
+                            <div id="div-selected-terms"
+                                class="d-flex justify-content-between align-items-center d-none">
+                                <span id="selected-terms" class="d-flex flex-wrap ">
+                                </span>
+                                <span class="ms-auto">
+                                    <span id="btnClearAll" title="Clear the Screen">
+                                        <i class="far fa-circle-xmark"></i>
+                                    </span>
+                                </span>
+                                <!-- <i id="search-history-bookmark" class="fa-book-bookmark search-history-bookmark clickable"
                     title="Bookmark Search"></i> -->
+                            </div>
                         </div>
                     </div>
                     <!-- <div class="rda-header h3 d-none">Associated Findings (Click to Add to Search Criteria)</div>

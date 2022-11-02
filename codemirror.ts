@@ -96,7 +96,7 @@ async function fetchAutoCompleteFromAPI(startsWith) {
                                 }
                             })
                             createTag($selectedTerms, name, cui, frequency, addClasses, fetchDiseases)
-                            $('#selected-terms').toggleClass('d-none', false)
+                            $('#div-selected-terms').toggleClass('d-none', false)
 
                         }
                     })
@@ -284,17 +284,19 @@ function createTag(parentElement, label, id, frequency, addClasses, callback) {
         //add click event to pos/neg option
         $divTag.find('.selection-tag-posneg .positive-finding').on("click", function () { addTagToSearchAndRequery($divTag, 'positive-finding', 'negative-finding') })
         $divTag.find('.selection-tag-posneg .negative-finding').on("click", function () { addTagToSearchAndRequery($divTag, 'negative-finding', 'positive-finding') })
-        //add mouseenter events to hover area to hide gradient and display pos/neg option
-        $divTag.children('.selection-tag-hover-area').on('mouseenter', function (e) {
-            $divTag.find('.frequency-gradient').addClass('d-none')
-            $divTag.find('.selection-tag-posneg').removeClass('d-none')
-        });
 
-        //add mouseenter events to hover area to display gradient and hide pos/neg option
-        $divTag.children('.selection-tag-hover-area').on('mouseleave', function (e) {
-            $divTag.find('.frequency-gradient').removeClass('d-none')
-            $divTag.find('.selection-tag-posneg').addClass('d-none')
-        });
+        //add hover events to hover area to show/hide gradient and display pos/neg option
+        $divTag.children('.selection-tag-hover-area').on('mouseenter mouseleave', function () {
+            $divTag.find('.frequency-gradient').toggleClass('d-none')
+            $divTag.find('.selection-tag-posneg').toggleClass('d-none')
+            $divTag.toggleClass('black-shadow')
+        })
+    }
+
+    if ($divTag.hasClass('removeable')) {
+        $divTag.children('.selection-tag-hover-area').on('mouseenter mouseleave', function () {
+            $divTag.toggleClass('white-shadow')
+        })
     }
 
     //add click event to tag label text
@@ -322,12 +324,17 @@ function createTag(parentElement, label, id, frequency, addClasses, callback) {
 //adds a tag to the search criteria as either a positive or negative finding
 function addTagToSearchAndRequery($myTag, classToAdd, classToRemove) {
 
-    $myTag.removeClass('selectable top-eight ' + classToRemove)
+    $myTag.removeClass('selectable top-eight white-shadow black-shadow ' + classToRemove)
     $myTag.addClass('removeable selected ' + classToAdd)
 
     // event handling
-    $myTag.find('.selection-tag-hover-area').off('mouseenter')
-    $myTag.find('.selection-tag-hover-area').off('mouseleave')
+    $myTag.find('.selection-tag-hover-area').off('mouseenter mouseleave')
+    $myTag.find('.selection-tag-hover-area').on('mouseenter', function () {
+        $myTag.addClass('white-shadow')
+    }).on('mouseleave', function () {
+        $myTag.removeClass('white-shadow')
+    })
+
     $myTag.find('.selection-tag-text').off('click')
     $myTag.find('.selection-tag-text').on('click', function () {
         $myTag.remove()
@@ -611,7 +618,7 @@ function formatPrevalenceLine(label, objValue) {
 function clearScreen(clearSelectedTerms = false) {
     if (clearSelectedTerms) {
         $selectedTerms.empty()
-        $('#selected-terms').toggleClass('d-none', true)
+        $('#div-selected-terms').toggleClass('d-none', true)
     }
 
     $('#suggestions-container').empty()
@@ -751,19 +758,52 @@ function getPrevalenceScale(prevalence) {
 //     })
 // }
 
+//show hide search records depending on favourites toggle
+function toggleFavourites() {
+    // if (($('#rda-header-search-history .save-icon').hasClass('fas'))) {
+    //     //toggle favourites on
+    //     $('.search-history-line-template').each(function (i, e2) {
+    //         $(e2).find('.save-icon.far').parents('.search-history-line-group').toggleClass('d-none', true)
+    //         $(e2).find('.save-icon.fas').parents('.search-history-line-group').toggleClass('d-none', false)
+    //         //hide dates where applicable
+    //         if ($(e2).find('.save-icon.fas').length == 0) {
+    //             $(e2).find('.date-header').toggleClass('d-none', true)
+    //         }
+
+    //     })
+    // }
+    // else {
+    //     $('.search-history-line-template .search-history-line-group').toggleClass('d-none', false)
+    //     $('.search-history-line-template .date-header').toggleClass('d-none', false)
+
+    // }
+
+    firstRecord = 1
+    refreshSearchHistory()
+}
+
 //show the search history
 function refreshSearchHistory() {
     var $searchHistoryLine = $(), $divTag = $()
     var searchDate, searchTime, oldSearchDate, longDate, shortDate
     var showFavourites = $('#rda-header-search-history .save-icon').hasClass('fas')
+    var count = 1
+    var records
     //remove existing history
     $('#search-history .search-history-line-template').remove()
     $.getJSON('/searchHistory.json', function (data) {
-        //sort data
-        lastRecord = firstRecord + stepCount - 1 > data.searchHistory.length ? data.searchHistory.length : firstRecord + stepCount - 1
+        //filter data depending on whether we include favourites
+        records = data.searchHistory
+        if (showFavourites) {
+            records = records.filter(function (d) {
+                return d.saved == 'true'
+            })
+        }
+
+        lastRecord = firstRecord + stepCount - 1 > records.length ? records.length : firstRecord + stepCount - 1
         //iterate through json data
-        $(data.searchHistory).each(function (i, d) {
-            if (i + 1 >= firstRecord && i + 1 <= lastRecord && !(showFavourites && !d.saved)) {
+        $(records).each(function (i, d) {
+            if (i + 1 >= firstRecord && i + 1 <= lastRecord) {
                 $searchHistoryLine = $('#search-history-line-template').clone(true).removeAttr('id')
 
                 searchDate = new Date(d.datetime).toLocaleDateString()
@@ -815,58 +855,54 @@ function refreshSearchHistory() {
                         addClasses = "mini removeable selected " + ($(t).hasClass('positive-search') ? 'positive-finding' : 'negative-finding')
                         createTag($selectedTerms, $(t).text(), $(t).data("cui"), null, addClasses, fetchDiseases)
                     })
-                    $('#selected-terms').toggleClass('d-none', false)
+                    $('#div-selected-terms').toggleClass('d-none', false)
                     // toggleSearchHistory()
                 })
                 oldSearchDate = searchDate
+                count++
+                //break out of loop if page has been generated
+                if (count > stepCount) { return false }
             }
         })
-        $('#search-history-navbar').text(Math.ceil(firstRecord / stepCount) + " of " + Math.ceil(data.searchHistory.length / stepCount))
+        // var numRecords = $('.search-history-line-group:not(.d-none)').length
+        $('#search-history-navbar').text(Math.ceil(firstRecord / stepCount) + " of " + Math.ceil(records.length / stepCount))
         $('#previous-record').attr('disabled', firstRecord == 1)
-        $('#next-record').attr('disabled', lastRecord == data.searchHistory.length)
+        $('#next-record').attr('disabled', lastRecord == records.length)
     })
 }
 
+//show/hide search history panel
 function toggleSearchHistory(hidePanel) {
-    // $('.search-editor, #search-history-icon, #search-history, #editor-container .buttons, #search-section-header, #clear-all-icon').toggleClass('d-none')
-    // $('#search-history-icon, #search-history, #search-section-header, #clear-all-icon').toggleClass('d-none')
-    // $('#rda-header-search-history, #search-history').toggleClass('contracted')
     if (hidePanel == 'toggle') {
-        hidePanel = !$('#search-history-container').hasClass('d-none')
+        if ($('#search-history-container').width() == 0) {
+            hidePanel = false
+        }
+        else {
+            hidePanel = true
+        }
+
     }
 
-    // $('#search-history-container').toggleClass(toggleState)
-
-    $('#search-history-container').toggleClass('d-none', hidePanel)
+    // $('#search-history-container').toggleClass('d-none', hidePanel)
+    $('#search-history-container').toggleClass('slide-in slide-out')
 
     if (hidePanel) {
-        console.log(hidePanel + ' :state is true')
-        $('#primary-container').css('width', '70%')
-        $('.gutter.gutter-horizontal').toggleClass('d-none', true)
-    }
-    else {
-        console.log(hidePanel + ' :state is false')
-        $('#primary-container').css('width', '100%')
-        $('.gutter.gutter-horizontal').toggleClass('d-none', false)
-    }
-}
-
-//show hide search records depending on favourites toggle
-function toggleFavourites() {
-    if (($('#rda-header-search-history .save-icon').hasClass('fas'))) {
-        $('.search-history-line-template').each(function (i, e2) {
-            $(e2).find('.save-icon.far').parents('.search-history-line-group').toggleClass('d-none', true)
-            $(e2).find('.save-icon.fas').parents('.search-history-line-group').toggleClass('d-none', false)
-            //hide dates
-            if ($(e2).find('.save-icon.fas').length == 0) {
-                $(e2).find('.date-header').toggleClass('d-none', true)
-            }
+        $('.gutter.gutter-horizontal').fadeOut(600)
+        $('#search-history-container').css({
+            'width': '0px',
+            'padding': '0px',
+            'opacity': 0,
+            'transition': '.6s'
         })
     }
     else {
-        $('.search-history-line-template .search-history-line-group').toggleClass('d-none', false)
-        $('.search-history-line-template .date-header').toggleClass('d-none', false)
-
+        $('#search-history-container').removeClass('d-none')
+        $('.gutter.gutter-horizontal').fadeIn(600, function () { $('#search-history-container').css('transition', '') })   //switch off transition once faded in
+        $('#search-history-container').css({
+            'width': '620px',
+            'padding': '0 2em',
+            'opacity': 1,
+        })
     }
 }
 
@@ -889,7 +925,7 @@ $(function () {
         // initial size in percents or CSS values.
         // sizes: [40, 60],
         // minimum size (Number or Array)
-        minSize: 615,
+        minSize: 465,
         // grow initial size to minSize
         expandToMin: true,
         // gutter size
@@ -913,7 +949,7 @@ $(function () {
         // onDragEnd: null
     });
 
-    $('.gutter.gutter-horizontal').toggleClass('d-none', true)
+    // $('.gutter.gutter-horizontal').toggleClass('d-none', true)
 
     const initialState = EditorState.create({
         doc: '',
@@ -934,11 +970,11 @@ $(function () {
         state: initialState,
     })
 
-    //bind Clear All button click event
-    $('#clear-search').on("click", function () {
-        clearScreen(true)
-        toggleSearchHistory(true)
-    })
+    // //bind Clear All button click event
+    // $('#clear-search').on("click", function () {
+    //     clearScreen(true)
+    //     toggleSearchHistory(true)
+    // })
 
     //bind pos/neg toggle change event
     $('#posneg-state').on("change", function () {
@@ -954,6 +990,13 @@ $(function () {
 
     });
 
+    $('.posneg-switch .form-check-label, .posneg-switch .form-check-input').on("mouseenter mouseleave", function (e) {
+        $(e.currentTarget).toggleClass('toggle-button-shadow')
+        if (!$(e.currentTarget).hasClass('form-check-input')) {
+            $('.form-check-input').toggleClass('toggle-button-shadow')
+        }
+    })
+
     //contract/expand all bookmarked diseases
     $('#rda-header-bookmarked-diseases').on("click", function (e) {
         $(e.currentTarget).toggleClass('contracted');
@@ -962,17 +1005,21 @@ $(function () {
     })
 
     //show/hide search history
-    $('#btnSearchHistory, #search-history-icon').on("click", function () {
+    $('#btnSearchHistory, #btnSearchHistoryLeft').on("click", function () {
         toggleSearchHistory('toggle')
-        // $('#search-history').toggleClass('d-none')
 
         if (!$('#search-history').hasClass('d-none')) {
             refreshSearchHistory()
         }
     })
 
-    $('#close-search-history').on("click", function () {
-        toggleSearchHistory('toggle')
+    $('#btnClearAll, #btnClearAllLeft').on("click", function () {
+        clearScreen(true)
+        toggleSearchHistory(true)
+    })
+
+    $('#search-history-title i').on('click', function () {
+        toggleSearchHistory(true)
     })
 
     //contract/expand all diseases
@@ -1023,6 +1070,9 @@ $(function () {
 
     //populate search history
     refreshSearchHistory()
+
+    //hide search history
+    toggleSearchHistory(true)
 
 
     // $('#bookmarked-diseases-dropdown li').on('click', function (e) {
