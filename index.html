@@ -49,11 +49,10 @@
             <span class="selection-tag-cui d-none"></span>
             <span class="selection-tag-frequency d-none" title="Frequency"
                 style="background-color: rgba(0,0,0,1)"></span>
-            <!-- <span class="remove-tag" title="Remove Finding from Search Criteria"></span> -->
         </div>
         <!-- template for disease suggestion -->
         <div id="suggestion-template" class="div-suggestion hide-findings">
-            <div class="section-container mb-auto">
+            <div class="mb-auto">
                 <div class="suggestion-header d-flex align-items-center justify-content-between h3">
                     <span class="expand-contract clickable" title="Expand/Contract Disease">
                         <span class="expand-contract-icon"></span>
@@ -75,9 +74,10 @@
                 </div>
             </div>
             <div class="disease-addinfo mt-3">
-                <div class="disease-info para2 mb-3"></div>
+                <div class="disease-info abbreviated para2 mb-3"></div>
                 <div class="disease-evidence mb-3 d-none"></div>
-                <div class="more-findings">
+                <div class="more-findings d-flex justify-content-start align-items-center mb-3">
+                    <label class="findings-label h4 me-3 mb-0">Findings</label>
                     <label class="btn-more-findings para3"></label>
                 </div>
                 <div class="disease-findings d-flex flex-wrap"></div>
@@ -141,11 +141,13 @@
 
     <!-- Page Header -->
     <header>
-        <div id="logo">
-            <a href="https://www.mi1.ai/">
-                <img src="./assets/Original on Transparent.png" height="60px"
-                    alt="Medical Intelligence One home page" />
-            </a>
+        <div class="d-flex justify-content-between align-items-center">
+            <div id="logo">
+                <a href="https://www.mi1.ai/">
+                    <img src="./assets/Original on Transparent.png" height="60px"
+                        alt="Medical Intelligence One home page" />
+                </a>
+            </div>
         </div>
     </header>
 
@@ -184,11 +186,13 @@
             <span class="footer screen-right">SHARE</span>
         </div> -->
             <div class="d-flex">
-                <div id="search-history-container" class="split col-4 stick-to-top slide-in d-none" style="width:0px">
+                <!-- <div id="search-history-container" class="split col stick-to-top slide-in d-none" style="width:0px"> -->
+                <div id="search-history-container" class="_split stick-to-top slide-in" style="width:0px;">
                     <div id="search-history-title" class="d-flex justify-content-between">
                         <span><i class="invisible ms-auto clickable fas fa-arrow-left"></i></span>
-                        <span class="h2 rda-title stick-to-top">Search History</span>
-                        <span id="close-left-navbar"><i class="ms-auto clickable fas fa-arrow-left"></i></span>
+                        <span class="h2 rda-title">Search History</span>
+                        <span id="close-left-navbar" title="Close Search History"><i
+                                class="ms-auto clickable fas fa-arrow-left"></i></span>
                     </div>
                     <div id="rda-header-search-history" class="d-flex rda-header justify-content-between">
                         <span class="invisible">
@@ -197,14 +201,16 @@
                             </button>
                         </span>
                         <span class="text-center align-middle h3">
-                            <button id="previous-record" class="btn">
+                            <button id="previous-record" class="btn" title="Go to Previous Page">
                                 <i class="previous-record-icon clickable fas fa-square-caret-left"></i></button>
                             <label id="search-history-navbar"></label>
                             <button id="next-record" class="btn">
-                                <i class="next-record-icon clickable fas fa-square-caret-right"></i></button>
+                                <i class="next-record-icon clickable fas fa-square-caret-right"
+                                    title="Go to Next Page"></i></button>
                         </span>
                         <span class="d-flex align-self-center">
-                            <i id="show-favourites" class="ms-auto save-icon clickable far fa-star"></i>
+                            <i id="show-favourites" class="ms-auto save-icon clickable far fa-star"
+                                title="Only Show Favourites"></i>
                         </span>
                     </div>
                     <!-- <div id="search-history-filters" class="d-flex">
@@ -216,76 +222,66 @@
                         </div>
                     </div>
                 </div>
+                <!-- <div id="pane-divider"></div> -->
 
-                <div id="results-container" class="split col">
-                    <div class="stick-to-top">
-                        <!-- <div class="d-flex justify-content-center stick-to-top"> -->
-                        <div class="rda-title h2">Enola Rare Disease Protoype<i id="page-info-popover"
-                                class="fa-solid fa-circle-question page-info" data-bs-toggle="popover"
-                                data-bs-html="true" data-bs-placement="auto" data-bs-trigger="hover"
-                                title="How to use"></i></div>
-                        <!-- </div> -->
-                        <div id="search-section" class="positive-search">
-                            <!-- <div id="search-section-header"
-                                class="d-flex align-items-end justify-content-between me-auto mb-2"> -->
-                            <div id="search-section-header" class="d-flex rda-header justify-content-between">
-                                <span class="posneg-switch d-flex align-items-center gap-3"
-                                    title=" Toggle between adding Positive and Negative Findings">
-                                    <label for="posneg-state" class="form-check-label fas fa-circle-plus me-2"></label>
-                                    <span class="form-check form-switch">
-                                        <input type="checkbox" class="form-check-input" id="posneg-state">
-                                    </span>
-                                    <label for="posneg-state" class="form-check-label fas fa-circle-minus"></label>
+                <div id="results-container" class="_split" style="width:100vw">
+                    <div class="rda-title h2">Enola™ Rare Disease Investigator<i id="page-info-popover"
+                            class="fa-solid fa-circle-question page-info" data-bs-toggle="popover" data-bs-html="true"
+                            data-bs-placement="auto" data-bs-trigger="hover" title="How to use"></i></div>
+                    <div id="search-section" class="positive-search stick-to-top">
+                        <div id="search-section-header" class="d-flex rda-header justify-content-between ">
+                            <span class="posneg-switch d-flex align-items-center gap-3"
+                                title=" Toggle between adding Positive and Negative Findings">
+                                <label for="posneg-state" class="form-check-label fas fa-circle-plus me-2"></label>
+                                <span class="form-check form-switch">
+                                    <input type="checkbox" class="form-check-input" id="posneg-state">
                                 </span>
-                                <span class="d-flex justify-content-end align-items-center gap-3">
-                                    <span id="btnSearchHistory" title="View History">
-                                        <i class="fas fa-clock-rotate-left"></i>
-                                    </span>
-                                    <span id="btnSave" title="Save Search Results">
-                                        <i class="far fa-star"></i>
-                                    </span>
-                                    <span id="btnShare" title="Share Results">
-                                        <i class="fas fa-share-nodes "></i>
-                                    </span>
+                                <label for="posneg-state" class="form-check-label fas fa-circle-minus"></label>
+                            </span>
+                            <span id="beta-label" class="h3 align-self-center">BETA</span>
+                            <span class="d-flex justify-content-end align-items-center gap-3">
+                                <span id="btnSearchHistory" title="View History">
+                                    <i class="fas fa-clock-rotate-left"></i>
                                 </span>
-                            </div>
-                            <div class="d-flex w-100 mb-2">
-                                <div id="editor-container" class="d-flex w-100 align-items-center">
-                                    <div class="search-editor input-lg w-100" id="editor"></div>
-                                </div>
-                            </div>
-                            <div id="div-selected-terms"
-                                class="d-flex justify-content-between align-items-center d-none">
-                                <span id="selected-terms" class="d-flex flex-wrap ">
+                                <span id="btnSave" title="Save Current Search">
+                                    <i class="far fa-star"></i>
                                 </span>
-                                <span class="ms-auto">
-                                    <span id="btnClearAll" title="Clear the Screen">
-                                        <i class="far fa-circle-xmark"></i>
-                                    </span>
+                                <span id="btnShare" title="Share Current Search">
+                                    <i class="fas fa-share-nodes "></i>
                                 </span>
-                                <!-- <i id="search-history-bookmark" class="fa-book-bookmark search-history-bookmark clickable"
-                    title="Bookmark Search"></i> -->
+                            </span>
+                        </div>
+                        <div class="d-flex w-100 mb-2">
+                            <div id="editor-container" class="d-flex w-100 align-items-center">
+                                <div class="search-editor input-lg w-100" id="editor"></div>
                             </div>
                         </div>
+                        <div id="div-selected-terms" class="d-flex justify-content-between align-items-center d-none">
+                            <span id="selected-terms" class="d-flex flex-wrap"></span>
+                            <span class="ms-auto">
+                                <span id="btnClearAll" title="Clear the Screen">
+                                    <i class="far fa-circle-xmark"></i>
+                                </span>
+                            </span>
+                        </div>
                     </div>
-                    <!-- <div class="rda-header h3 d-none">Associated Findings (Click to Add to Search Criteria)</div>
-            <div id="associated-findings" class="section-container d-flex flex-wrap d-none"></div> -->
                     <div id="rda-header-bookmarked-diseases"
                         class="rda-header d-none h3 d-flex justify-content-between clickable">
                         <span>
-                            <span class=" expand-contract-icon"></span>
+                            <span class="expand-contract-icon"></span>
                             <span>Bookmarked Diseases</span>
                         </span>
                     </div>
                     <div id="bookmarked-diseases-container" class="section-container d-none"></div>
                     <div id="rda-header-diseases" class="rda-header hide-at-start h3 mb-auto clickable">
                         <span class="expand-contract-icon"></span>
-                        <span>Diseases</span>
+                        <span>Search Results Diseases</span>
                     </div>
                     <div id="suggestions-container" class="section-container"></div>
                 </div>
             </div>
         </div>
+    </div>
     </div>
     <div id="particles-js">
     </div>

@@ -1,24 +1,16 @@
-// import * as CodeMirror from "codemirror"
-// import { } from "@codemirror/commands"
 import { basicSetup, EditorState, EditorView } from '@codemirror/basic-setup';
-// import { keymap } from "@codemirror/view"
-// import { indentWithTab } from "@codemirror/commands"
 import { autocompletion, CompletionContext, startCompletion } from "@codemirror/autocomplete"
-// import { StateField, EditorSelection } from "@codemirror/state"
-// import { Tooltip, showTooltip } from "@codemirror/tooltip"
-// import { indentUnit } from '@codemirror/language'
-// import rareDiseaseData from '../mi1-rare-disease/rare-diseases.json'       //test data until api is working
-// import autocompleteRareDiseaseData from '../mi1-rare-disease/autocomplete_rareDz_findings.json'       //test data until api is working
-// import { typeOf } from 'react-is';
-import bookmarkedDiseaseData from '../mi1-rare-disease/dx1.json'       //test data until api is working
+// import bookmarkedDiseaseData from '../mi1-rare-disease/dx1.json'       //test data until api is working
 // import searchHistoryData from '../mi1-rare-disease/searchHistory.json'       //test data until api is working
-import Split from 'split.js'
+// import Split from 'split.js'
 const axios = require('axios')
 const headers = {
     'Access-Control-Allow-Origin': '*'
 }
 var view, inputVal
 var searchOptions: any[] = []
+var searchHistoryData
+var mySplit
 
 var $selectedTerms = $('#selected-terms')
 var $bookmarkedDiseasesContainer = $('#bookmarked-diseases-container')
@@ -232,32 +224,6 @@ async function fetchDiseases() {
     }
 }
 
-// //fetch and display bookmarked diseases
-// function fetchBookmarkedDiseases(bookmarkedDiseaseName) {
-
-//     $('#associated-findings').empty()
-//     $('#bookmarked-diseases-container').empty()
-
-//     if (bookmarkedDiseaseData.length > 0) {
-//         showDiseases(bookmarkedDiseaseData, $('#bookmarked-diseases-container'))
-//         $('#bookmarked-diseases-container').removeClass('d-none')
-//         showHideDiseasesUsingBookmarkedDiseases()
-//     }
-//     else {
-//         clearScreen()
-//     }
-
-//     // return focus to codemirror input
-//     view.focus
-//     try {
-//         startCompletion
-//     }
-//     catch (ex) {
-//         console.log(console.log(ex))
-//     }
-// }
-
-
 //create a findings tag with click event. This has a call back function to ensure api call is done only on completion of tag creation
 function createTag(parentElement, label, id, frequency, addClasses, callback) {
     //clone template to get new tag object
@@ -265,8 +231,8 @@ function createTag(parentElement, label, id, frequency, addClasses, callback) {
 
     //populate tag with data
     $divTag.find('.selection-tag-text').text(label)
-    $divTag.children('.selection-tag-cui').text(id)
-    $divTag.children('.selection-tag-frequency').text(frequency)
+    $divTag.find('.selection-tag-cui').text(id)
+    $divTag.find('.selection-tag-frequency').text(frequency)
 
     //set frequency indicator by changing width and position of 'empty box' element which is designed to conceal a proportion of the gradient inversely related to the frequency
     let objFrequency = getFrequencyScale(frequency)
@@ -280,34 +246,41 @@ function createTag(parentElement, label, id, frequency, addClasses, callback) {
     $divTag.addClass(addClasses)
 
     //add events to non-matched disease findings tags
-    if ($divTag.hasClass('selectable') && !$divTag.hasClass('selected')) {
+    if ($divTag.hasClass('selectable') && !$divTag.hasClass('removeable')) {
         //add click event to pos/neg option
-        $divTag.find('.selection-tag-posneg .positive-finding').on("click", function () { addTagToSearchAndRequery($divTag, 'positive-finding', 'negative-finding') })
-        $divTag.find('.selection-tag-posneg .negative-finding').on("click", function () { addTagToSearchAndRequery($divTag, 'negative-finding', 'positive-finding') })
+        $divTag.find('.selection-tag-posneg .positive-finding').on("click", function (e) { addTagToSearchAndRequery($(e.currentTarget), 'positive-finding', 'negative-finding') })
+        $divTag.find('.selection-tag-posneg .negative-finding').on("click", function (e) { addTagToSearchAndRequery($(e.currentTarget), 'negative-finding', 'positive-finding') })
 
         //add hover events to hover area to show/hide gradient and display pos/neg option
-        $divTag.children('.selection-tag-hover-area').on('mouseenter mouseleave', function () {
-            $divTag.find('.frequency-gradient').toggleClass('d-none')
-            $divTag.find('.selection-tag-posneg').toggleClass('d-none')
-            $divTag.toggleClass('black-shadow')
+        $divTag.children('.selection-tag-hover-area').on('mouseenter mouseleave', function (e) {
+            let $currentTag = $(e.currentTarget).parents('.selection-tag')
+            $currentTag.find('.frequency-gradient').toggleClass('d-none')
+            $currentTag.find('.selection-tag-posneg').toggleClass('d-none')
+            $currentTag.toggleClass('black-shadow')
         })
     }
 
     if ($divTag.hasClass('removeable')) {
-        $divTag.children('.selection-tag-hover-area').on('mouseenter mouseleave', function () {
-            $divTag.toggleClass('white-shadow')
+        $divTag.children('.selection-tag-hover-area').on('mouseenter mouseleave', function (e) {
+            if ($divTag.parents('#div-selected-terms').length > 0) {
+                $(e.currentTarget).parents('.selection-tag').toggleClass('white-shadow')
+            }
+            else {
+                $(e.currentTarget).parents('.selection-tag').toggleClass('black-shadow')
+            }
         })
     }
 
     //add click event to tag label text
     $divTag.find('.selection-tag-text').on('click', function (e) {
-        //if the tag is already a search term, remove tag and requery, otherwise add tag to search and requery
-        if ($divTag.parents('#selected-terms').length > 0) {
-            $divTag.remove()
+        //if the tag is already a search term, remove tag from search terms and requery, otherwise add tag to search terms and requery
+        let $currentTag = $(e.currentTarget).parents('.selection-tag')
+        if ($currentTag.hasClass('removeable')) {
+            $('#selected-terms .selection-tag').filter(function (i2, e2) { return $(e2).find('.selection-tag-cui').text() == $currentTag.find('.selection-tag-cui').text() }).remove()
             fetchDiseases()
         }
-        else if (!$divTag.hasClass('selected')) {
-            addTagToSearchAndRequery($divTag, 'positive-finding', 'negative-finding')
+        else if (!$currentTag.hasClass('selected')) {
+            addTagToSearchAndRequery($currentTag.clone(true), 'positive-finding', 'negative-finding')
         }
     });
 
@@ -329,16 +302,11 @@ function addTagToSearchAndRequery($myTag, classToAdd, classToRemove) {
 
     // event handling
     $myTag.find('.selection-tag-hover-area').off('mouseenter mouseleave')
-    $myTag.find('.selection-tag-hover-area').on('mouseenter', function () {
-        $myTag.addClass('white-shadow')
-    }).on('mouseleave', function () {
-        $myTag.removeClass('white-shadow')
-    })
+    $myTag.find('.selection-tag-hover-area').on('mouseenter', function (e) {
 
-    $myTag.find('.selection-tag-text').off('click')
-    $myTag.find('.selection-tag-text').on('click', function () {
-        $myTag.remove()
-        fetchDiseases()
+        $(e.currentTarget).parents('.selection-tag').addClass('white-shadow')
+    }).on('mouseleave', function (e) {
+        $(e.currentTarget).parents('.selection-tag').removeClass('white-shadow')
     })
 
     // append tag to search terms
@@ -399,6 +367,10 @@ function showDiseases(data, $parentContainer) {
     searchOptions = []      //global array
 
     $('.container-fluid').removeClass('is-empty')
+    //store all bookmarked diseases in array
+
+    var $bookmarkedDiseases = $bookmarkedDiseasesContainer.clone()
+    // $bookmarkedDiseasesContainer.empty()
 
     // populate suggestion-template with disease data and add to suggestions-container div
     try {
@@ -407,10 +379,11 @@ function showDiseases(data, $parentContainer) {
             let diseaseTag = diseaseItem.Disease.replaceAll(' ', '_')
             let $divSuggestion = $('#suggestion-template').clone().removeAttr('id').removeClass('d-none').addClass(diseaseTag)
             // let $divSuggestion = $('#suggestion-template').clone().attr('id', diseaseItem.Disease_CUI).removeClass('d-none')
-
+            $divSuggestion.attr('cui', diseaseItem.Disease_CUI)
             $divSuggestion.find('.disease-name').text(diseaseItem.Disease)
 
             $divSuggestion.find('.disease-info').text(diseaseItem.Disease_Definition)
+            $divSuggestion.find('.disease-info').attr('title', diseaseItem.Disease_Definition)
 
             // let probability = Math.round(Math.abs(obj.Disease_Probability)) + '%'
             let probability = Math.round(diseaseItem.Disease_Probability)
@@ -495,34 +468,30 @@ function showDiseases(data, $parentContainer) {
             }
 
             $divSuggestion.find('.expand-contract').on("click", function (e) {
-                $divSuggestion.toggleClass('contracted');
+                $(e.currentTarget).parents('.div-suggestion').toggleClass('contracted');
             })
 
-            //add/remove suggestion to bookmark list when bookmark selected/deselected
-            $divSuggestion.find('.disease-bookmark').on("click", function (e) {
-                var $bookmarkIcon = $('.' + diseaseTag + ' .disease-bookmark')      //include suggestions in both the bookmarked list and diseases list
-
-                $bookmarkIcon.toggleClass('active')
-                $bookmarkIcon.toggleClass('fas far')
-
-                if ($bookmarkIcon.hasClass('active')) {
-                    let $divSuggestionClone = $divSuggestion.clone(true)        //clone elements and events
-                    $divSuggestionClone.find('.expand-contract').on("click", function (e) {
-                        $divSuggestionClone.toggleClass('contracted');
-                    })
-                    $bookmarkedDiseasesContainer.append($divSuggestionClone)
+            //add click event to expand disease info
+            $divSuggestion.find('.disease-info').on('click', function (e) {
+                let $suggestion = $(e.currentTarget)
+                $suggestion.toggleClass('abbreviated')
+                if ($suggestion.hasClass('abbreviated')) {
+                    $suggestion.attr('title', $suggestion.text())
                 }
                 else {
-                    $bookmarkedDiseasesContainer.find('.' + diseaseTag).remove()
+                    $suggestion.removeAttr('title')
                 }
-                if ($('#bookmarked-diseases-container .div-suggestion').length == 0) {
-                    $('#bookmarked-diseases-container, #rda-header-bookmarked-diseases').toggleClass('d-none', true)
-                }
-                else {
-                    $('#bookmarked-diseases-container, #rda-header-bookmarked-diseases').toggleClass('d-none', false)
-                }
-
             })
+
+            //check if bookmark should be active
+            let bookmarkedDiseaseNames = $bookmarkedDiseases.children('.disease-name').map(function () {
+                return $(this).text()
+            }).get()
+
+            //if active, add clone of elements to bookmarks
+            if (bookmarkedDiseaseNames.indexOf(diseaseItem.disease) > -1) {
+                $divSuggestion.find('.disease-bookmark').toggleClass('active', true)
+            }
 
             //populate findings div for diagnosis and associated findings div for top 3 diagnoses
             //create isMatched property and concatenate matched and unmatched findings
@@ -574,34 +543,101 @@ function showDiseases(data, $parentContainer) {
                     }
 
                     //add 'selected' class if cui is returned in matched-findings array (ie it was used in the search terms )
-                    addClasses += ((obj.TypeOfFinding == "Matched" || obj.TypeOfFinding == "NegativeMatched") ? "selected " : "selectable ")
+                    addClasses += ((obj.TypeOfFinding == "Matched" || obj.TypeOfFinding == "NegativeMatched") ? "selected removeable " : "selectable ")
 
                     //add top-eight class for top 8 findings. These will always be displayed
                     if (j < 8) {
                         addClasses += "top-eight "
                     }
-
+                    if (j == 8) {
+                        $divSuggestion.find('.disease-findings').append("<span class='ellipsis'></span>")
+                    }
                     //add tag to the disease findings container
                     createTag($divSuggestion.find('.disease-findings'), label, cui, frequency, addClasses, null)
                 }
             }
-
+            //update findings label
+            let x = diseaseFindings.length
+            $divSuggestion.find('.findings-label').text("Findings (" + diseaseFindings.length + ")")
             //attach click event for more-findings button
+
             let btnMoreFindings = $divSuggestion.find('.btn-more-findings')
-            btnMoreFindings.on("click", function () {
-                $divSuggestion.toggleClass('show-findings hide-findings')
+            if (x > 8) {
+                btnMoreFindings.text("Show All")
+            }
+            else {
+                btnMoreFindings.hide()
+            }
+
+            //add click event to show/hide additional findings
+            $divSuggestion.find('.btn-more-findings, .ellipsis').on("click", function (e) {
+                let $suggestion = $(e.currentTarget).parents('.div-suggestion')
+                $suggestion.toggleClass('show-findings hide-findings')
+                if ($suggestion.hasClass('show-findings')) {
+                    $suggestion.find('.btn-more-findings').text("Show Fewer")
+                    $suggestion.find('.ellipsis').hide()
+                }
+                else {
+                    $suggestion.find('.btn-more-findings').text("Show All")
+                    $suggestion.find('.ellipsis').show()
+
+                }
+            })
+
+            //add click event to add/remove suggestion to bookmark list when bookmark selected/deselected
+            $divSuggestion.find('.disease-bookmark').on("click", function (e) {
+                let $suggestion = $(e.currentTarget).parents('.div-suggestion')
+                var $bookmarkIcon = $('.' + diseaseTag + ' .disease-bookmark')      //include suggestions in both the bookmarked list and diseases list
+
+                $bookmarkIcon.toggleClass('active')
+                $bookmarkIcon.toggleClass('fas far')
+
+                if ($bookmarkIcon.hasClass('active')) {
+                    let $divSuggestionClone = $suggestion.clone(true)        //clone elements and events
+                    // $divSuggestionClone.find('.expand-contract').on("click", function (e) {
+                    //     $(e.currentTarget).parents('.div-suggestion').toggleClass('contracted');
+                    // })
+                    $bookmarkedDiseasesContainer.append($divSuggestionClone)
+                }
+                else {
+                    $bookmarkedDiseasesContainer.find('.' + diseaseTag).remove()
+                }
+                showHideBookmarksContainer()
             })
 
             //append this new div-suggestion to the parent container
             $parentContainer.append($divSuggestion)
 
         }
+        //update bookmark findings with appropriate class if this is in search terms
+        $bookmarkedDiseasesContainer.find('.selection-tag:visible .selection-tag-cui').each(function (i, e) {
+            if ($selectedTerms.find('.selection-tag-cui').text().indexOf($(e).text()) > -1) {
+                $(e).parents('.selection-tag').addClass('selected removeable')
+            }
+            else {
+                $(e).parents('.selection-tag').removeClass('selected removeable')
+            }
+        })
+
         //populate autocomplete from disease findings
         fetchAutoCompleteFromDiseaseFindings('')
         $('.popover').hide()
+
     }
     catch (ex) {
         console.log(console.log(ex))
+    }
+}
+
+//hide bookmarks container if there are no bookmarks to display
+function showHideBookmarksContainer() {
+    if ($('#bookmarked-diseases-container .div-suggestion').length == 0) {
+        $('#bookmarked-diseases-container, #rda-header-bookmarked-diseases').toggleClass('d-none', true)
+        // $('#rda-header-diseases').css('top', '-=50')
+    }
+    else {
+        $('#bookmarked-diseases-container, #rda-header-bookmarked-diseases').toggleClass('d-none', false)
+        // $('#rda-header-diseases').css('top', '255px')
     }
 }
 
@@ -622,7 +658,7 @@ function clearScreen(clearSelectedTerms = false) {
     }
 
     $('#suggestions-container').empty()
-    $('#bookmarked-diseases-container').empty()
+    // $('#bookmarked-diseases-container').empty()
     $('.container-fluid').addClass('is-empty')
     $('.search-editor, #search-history-icon').toggleClass('d-none', false)
     // $('#search-history').toggleClass('d-none', true)
@@ -760,115 +796,105 @@ function getPrevalenceScale(prevalence) {
 
 //show hide search records depending on favourites toggle
 function toggleFavourites() {
-    // if (($('#rda-header-search-history .save-icon').hasClass('fas'))) {
-    //     //toggle favourites on
-    //     $('.search-history-line-template').each(function (i, e2) {
-    //         $(e2).find('.save-icon.far').parents('.search-history-line-group').toggleClass('d-none', true)
-    //         $(e2).find('.save-icon.fas').parents('.search-history-line-group').toggleClass('d-none', false)
-    //         //hide dates where applicable
-    //         if ($(e2).find('.save-icon.fas').length == 0) {
-    //             $(e2).find('.date-header').toggleClass('d-none', true)
-    //         }
-
-    //     })
-    // }
-    // else {
-    //     $('.search-history-line-template .search-history-line-group').toggleClass('d-none', false)
-    //     $('.search-history-line-template .date-header').toggleClass('d-none', false)
-
-    // }
-
     firstRecord = 1
     refreshSearchHistory()
 }
 
-//show the search history
+//render search history records held in searchHistoryData object
 function refreshSearchHistory() {
     var $searchHistoryLine = $(), $divTag = $()
     var searchDate, searchTime, oldSearchDate, longDate, shortDate
     var showFavourites = $('#rda-header-search-history .save-icon').hasClass('fas')
     var count = 1
-    var records
-    //remove existing history
+    var numRecords, index
+    //remove existing history lines
     $('#search-history .search-history-line-template').remove()
-    $.getJSON('/searchHistory.json', function (data) {
-        //filter data depending on whether we include favourites
-        records = data.searchHistory
-        if (showFavourites) {
-            records = records.filter(function (d) {
-                return d.saved == 'true'
-            })
-        }
+    //filter data on favourites if applicable
+    if (showFavourites) {
+        numRecords = searchHistoryData.filter(function (d) {
+            return d.saved.toString() == 'true'
+        }).length
+    }
+    else {
+        numRecords = searchHistoryData.length
+    }
+    //calculate index of lastRecord to be displayed on page.
+    lastRecord = firstRecord + stepCount - 1 > numRecords ? numRecords : firstRecord + stepCount - 1
+    //iterate through json data, ignoring records that don't belong on the page or have been filtered out
+    $(searchHistoryData.slice(firstRecord - 1)).each(function (i, d) {
+        index = firstRecord + i - 1
+        if (showFavourites == false || d.saved == 'true') {
+            $searchHistoryLine = $('#search-history-line-template').clone(true).removeAttr('id')
 
-        lastRecord = firstRecord + stepCount - 1 > records.length ? records.length : firstRecord + stepCount - 1
-        //iterate through json data
-        $(records).each(function (i, d) {
-            if (i + 1 >= firstRecord && i + 1 <= lastRecord) {
-                $searchHistoryLine = $('#search-history-line-template').clone(true).removeAttr('id')
+            searchDate = new Date(d.datetime).toLocaleDateString()
+            searchTime = new Date(d.datetime).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit", hour12: "true" })
 
-                searchDate = new Date(d.datetime).toLocaleDateString()
-                searchTime = new Date(d.datetime).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit", hour12: "true" })
-
-                //hide date header if not applicable
-                // $searchHistoryLine.find('.date-header').text(new Date(d.datetime).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "2-digit", year: "numeric" }))
-                longDate = new Date(d.datetime).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "2-digit", year: "numeric" })
-                shortDate = new Date(d.datetime).toLocaleDateString()
-                if (searchDate != oldSearchDate || oldSearchDate == undefined) {
-                    // $searchHistoryLine.prepend("<div class='date-header'>" + formattedDate + "</div>")
-                    // $searchHistoryLine = $("<span class='date-header'>" + formattedDate + "</span>").append($searchHistoryLine)
-                    $searchHistoryLine.find('.date-header').text(longDate)
-                    $searchHistoryLine.find('.date-header').attr('id', shortDate)
-                }
-                else {
-                    $searchHistoryLine.find('.date-header').remove()
-                }
-
-                $searchHistoryLine.find('.search-time').text(searchTime)
-
-                //make save icon solid if not applicable
-                if (d.saved == "true") {
-                    // $searchHistoryLine.find('.save-icon').css('visibility', 'hidden')
-                    $searchHistoryLine.find('.save-icon').toggleClass('fas far')
-                }
-
-                //add findings tags
-                $(d.searchTerms).each(function (i2, d2) {
-                    $divTag = $("<span class='tag'>" + d2.name + "</span>")
-                    $divTag.data('cui', d2.cui)
-                    $divTag.addClass(d2.posneg == 'pos' ? 'positive-search' : 'negative-search')
-                    $searchHistoryLine.find('.search-history-line-findings').append($divTag)
-                })
-
-                //append searchHistoryLine to div
-                if ($searchHistoryLine.find('.date-header').length > 0) {
-                    $('#search-history-lines').append($searchHistoryLine)
-                }
-                else {
-                    $('#search-history-lines .search-history-line-template').last().append($searchHistoryLine.find('.search-history-line-group'))
-                }
-
-                //add event to trigger search when line is clicked
-                $('#search-history .search-history-line-findings').on("click", function (e) {
-                    $selectedTerms.empty()
-                    var addClasses
-                    $(e.currentTarget).children('.tag').each(function (i, t) {
-                        addClasses = "mini removeable selected " + ($(t).hasClass('positive-search') ? 'positive-finding' : 'negative-finding')
-                        createTag($selectedTerms, $(t).text(), $(t).data("cui"), null, addClasses, fetchDiseases)
-                    })
-                    $('#div-selected-terms').toggleClass('d-none', false)
-                    // toggleSearchHistory()
-                })
-                oldSearchDate = searchDate
-                count++
-                //break out of loop if page has been generated
-                if (count > stepCount) { return false }
+            //hide date header if not applicable
+            // $searchHistoryLine.find('.date-header').text(new Date(d.datetime).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "2-digit", year: "numeric" }))
+            longDate = new Date(d.datetime).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "2-digit", year: "numeric" })
+            shortDate = new Date(d.datetime).toLocaleDateString()
+            if (searchDate != oldSearchDate || oldSearchDate == undefined) {
+                // $searchHistoryLine.prepend("<div class='date-header'>" + formattedDate + "</div>")
+                // $searchHistoryLine = $("<span class='date-header'>" + formattedDate + "</span>").append($searchHistoryLine)
+                $searchHistoryLine.find('.date-header').text(longDate)
+                $searchHistoryLine.find('.date-header').attr('id', shortDate)
             }
-        })
-        // var numRecords = $('.search-history-line-group:not(.d-none)').length
-        $('#search-history-navbar').text(Math.ceil(firstRecord / stepCount) + " of " + Math.ceil(records.length / stepCount))
-        $('#previous-record').attr('disabled', firstRecord == 1)
-        $('#next-record').attr('disabled', lastRecord == records.length)
+            else {
+                $searchHistoryLine.find('.date-header').remove()
+            }
+
+            $searchHistoryLine.find('.search-time').text(searchTime)
+
+            //make save icon solid or regular depending on saved flag
+            if (d.saved.toString() == "true") {
+                $searchHistoryLine.find('.save-icon').addClass('fas')
+                $searchHistoryLine.find('.save-icon').removeClass('far')
+            }
+            else {
+                $searchHistoryLine.find('.save-icon').addClass('far')
+                $searchHistoryLine.find('.save-icon').removeClass('fas')
+            }
+
+            //add findings tags
+            $(d.searchTerms).each(function (i2, d2) {
+                $divTag = $("<span class='tag'>" + d2.name + "</span>")
+                $divTag.data('cui', d2.cui)
+                $divTag.addClass(d2.posneg == 'pos' ? 'positive-search' : 'negative-search')
+                $searchHistoryLine.find('.search-history-line-findings').append($divTag)
+            })
+
+            //store index number in attribute of save icon
+            $searchHistoryLine.find('.save-icon').attr('index', index)
+
+            //append searchHistoryLine to div
+            if ($searchHistoryLine.find('.date-header').length > 0) {
+                $('#search-history-lines').append($searchHistoryLine)
+            }
+            else {
+                $('#search-history-lines .search-history-line-template').last().append($searchHistoryLine.find('.search-history-line-group'))
+            }
+
+            //add event to trigger search when line is clicked
+            $('#search-history .search-history-line-findings').on("click", function (e) {
+                $selectedTerms.empty()
+                var addClasses
+                $(e.currentTarget).children('.tag').each(function (i, t) {
+                    addClasses = "mini removeable selected " + ($(t).hasClass('positive-search') ? 'positive-finding' : 'negative-finding')
+                    createTag($selectedTerms, $(t).text(), $(t).data("cui"), null, addClasses, fetchDiseases)
+                })
+                $('#div-selected-terms').toggleClass('d-none', false)
+            })
+
+            oldSearchDate = searchDate
+            count++
+            //break out of loop if page has been generated
+            if (count > stepCount) { return false }
+        }
     })
+    // var numRecords = $('.search-history-line-group:not(.d-none)').length
+    $('#search-history-navbar').text(Math.ceil(firstRecord / stepCount) + " of " + Math.ceil(numRecords / stepCount))
+    $('#previous-record').attr('disabled', firstRecord == 1)
+    $('#next-record').attr('disabled', lastRecord == numRecords)
 }
 
 //show/hide search history panel
@@ -880,30 +906,67 @@ function toggleSearchHistory(hidePanel) {
         else {
             hidePanel = true
         }
-
     }
 
-    // $('#search-history-container').toggleClass('d-none', hidePanel)
     $('#search-history-container').toggleClass('slide-in slide-out')
+    if (mySplit != undefined) {
+        mySplit.destroy()
+    }
+    // $('.gutter.gutter-horizontal').toggleClass('d-none', true)
 
     if (hidePanel) {
-        $('.gutter.gutter-horizontal').fadeOut(600)
+        // mySplit = Split(['#search-history-container', '#results-container'], {
+        //     sizes: [0, 100],
+        //     minSize: 0,
+        //     expandToMin: false,
+        //     gutterSize: 1,
+        //     gutterAlign: 'center',
+        //     snapOffset: 30,
+        //     dragInterval: 1,
+        //     direction: 'horizontal',
+        //     cursor: 'col-resize',
+        // })
+        // $('.gutter.gutter-horizontal').fadeOut(600)
         $('#search-history-container').css({
             'width': '0px',
             'padding': '0px',
             'opacity': 0,
             'transition': '.6s'
         })
+        $('#results-container').css({
+            'width': '100vw',
+            'border-left': 'none'
+        })
+        $('body').css({
+            'overflow-y': 'hidden'
+        })
+
     }
     else {
-        $('#search-history-container').removeClass('d-none')
-        $('.gutter.gutter-horizontal').fadeIn(600, function () { $('#search-history-container').css('transition', '') })   //switch off transition once faded in
+        // mySplit = Split(['#search-history-container', '#results-container'], {
+        //     sizes: [30, 70]
+        //     // minSize: 480
+        // })
+        // $('#search-history-container').removeClass('d-none')
+        // $('.gutter.gutter-horizontal').fadeIn(600)
+        // $('#search-history-container').css('transition', '')    //switch off transition once faded in
         $('#search-history-container').css({
-            'width': '620px',
+            'width': '40vw',
             'padding': '0 2em',
             'opacity': 1,
+            'transition': '.6s'
+        })
+        $('#results-container').css({
+            'width': '60vw',
+            'border-left': '5px solid grey',
+            'transition': '.6s'
+
+        })
+        $('body').css({
+            'overflow-y': 'auto'
         })
     }
+
 }
 
 function showHideImageDescriptions(showDescriptions) {
@@ -921,35 +984,6 @@ $(function () {
         console.log('callback - particles-js config loaded');
     });
 
-    Split(['#search-history-container', '#results-container'], {
-        // initial size in percents or CSS values.
-        // sizes: [40, 60],
-        // minimum size (Number or Array)
-        minSize: 465,
-        // grow initial size to minSize
-        expandToMin: true,
-        // gutter size
-        gutterSize: 1,
-        // gutter alignment
-        gutterAlign: 'center',
-        // snap to minimum size offset in pixels
-        snapOffset: 30,
-        // number of pixels to drag
-        dragInterval: 1,
-        // or 'vertical'
-        direction: 'horizontal',
-        // cursor style
-        cursor: 'col-resize',
-        // functions & callbacks
-        // gutter: null,
-        // elementStyle: null,
-        // gutterStyle: null,
-        // onDrag: null,
-        // onDragStart: null,
-        // onDragEnd: null
-    });
-
-    // $('.gutter.gutter-horizontal').toggleClass('d-none', true)
 
     const initialState = EditorState.create({
         doc: '',
@@ -1008,10 +1042,19 @@ $(function () {
     $('#btnSearchHistory, #btnSearchHistoryLeft').on("click", function () {
         toggleSearchHistory('toggle')
 
-        if (!$('#search-history').hasClass('d-none')) {
-            refreshSearchHistory()
-        }
+        // if (!$('#search-history').hasClass('d-none')) {
+        //     refreshSearchHistory()
+        // }
     })
+
+    //disable/enable buttons during animation
+    $('#search-history-container').on('animationstart webkitAnimationStart', function () {
+        $('#btnSearchHistory, #btnSearchHistoryLeft').prop('disabled', 'true')
+    });
+
+    $('#search-history-container').on('animationend webkitAnimationEnd', function () {
+        $('#btnSearchHistory, #btnSearchHistoryLeft').prop('disabled', 'false')
+    });
 
     $('#btnClearAll, #btnClearAllLeft').on("click", function () {
         clearScreen(true)
@@ -1042,12 +1085,6 @@ $(function () {
         toggleFavourites()
     })
 
-    //add event for search history favourites
-    $('.search-history-line-header .save-icon').on('click', function (e) {
-        $(e.currentTarget).toggleClass('fas far')
-        toggleFavourites()
-    })
-
     $('#next-record').on('click', function () {
         firstRecord = firstRecord + stepCount
         refreshSearchHistory()
@@ -1055,7 +1092,7 @@ $(function () {
 
     $('#previous-record').on('click', function () {
         firstRecord = firstRecord - stepCount
-        if (firstRecord > 0
+        if (firstRecord < 0
         ) { firstRecord = 1 }
         refreshSearchHistory()
     })
@@ -1068,35 +1105,23 @@ $(function () {
         showHideImageDescriptions(false)
     })
 
+
+    //add event to toggle saved value when clicking corresponding 'save' icon.
+    $('#search-history-line-template .save-icon').on('click', function (e) {
+        // $(e.currentTarget).toggleClass('fas far')
+        var index = $(e.currentTarget).attr('index')
+        searchHistoryData[index].saved = searchHistoryData[index].saved.toString() == 'true' ? 'false' : 'true'
+        refreshSearchHistory()
+    })
+
     //populate search history
-    refreshSearchHistory()
+    $.getJSON('/searchHistory.json', function (data) {
+        searchHistoryData = data.searchHistory
+        refreshSearchHistory()
+    })
 
     //hide search history
     toggleSearchHistory(true)
-
-
-    // $('#bookmarked-diseases-dropdown li').on('click', function (e) {
-    //     fetchBookmarkedDiseases('dx1')
-    //     inputVal = $(e.target).text()
-    //     $('#bookmarked-diseases-label').text(inputVal);
-
-    // })
-
-    // $('#new-bookmarked-disease-textbox').on("keypress", function (e) {
-    //     if (e.which == 13) {
-    //         inputVal = $(this).val()?.toString() + '';
-    //         $('#bookmarked-diseases-label').text(inputVal);
-    //         $('#bookmarked-diseases-dropdown .rda-dropdown-items').hide()
-    //     }
-    // })
-
-
-    // $(window).scroll(function () {
-    //     // console.log(($(window)).scrollTop() + ' ' + $('.stick-to-top').offset()?.top)
-    //     if ($('.stick-to-top').offset()?.top <= ($(window)).scrollTop()) {
-    //         $('.search-editor, #search-history-icon, #search-history, #editor-container .buttons, #search-section-header, #clear-all-icon').toggleClass('d-none')
-    //     }
-    // })
 
     //page info popover
     // $('#page-info-popover').popover("dispose")

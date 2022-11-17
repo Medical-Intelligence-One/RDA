@@ -133,6 +133,10 @@ body {
   font-family: "Rubik Light", "Open Sans";
 }
 
+#beta-label {
+  color: rgba(255, 255, 255, 0.5);
+}
+
 #left-navbar {
   width: 80px;
   background-color: #000000;
@@ -254,8 +258,14 @@ hr.hr-2 {
   border-radius: 7px;
 }
 
+#pane-divider {
+  width: 5px;
+  background-color: grey;
+  height: 100vh;
+}
+
 #results-container {
-  margin: 0 2em;
+  padding: 0 2em;
 }
 
 #editor-container {
@@ -313,7 +323,9 @@ header {
 
 #search-history-container {
   color: rgb(3, 184, 234);
-  height: calc(100vh - 122px);
+  height: -webkit-fit-content;
+  height: -moz-fit-content;
+  height: fit-content;
   overflow: auto;
   overflow-y: clip;
 }
@@ -389,7 +401,6 @@ header {
 }
 
 .section-container {
-  width: 100%;
   background-color: white;
   border-radius: 7px;
   text-align: left;
@@ -459,6 +470,19 @@ header {
   font-family: "Font Awesome 5 Free";
   content: "\f35a";
   padding-left: 1em;
+}
+
+.disease-info {
+  cursor: pointer;
+}
+.disease-info.abbreviated {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.disease-info:hover {
+  transition: 0.3s;
+  color: #5a99e2;
 }
 
 .disease-name {
@@ -733,6 +757,10 @@ header {
 #selected-terms .remove-tag:hover:after {
   color: lightgray;
 }
+#selected-terms .selection-tag {
+  height: 2.5em;
+  padding-right: 0;
+}
 #selected-terms .selection-tag:not(.selected) {
   display: none !important;
 }
@@ -748,26 +776,22 @@ header {
   text-align: center;
 }
 .expand-contract-icon:before {
-  font-family: "Font Awesome 5 Free";
-  content: "\f077";
-  font-weight: bold;
-}
-
-.contracted .expand-contract-icon:before {
-  font-family: "Font Awesome 5 Free";
+  font-family: "Font Awesome 6 Free";
   content: "\f078";
   font-weight: bold;
 }
 
-.expand-contract:hover .expand-contract-icon:before,
 .expand-contract-icon:hover:before {
-  content: "\f139";
-  margin-right: -0.12em;
+  content: "\f13a";
+  margin-right: -3px;
 }
 
-.contracted .expand-contract:hover .expand-contract-icon:before,
 .contracted .expand-contract-icon:hover:before {
-  content: "\f13a";
+  content: "\f138";
+  margin-right: -8px;
+}
+.contracted .expand-contract-icon:before {
+  content: "\f054";
 }
 
 .div-suggestion.contracted .disease-addinfo {
@@ -783,24 +807,34 @@ header {
     display: none !important;
 } */
 .btn-more-findings {
-  text-decoration: underline;
-  margin-bottom: 1em;
   cursor: pointer;
+  padding: 0.4em;
+  border-radius: 7px;
+  border: 2px solid lightgrey;
 }
 .btn-more-findings:hover {
-  color: rgb(3, 184, 234);
+  border-radius: 7px;
+  box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.3);
+  transition: 0.3s !important;
+  cursor: pointer;
+}
+
+.ellipsis {
+  align-self: self-end;
+  font-size: 2em;
+  color: #5a99e2;
+}
+.ellipsis:after {
+  content: "...";
+}
+.ellipsis:hover {
+  cursor: pointer;
+  -webkit-transform: scale(1.2);
+  transition: 0.3s;
 }
 
 .hide-findings .selection-tag:not(.top-eight) {
   display: none !important;
-}
-
-.show-findings .btn-more-findings:before {
-  content: "Show Fewer Findings ...";
-}
-
-.hide-findings .btn-more-findings:before {
-  content: "Show All Findings ...";
 }
 
 .gradient-bar {
@@ -861,7 +895,7 @@ header {
 }
 
 #search-history {
-  border: 7px solid #5a99e2;
+  border: 0.2rem solid rgb(3, 184, 234);
   border-radius: 7px;
 }
 #search-history.contracted {
@@ -882,7 +916,7 @@ header {
   /* margin-left: .5em; */
   text-align: left;
   color: white;
-  padding: 1em;
+  padding: 0.25em;
   background-color: rgb(3, 184, 234);
 }
 #search-history .search-time {
@@ -981,6 +1015,13 @@ header {
   color: #f32e15;
 }
 
+#suggestions-container .selection-tag-hover-area:hover {
+  border-radius: 7px;
+  box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.3);
+  transition: 0.3s !important;
+  cursor: pointer;
+}
+
 .footer {
   position: fixed;
   bottom: 0;
@@ -1042,6 +1083,10 @@ header {
   cursor: ew-resize;
   background-color: gray;
   padding: 0 0.25em;
+  background-image: url("assets/drag-horizontal.png");
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: center;
   flex-shrink: 0;
   height: auto;
 }
@@ -1049,4 +1094,26 @@ header {
   background-color: #ffffff;
 }
 
-/*# sourceMappingURL=custom.css.map *//*# sourceMappingURL=custom.css.map */
+/*# sourceMappingURL=custom.css.map */
+.slide-out {
+  animation: slide-out 0.5s forwards;
+  -webkit-animation: slide-out 0.5s forwards;
+}
+
+@-webkit-keyframes slide-out {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes slide-out {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}/*# sourceMappingURL=custom.css.map */
