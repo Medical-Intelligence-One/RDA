@@ -315,7 +315,9 @@ function expandTag($currentTag) {
     $('.selection-tag.expanded').remove()
     var width = parseInt($currentTag.outerWidth(), 10) <= 380 ? '380px' : parseInt($currentTag.outerWidth(), 10)
     let $currentTagClone = $currentTag.clone(true)
-    $currentTagClone.toggleClass('expanded')
+    $currentTagClone.addClass('expanded')
+    // $currentTagClone.removeClass('top-eight')
+    $currentTagClone.replace
     $currentTagClone.insertAfter($currentTag.prev())
     var offset = $currentTagClone.offset()
     $currentTagClone.find('.finding-description').toggleClass('d-none')
@@ -332,7 +334,7 @@ function expandTag($currentTag) {
 //adds a tag to the search criteria as either a positive or negative finding
 function addTagToSearchAndRequery($target) {
     let $myTag = $target.parents('.selection-tag').clone(true)
-    $myTag.removeClass('selectable white-shadow black-shadow')
+    $myTag.removeClass('selectable top-eight white-shadow black-shadow')
     $myTag.addClass('mini removeable selected')
 
     if ($target.hasClass('negative-finding')) {
@@ -644,6 +646,10 @@ function showDiseases(data, $parentContainer) {
                     //add 'selected' class if cui is returned in matched-findings array (ie it was used in the search terms )
                     addClasses += ((obj.TypeOfFinding == "Matched" || obj.TypeOfFinding == "NegativeMatched") ? "selected removeable " : "selectable ")
 
+                    //add top-eight class for top 8 findings. These will always be displayed
+                    if (j < 8) {
+                        addClasses += "top-eight "
+                    }
                     //add ellipsis after 8th finding
                     if (j == 8 && diseaseFindings.length > 8) {
                         $divSuggestion.find('.disease-findings').append("<span class='ellipsis'></span>")
@@ -744,6 +750,9 @@ function updateBookmarkFindings() {
 
         // sort findings by rank
         let $divTagsSorted = sortElementsDesc($divTags.clone(true), 'rank')
+
+        $divTagsSorted.removeClass('top-eight')
+        $divTagsSorted.slice(0, 8).addClass('top-eight')
         $divTags.remove()
         $divTagsSorted.prependTo($diseaseFindings)
 

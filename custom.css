@@ -843,7 +843,7 @@ header {
   transition: 0.3s;
 }
 
-.hide-findings .selection-tag:nth-child(n+9) {
+.hide-findings .selection-tag:not(.top-eight) {
   display: none !important;
 }
 

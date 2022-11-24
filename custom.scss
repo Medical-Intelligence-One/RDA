@@ -988,7 +988,11 @@ header {
 
 // }
 
-.hide-findings .selection-tag:nth-child(n + 9) {
+// .disease-findings .selection-tag:nth-child(1n + 9) {
+//   display: none !important;
+// }
+
+.hide-findings .selection-tag:not(.top-eight) {
   display: none !important;
 }
 
