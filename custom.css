@@ -657,6 +657,16 @@ header {
 .selection-tag.selectable:not(.negative-finding) .posneg-finding {
   color: #5a99e2;
 }
+.selection-tag.expanded {
+  height: auto;
+  border-radius: 7px;
+  box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.3);
+  transition: 0.3s !important;
+  cursor: pointer;
+}
+.selection-tag .finding-description {
+  font-style: italic;
+}
 
 .selection-tag-text {
   padding-right: 1em;
@@ -833,7 +843,7 @@ header {
   transition: 0.3s;
 }
 
-.hide-findings .selection-tag:not(.top-eight) {
+.hide-findings .selection-tag:nth-child(n+9) {
   display: none !important;
 }
 

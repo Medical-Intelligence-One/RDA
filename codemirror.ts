@@ -11,6 +11,7 @@ var view, inputVal
 var searchOptions: any[] = []
 var searchHistoryData
 var mySplit
+var loremIpsum = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris placerat lacus eu nisi ultrices congue. Praesent venenatis at lorem sed maximus. Suspendisse potenti. Donec sit amet sem quis ante imperdiet vehicula vel et risus. Nullam nisi urna, facilisis in rutrum id, suscipit vulputate ligula. Vestibulum at malesuada lectus, nec tincidunt nunc. Pellentesque porttitor mi id erat posuere, elementum laoreet lorem tristique. Praesent mauris lorem, gravida sit amet semper ac, viverra eu sem.'
 
 var $selectedTerms = $('#selected-terms')
 var $bookmarkedDiseasesContainer = $('#bookmarked-diseases-container')
@@ -106,7 +107,7 @@ function fetchAutoCompleteFromDiseaseFindings(contains) {
         let cui = $(obj).find('.selection-tag-cui').text()
         let label = $(obj).find('.selection-tag-text').text()
         let frequency = $(obj).find('.selection-tag-frequency').text()
-        let addClasses = "removeable selected " + ($('#search-section').hasClass('positive-search') ? 'positive-finding' : 'negative-finding')
+        let addClasses = "mini removeable selected " + ($('#search-section').hasClass('positive-search') ? 'positive-finding' : 'negative-finding')
 
         if (!searchOptions.some(e => { if (e.info == cui && e.label == label) { return true } }) && label.toLowerCase().indexOf(contains.toLowerCase()) >= 0) {
             searchOptions.push({
@@ -200,11 +201,12 @@ async function fetchDiseases() {
     //get API call response and display diseases
     await axios.post('https://dev_api.mi1.ai/api/' + endPoint, await (cuiArrayPromise), { headers })
         .then(async function (response) {
-            $('#associated-findings').empty()
-            $('#suggestions-container').empty()
 
             if (response.data.length > 0) {
                 showDiseases(response.data, $('#suggestions-container'))
+                //populate autocomplete from disease findings
+                fetchAutoCompleteFromDiseaseFindings('')
+                $('.popover').hide()
             }
             else {
                 clearScreen()
@@ -241,38 +243,52 @@ function createTag(parentElement, label, id, frequency, addClasses, callback) {
     $divTag.find('.empty-box').attr('title', objFrequency.description + ": " + objFrequency.range)
     $divTag.find('.empty-box').css('width', ((1 - frequency) * 4.5) + .0625 + 'em')
     $divTag.find('.empty-box').css('margin-left', ((1 - frequency) * -4.5) - .0625 + 'em')  //make 1px adjustment to allow for border width
-
+    $divTag.find('.finding-description').text(loremIpsum.substring(0, loremIpsum.split(' ', Math.ceil(Math.random() * 72)).join(' ').length))
+    $divTag.find('.finding-source').text('Source: Orphanet & HPO')
     //add any additional classes
     $divTag.addClass(addClasses)
 
     //add events to non-matched disease findings tags
     if ($divTag.hasClass('selectable') && !$divTag.hasClass('removeable')) {
         //add click event to pos/neg option
-        $divTag.find('.selection-tag-posneg .positive-finding').on("click", function (e) { addTagToSearchAndRequery($(e.currentTarget), 'positive-finding', 'negative-finding') })
-        $divTag.find('.selection-tag-posneg .negative-finding').on("click", function (e) { addTagToSearchAndRequery($(e.currentTarget), 'negative-finding', 'positive-finding') })
-
-        //add hover events to hover area to show/hide gradient and display pos/neg option
-        $divTag.children('.selection-tag-hover-area').on('mouseenter mouseleave', function (e) {
-            let $currentTag = $(e.currentTarget).parents('.selection-tag')
-            $currentTag.find('.frequency-gradient').toggleClass('d-none')
-            $currentTag.find('.selection-tag-posneg').toggleClass('d-none')
-            $currentTag.toggleClass('black-shadow')
-        })
+        $divTag.find('.selection-tag-posneg').on("click", function (e) { addTagToSearchAndRequery($(e.target)) })
     }
 
-    if ($divTag.hasClass('removeable')) {
-        $divTag.children('.selection-tag-hover-area').on('mouseenter mouseleave', function (e) {
-            if ($divTag.parents('#div-selected-terms').length > 0) {
-                $(e.currentTarget).parents('.selection-tag').toggleClass('white-shadow')
-            }
-            else {
-                $(e.currentTarget).parents('.selection-tag').toggleClass('black-shadow')
-            }
-        })
-    }
+    // $divTag.children('.selection-tag-hover-area').on('mouseenter mouseleave', function (e) {
+    //     let $currentTag = $(e.currentTarget).parents('.selection-tag')
+    //     if ($currentTag.hasClass('removeable')) {
+    //         if ($currentTag.parents('#div-selected-terms').length > 0) {
+    //             $currentTag.toggleClass('white-shadow')
+    //         }
+    //         else {
+    //             $currentTag.toggleClass('black-shadow')
+    //         }
+    //     }
+    //     else {
+    //         if ($divTag.hasClass('selectable')) {
+    //             $currentTag.toggleClass('black-shadow')
+
+    //         }
+    //     }
+    // })
+
+    $divTag.find('.selection-tag-text').on('mouseenter', function (e) {
+        let $currentTag = $(e.currentTarget).parents('.selection-tag')
+        if (!($currentTag.hasClass('selected') || $currentTag.hasClass('expanded'))) {
+            expandTag($currentTag)
+        }
+    })
+
+    $divTag.find('.selection-tag-text').on('mouseleave', function (e) {
+        let $currentTag = $(e.currentTarget).parents('.selection-tag')
+        if ($currentTag.hasClass('expanded')) {
+            $('.selection-tag.expanded').remove()
+        }
+    })
 
     //add click event to tag label text
     $divTag.find('.selection-tag-text').on('click', function (e) {
+        e.stopPropagation()
         //if the tag is already a search term, remove tag from search terms and requery, otherwise add tag to search terms and requery
         let $currentTag = $(e.currentTarget).parents('.selection-tag')
         if ($currentTag.hasClass('removeable')) {
@@ -280,7 +296,7 @@ function createTag(parentElement, label, id, frequency, addClasses, callback) {
             fetchDiseases()
         }
         else if (!$currentTag.hasClass('selected')) {
-            addTagToSearchAndRequery($currentTag.clone(true), 'positive-finding', 'negative-finding')
+            expandTag($currentTag)
         }
     });
 
@@ -294,34 +310,80 @@ function createTag(parentElement, label, id, frequency, addClasses, callback) {
     }
 }
 
-//adds a tag to the search criteria as either a positive or negative finding
-function addTagToSearchAndRequery($myTag, classToAdd, classToRemove) {
+//expand findings tag to show description
+function expandTag($currentTag) {
+    $('.selection-tag.expanded').remove()
+    var width = parseInt($currentTag.outerWidth(), 10) <= 380 ? '380px' : parseInt($currentTag.outerWidth(), 10)
+    let $currentTagClone = $currentTag.clone(true)
+    $currentTagClone.toggleClass('expanded')
+    $currentTagClone.insertAfter($currentTag.prev())
+    var offset = $currentTagClone.offset()
+    $currentTagClone.find('.finding-description').toggleClass('d-none')
+    $currentTagClone.find('.finding-source').toggleClass('d-none')
+    $currentTagClone.css({
+        'position': 'absolute',
+        'top': offset?.top - 14,
+        'left': offset?.left,
+        'width': width,
+        'flex-direction': 'column'
+    })
 
-    $myTag.removeClass('selectable top-eight white-shadow black-shadow ' + classToRemove)
-    $myTag.addClass('removeable selected ' + classToAdd)
+}
+//adds a tag to the search criteria as either a positive or negative finding
+function addTagToSearchAndRequery($target) {
+    let $myTag = $target.parents('.selection-tag').clone(true)
+    $myTag.removeClass('selectable white-shadow black-shadow')
+    $myTag.addClass('mini removeable selected')
+
+    if ($target.hasClass('negative-finding')) {
+        $myTag.addClass('negative-finding').removeClass('positive-finding')
+    }
+    else {
+        $myTag.addClass('positive-finding').removeClass('negative-finding')
+    }
 
     // event handling
-    $myTag.find('.selection-tag-hover-area').off('mouseenter mouseleave')
-    $myTag.find('.selection-tag-hover-area').on('mouseenter', function (e) {
+    // $myTag.find('.selection-tag-hover-area').off('mouseenter mouseleave')
+    // $myTag.find('.selection-tag-hover-area').on('mouseenter', function (e) {
 
-        $(e.currentTarget).parents('.selection-tag').addClass('white-shadow')
-    }).on('mouseleave', function (e) {
-        $(e.currentTarget).parents('.selection-tag').removeClass('white-shadow')
-    })
+    //     $(e.currentTarget).parents('.selection-tag').addClass('white-shadow')
+    // }).on('mouseleave', function (e) {
+    //     $(e.currentTarget).parents('.selection-tag').removeClass('white-shadow')
+    // })
 
     // append tag to search terms
     $selectedTerms.append($myTag)
     updateTagTitle($myTag)
 
     //requery
-    fetchDiseases()
+    // fetchDiseases()
+    fetchDiseases().then(function () {
+
+        //scroll screen to suggestion
+        if ($target.parents('#suggestions-container').length > 0) {
+            $('html, body').animate({
+                scrollTop: $('#suggestions-container .div-suggestion').filter(function (i, e) {
+                    return $(e).find('.disease-name').text() == $target.parents('.div-suggestion').find('.disease-name').text()
+                }).offset().top - 225
+            }, 500);
+        }
+        // else {
+        //     $('html, body').animate({
+        //         scrollTop: $('#bookmarked-diseases-container .div-suggestion').filter(function (i, e) {
+        //             return $(e).find('.disease-name').text() == $target.parents('.div-suggestion').find('.disease-name').text()
+        //         }).offset().top - 225
+        //     }, 500);
+        // }
+    })
+
 }
 
 //adds a mouseover caption to the tag text
 function updateTagTitle($divTag) {
     let textTitle = ''
     if ($divTag.hasClass('selectable') && !$divTag.hasClass('selected')) {
-        textTitle = 'Click to Add to Search Terms as Positive Finding.'
+        // textTitle = 'Click to Add to Search Terms as Positive Finding.'
+        // textTitle = 'Click to expand.'
     }
     else if ($divTag.hasClass('removeable')) {
         textTitle = 'Click to Remove from Search Terms'
@@ -367,10 +429,17 @@ function showDiseases(data, $parentContainer) {
     searchOptions = []      //global array
 
     $('.container-fluid').removeClass('is-empty')
-    //store all bookmarked diseases in array
+    //get list of bookmarked diseases
+    var bookmarkedDiseaseNames = $bookmarkedDiseasesContainer.find('.disease-name').map(function () {
+        return $(this).text()
+    }).get()
 
-    var $bookmarkedDiseases = $bookmarkedDiseasesContainer.clone()
-    // $bookmarkedDiseasesContainer.empty()
+    //get list of all suggestions with show findings expanded
+    var showFindings = $('#suggestions-container .div-suggestion.show-findings .disease-name').map(function () {
+        return $(this).text()
+    }).get()
+
+    $('#suggestions-container').empty()
 
     // populate suggestion-template with disease data and add to suggestions-container div
     try {
@@ -407,6 +476,8 @@ function showDiseases(data, $parentContainer) {
 
             let $prevalence = $divSuggestion.find('.disease-prevalence')
             var prevelanceRange
+
+
             if (maxPrevalence == 0) {
                 $prevalence.addClass('not-known')
                 // prevelanceRange = "Prevalence Not Known"
@@ -483,14 +554,23 @@ function showDiseases(data, $parentContainer) {
                 }
             })
 
-            //check if bookmark should be active
-            let bookmarkedDiseaseNames = $bookmarkedDiseases.children('.disease-name').map(function () {
-                return $(this).text()
-            }).get()
+            // //add hover event to expand disease info
+            // $divSuggestion.find('.disease-info').on('mouseenter', function (e) {
+            //     let $suggestion = $(e.currentTarget)
+            //     $suggestion.removeClass('abbreviated')
+            //     var offset = $suggestion.offset()
+            //     $suggestion.css({
+            //         'position': 'absolute',
+            //         'top': offset?.top,
+            //         'left': offset?.left,
+            //         'width': $suggestion.outerWidth()
+            //     })
+            // })
 
-            //if active, add clone of elements to bookmarks
-            if (bookmarkedDiseaseNames.indexOf(diseaseItem.disease) > -1) {
-                $divSuggestion.find('.disease-bookmark').toggleClass('active', true)
+
+            //check if bookmark should be active
+            if (bookmarkedDiseaseNames.indexOf(diseaseItem.Disease) > -1) {
+                $divSuggestion.find('.disease-bookmark').addClass('active').toggleClass('fas far')
             }
 
             //populate findings div for diagnosis and associated findings div for top 3 diagnoses
@@ -527,6 +607,25 @@ function showDiseases(data, $parentContainer) {
                 return (parseFloat(b.Rank) - parseFloat(a.Rank))
             })
 
+            //update findings label
+            $divSuggestion.find('.findings-label').text("Findings (" + diseaseFindings.length + ")")
+
+            //show/hide more findings button text
+            let btnMoreFindings = $divSuggestion.find('.btn-more-findings')
+            if (diseaseFindings.length > 8) {
+                //check if suggestion previously had findings expanded to show all
+                if (showFindings.indexOf(diseaseItem.Disease) > -1) {
+                    btnMoreFindings.text("Show Fewer")
+                    $divSuggestion.toggleClass('hide-findings show-findings')
+                }
+                else {
+                    btnMoreFindings.text("Show All")
+                }
+            }
+            else {
+                btnMoreFindings.hide()
+            }
+
             //iterate through findings
             if (diseaseFindings != null) {
                 for (let j = 0; j < diseaseFindings.length; j++) {
@@ -545,28 +644,16 @@ function showDiseases(data, $parentContainer) {
                     //add 'selected' class if cui is returned in matched-findings array (ie it was used in the search terms )
                     addClasses += ((obj.TypeOfFinding == "Matched" || obj.TypeOfFinding == "NegativeMatched") ? "selected removeable " : "selectable ")
 
-                    //add top-eight class for top 8 findings. These will always be displayed
-                    if (j < 8) {
-                        addClasses += "top-eight "
-                    }
-                    if (j == 8) {
+                    //add ellipsis after 8th finding
+                    if (j == 8 && diseaseFindings.length > 8) {
                         $divSuggestion.find('.disease-findings').append("<span class='ellipsis'></span>")
+                        if ($divSuggestion.hasClass('show-findings')) {
+                            $divSuggestion.find('.ellipsis').hide()
+                        }
                     }
                     //add tag to the disease findings container
                     createTag($divSuggestion.find('.disease-findings'), label, cui, frequency, addClasses, null)
                 }
-            }
-            //update findings label
-            let x = diseaseFindings.length
-            $divSuggestion.find('.findings-label').text("Findings (" + diseaseFindings.length + ")")
-            //attach click event for more-findings button
-
-            let btnMoreFindings = $divSuggestion.find('.btn-more-findings')
-            if (x > 8) {
-                btnMoreFindings.text("Show All")
-            }
-            else {
-                btnMoreFindings.hide()
             }
 
             //add click event to show/hide additional findings
@@ -594,9 +681,6 @@ function showDiseases(data, $parentContainer) {
 
                 if ($bookmarkIcon.hasClass('active')) {
                     let $divSuggestionClone = $suggestion.clone(true)        //clone elements and events
-                    // $divSuggestionClone.find('.expand-contract').on("click", function (e) {
-                    //     $(e.currentTarget).parents('.div-suggestion').toggleClass('contracted');
-                    // })
                     $bookmarkedDiseasesContainer.append($divSuggestionClone)
                 }
                 else {
@@ -609,24 +693,78 @@ function showDiseases(data, $parentContainer) {
             $parentContainer.append($divSuggestion)
 
         }
-        //update bookmark findings with appropriate class if this is in search terms
-        $bookmarkedDiseasesContainer.find('.selection-tag:visible .selection-tag-cui').each(function (i, e) {
-            if ($selectedTerms.find('.selection-tag-cui').text().indexOf($(e).text()) > -1) {
-                $(e).parents('.selection-tag').addClass('selected removeable')
-            }
-            else {
-                $(e).parents('.selection-tag').removeClass('selected removeable')
-            }
-        })
-
-        //populate autocomplete from disease findings
-        fetchAutoCompleteFromDiseaseFindings('')
-        $('.popover').hide()
+        updateBookmarkFindings()
 
     }
     catch (ex) {
         console.log(console.log(ex))
     }
+}
+
+//update findings for bookmarked results based on current search criteria
+function updateBookmarkFindings() {
+    //update bookmark findings with appropriate class if this is in search terms
+    $bookmarkedDiseasesContainer.find('.div-suggestion').each(function (i, e) {
+        let $divSuggestion = $(e)
+        let $divTags = $divSuggestion.find('.selection-tag:visible')
+        let $diseaseFindings = $divSuggestion.find('.disease-findings')
+        $divTags.each(function (i2, e2) {
+            let $divTag = $(e2)
+            let rank = parseFloat($divTag.find('.selection-tag-frequency').text())
+
+            //look for bookmarked finding in selected terms
+            let $selectedTerm = $selectedTerms.find('.selection-tag').filter(function (i3, e3) { return $(e3).find('.selection-tag-cui').text() == $divTag.find('.selection-tag-cui').text() })
+            // if ($selectedTerms.find('.selection-tag-cui').text().indexOf($(e).text()) > -1) {
+            if ($selectedTerm.length > 0) {
+                $divTag.addClass('selected removeable')
+                $divTag.removeClass('selectable')
+
+                //positive finding
+                if ($selectedTerm.hasClass('positive-finding')) {
+                    $divTag.addClass('positive-finding')
+                    $divTag.removeClass('negative-finding')
+                    rank += 2
+                }
+                //negative finding
+                else {
+                    $divTag.addClass('negative-finding')
+                    $divTag.removeClass('positive-finding')
+                    rank += 1
+                }
+
+            }
+            //not in selected terms so remove positive/negative findings classes 
+            else {
+                $divTag.removeClass('selected removeable positive-finding negative-finding')
+                $divTag.find('.selection-tag-posneg .positive-finding, .selection-tag-posneg .negative-finding').off("click")
+            }
+
+            $divTag.attr('rank', rank)
+        })
+
+        // sort findings by rank
+        let $divTagsSorted = sortElementsDesc($divTags.clone(true), 'rank')
+        $divTags.remove()
+        $divTagsSorted.prependTo($diseaseFindings)
+
+        // //add ellipsis
+        // if ($divSuggestion.find('.selection-tag').length > 8) {
+        //     $diseaseFindings.append("<span class='ellipsis'></span>")
+        //     if ($divSuggestion.hasClass('show-findings')) {
+        //         $divSuggestion.find('.ellipsis').hide()
+        //     }
+        // }
+
+    })
+}
+
+//sort list of jquery elements on attrName
+function sortElementsDesc($items, attrName) {
+    return $($items.toArray().sort(function (a, b) {
+        var aVal = parseInt(a.getAttribute(attrName)),
+            bVal = parseInt(b.getAttribute(attrName));
+        return bVal - aVal;
+    }));
 }
 
 //hide bookmarks container if there are no bookmarks to display
@@ -875,14 +1013,15 @@ function refreshSearchHistory() {
             }
 
             //add event to trigger search when line is clicked
-            $('#search-history .search-history-line-findings').on("click", function (e) {
+            $('#search-history .search-history-line-findings').off().on("click", function (e) {
                 $selectedTerms.empty()
                 var addClasses
                 $(e.currentTarget).children('.tag').each(function (i, t) {
                     addClasses = "mini removeable selected " + ($(t).hasClass('positive-search') ? 'positive-finding' : 'negative-finding')
-                    createTag($selectedTerms, $(t).text(), $(t).data("cui"), null, addClasses, fetchDiseases)
+                    createTag($selectedTerms, $(t).text(), $(t).data("cui"), null, addClasses, null)
                 })
                 $('#div-selected-terms').toggleClass('d-none', false)
+                fetchDiseases()
             })
 
             oldSearchDate = searchDate
@@ -931,7 +1070,7 @@ function toggleSearchHistory(hidePanel) {
             'width': '0px',
             'padding': '0px',
             'opacity': 0,
-            'transition': '.6s'
+            'transition': 'width .6s'
         })
         $('#results-container').css({
             'width': '100vw',
@@ -1123,6 +1262,9 @@ $(function () {
     //hide search history
     toggleSearchHistory(true)
 
+    $('body').on('click', function () {
+        $('.selection-tag.expanded').remove();
+    });
     //page info popover
     // $('#page-info-popover').popover("dispose")
     // $('#page-info-popover').popover({
