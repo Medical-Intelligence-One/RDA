@@ -556,23 +556,12 @@ header {
 
 .disease-info {
   cursor: pointer;
-  //   &:not(.abbreviated):hover {
-  //     white-space: nowrap;
-  //     overflow: hidden;
-  //     text-overflow: ellipsis;
-  //     transition: 0.3s;
-  //     color: $colorDarkBlue;
-  //   }
   &.abbreviated {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
   &:hover {
-    //   white-space: initial;
-    //   overflow: initial;
-    //   text-overflow: initial;
-    //   width: initial;
     transition: 0.3s;
     color: $colorDarkBlue;
   }
@@ -777,6 +766,13 @@ header {
 
   &.selectable:not(.negative-finding) .posneg-finding {
     color: $colorDarkBlue;
+  }
+  &.expanded {
+    height: auto;
+    @include black-shadow(5px);
+  }
+  .finding-description {
+    font-style: italic;
   }
 }
 
@@ -992,7 +988,7 @@ header {
 
 // }
 
-.hide-findings .selection-tag:not(.top-eight) {
+.hide-findings .selection-tag:nth-child(n + 9) {
   display: none !important;
 }
 
