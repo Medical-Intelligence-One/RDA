@@ -34,7 +34,7 @@
 
         <!-- template for disease findings tag -->
         <div id="selection-tag-template" class="selection-tag findings-tag para3 d-flex col-auto  me-2">
-            <div class="d-flex justify-content-start align-items-center">
+            <div class="d-flex justify-content-start align-items-center content-wrapper">
                 <span class="selection-tag-hover-area">
                     <span class="selection-tag-text text-truncate"></span>
                 </span>
@@ -43,7 +43,7 @@
                 <span class="selection-tag-cui d-none"></span>
                 <span class="selection-tag-frequency d-none" title="Frequency"
                     style="background-color: rgba(0,0,0,1)"></span>
-                <span class="selection-tag-posneg">
+                <span class="selection-tag-posneg d-none d-sm-flex gap-1">
                     <i class="positive-finding fas fa-circle-plus"
                         title="Click to Add to Search Terms as Positive Finding"></i>
                     <i class="negative-finding fas fa-circle-minus"
@@ -188,7 +188,7 @@
             <a href="https://www.mi1.ai/enola-feedback" class="footer screen-left">FEEDBACK</a>
             <span class="footer screen-right">SHARE</span>
         </div> -->
-            <div class="d-flex">
+            <div class="d-flex align-self-center">
                 <!-- <div id="search-history-container" class="split col stick-to-top slide-in d-none" style="width:0px"> -->
                 <div id="search-history-container" class="_split stick-to-top slide-in" style="width:0px;">
                     <div id="search-history-title" class="d-flex justify-content-between">
@@ -233,7 +233,7 @@
                             data-bs-placement="auto" data-bs-trigger="hover" title="How to use"></i></div>
                     <div id="search-section" class="positive-search stick-to-top">
                         <div id="search-section-header" class="d-flex rda-header justify-content-between ">
-                            <span class="posneg-switch d-flex align-items-center gap-3"
+                            <span class="posneg-switch d-flex align-items-center gap-sm-3"
                                 title=" Toggle between adding Positive and Negative Findings">
                                 <label for="posneg-state" class="form-check-label fas fa-circle-plus me-2"></label>
                                 <span class="form-check form-switch">
@@ -242,7 +242,7 @@
                                 <label for="posneg-state" class="form-check-label fas fa-circle-minus"></label>
                             </span>
                             <span id="beta-label" class="h3 align-self-center">BETA</span>
-                            <span class="d-flex justify-content-end align-items-center gap-3">
+                            <span class="d-flex justify-content-end align-items-center gap-sm-3">
                                 <span id="btnSearchHistory" title="View History">
                                     <i class="fas fa-clock-rotate-left"></i>
                                 </span>

@@ -57,13 +57,21 @@
   }
   #search-section {
     font-size: 12px;
+    width: 100%;
   }
   .selection-tag {
     padding: 0.5em;
     padding-right: 1em;
   }
+  .selection-tag.mini {
+    max-width: 175px;
+  }
   .div-suggestion {
-    padding: 1em !important;
+    padding: 0.5em !important;
+  }
+  #suggestions-container,
+#bookmarked-diseases-container {
+    padding: 0.5em;
   }
   .expand-contract-icon {
     font-size: 1.1rem;
@@ -105,10 +113,6 @@
   }
   .section-container {
     margin-bottom: 2em;
-  }
-  #suggestions-container,
-#bookmarked-diseases-container {
-    padding: 1em;
   }
   #search-section {
     font-size: 16px;
@@ -152,8 +156,12 @@ body {
   border-radius: 7px;
   background-color: black;
   border: 1px solid rgba(255, 255, 255, 0);
-  width: 55px;
-  height: 55px;
+}
+@media screen and (min-width: 897px) {
+  #left-navbar i {
+    width: 55px;
+    height: 55px;
+  }
 }
 #left-navbar i:hover {
   color: white;
@@ -306,6 +314,11 @@ div.tooltip-inner {
   display: none;
 }
 
+#suggestions-container,
+#bookmarked-diseases-container {
+  padding: 1em;
+}
+
 header {
   background-color: black;
   color: white;
@@ -336,10 +349,14 @@ header {
   color: white;
   width: 75%;
   padding: 0.1em 0em;
-  min-height: 104px;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+@media only screen and (min-width: 897px) {
+  .rda-title {
+    min-height: 104px;
+  }
 }
 
 @-webkit-keyframes pulse {
@@ -454,7 +471,7 @@ header {
 }
 
 .div-suggestion {
-  margin: 1em;
+  margin-bottom: 1em;
   border: solid 0.2rem rgb(3, 184, 234);
   background-color: white;
   color: black;
@@ -644,6 +661,9 @@ header {
   margin: 0.5em 0;
   /* margin: 1em; */
 }
+.selection-tag.mini .content-wrapper {
+  align-self: center;
+}
 .selection-tag.mini .selection-tag-text {
   margin-right: 0;
 }
@@ -652,7 +672,7 @@ header {
   display: block;
 }
 .selection-tag.selected .selection-tag-posneg {
-  display: none;
+  display: none !important;
 }
 .selection-tag.selectable:not(.negative-finding) .posneg-finding {
   color: #5a99e2;
@@ -675,6 +695,15 @@ header {
 .selection-tag:not(.selected) .selection-tag-text:hover, .selection-tag.removeable .selection-tag-text:hover {
   text-decoration: underline;
   cursor: pointer;
+}
+.selection-tag .content-wrapper {
+  align-self: normal;
+  padding: 0.1em 0;
+}
+@media only screen and (min-width: 897px) {
+  .selection-tag .content-wrapper {
+    overflow: hidden;
+  }
 }
 .selection-tag .positive-finding,
 .selection-tag .negative-finding {
@@ -730,6 +759,8 @@ header {
   font-size: 1.5em;
   width: 3em;
   text-align: center;
+  display: flex;
+  padding-left: 5px;
   /* margin-left: 1em; */
   /* background-color: white;
   border-left: 0; */
@@ -907,6 +938,7 @@ header {
 #search-history {
   border: 0.2rem solid rgb(3, 184, 234);
   border-radius: 7px;
+  margin: 0.5em;
 }
 #search-history.contracted {
   display: none;
@@ -958,8 +990,14 @@ header {
   border-radius: 7px;
   background-color: black;
   border: 1px solid rgba(255, 255, 255, 0);
-  width: 55px;
-  height: 55px;
+}
+@media screen and (min-width: 897px) {
+  #rda-header-search-history i,
+#search-section-header i,
+#btnClearAll i {
+    width: 55px;
+    height: 55px;
+  }
 }
 #rda-header-search-history i:hover,
 #search-section-header i:hover,

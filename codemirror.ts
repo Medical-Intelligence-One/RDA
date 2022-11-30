@@ -251,54 +251,69 @@ function createTag(parentElement, label, id, frequency, addClasses, callback) {
     //add events to non-matched disease findings tags
     if ($divTag.hasClass('selectable') && !$divTag.hasClass('removeable')) {
         //add click event to pos/neg option
-        $divTag.find('.selection-tag-posneg').on("click", function (e) { addTagToSearchAndRequery($(e.target)) })
+
+        $divTag.find('.selection-tag-posneg').on("click", function (e) {
+            if ($(e.target).hasClass('positive-finding')) {
+                addTagToSearchAndRequery($divTag, 'positive-finding')
+            }
+            else {
+                addTagToSearchAndRequery($divTag, 'negative-finding')
+
+            }
+        })
     }
 
-    // $divTag.children('.selection-tag-hover-area').on('mouseenter mouseleave', function (e) {
-    //     let $currentTag = $(e.currentTarget).parents('.selection-tag')
-    //     if ($currentTag.hasClass('removeable')) {
-    //         if ($currentTag.parents('#div-selected-terms').length > 0) {
-    //             $currentTag.toggleClass('white-shadow')
+    // if (window.matchMedia("(hover: none)").matches) {
+    //     // hover unavailable so expand and contract on click
+    //     $divTag.find('.selection-tag-text').on('click', function (e) {
+    //         e.stopPropagation()
+    //         let $currentTag = $(e.currentTarget).parents('.selection-tag')
+    //         if (!($currentTag.hasClass('selected'))) {
+    //             expandTag($currentTag)
     //         }
-    //         else {
-    //             $currentTag.toggleClass('black-shadow')
-    //         }
-    //     }
-    //     else {
-    //         if ($divTag.hasClass('selectable')) {
-    //             $currentTag.toggleClass('black-shadow')
+    //     })
+    // }
+    // else {
+    //add hover event to expand/contract tag for desktops
+    if (!window.matchMedia("(hover: none)").matches) {
+        $divTag.find('.selection-tag-text').on('mouseenter', function (e) {
+            let $currentTag = $(e.currentTarget).parents('.selection-tag')
+            if (!($currentTag.hasClass('selected') || $currentTag.hasClass('expanded'))) {
+                expandTag($currentTag)
+            }
+        })
 
-    //         }
-    //     }
-    // })
-
-    $divTag.find('.selection-tag-text').on('mouseenter', function (e) {
-        let $currentTag = $(e.currentTarget).parents('.selection-tag')
-        if (!($currentTag.hasClass('selected') || $currentTag.hasClass('expanded'))) {
-            expandTag($currentTag)
-        }
-    })
-
-    $divTag.find('.selection-tag-text').on('mouseleave', function (e) {
-        let $currentTag = $(e.currentTarget).parents('.selection-tag')
-        if ($currentTag.hasClass('expanded')) {
-            $('.selection-tag.expanded').remove()
-        }
-    })
+        $divTag.find('.selection-tag-text').on('mouseleave', function (e) {
+            let $currentTag = $(e.currentTarget).parents('.selection-tag')
+            if ($currentTag.hasClass('expanded')) {
+                $('.selection-tag.expanded').remove()
+            }
+        })
+    }
 
     //add click event to tag label text
     $divTag.find('.selection-tag-text').on('click', function (e) {
-        e.stopPropagation()
+        // e.stopPropagation()
         //if the tag is already a search term, remove tag from search terms and requery, otherwise add tag to search terms and requery
+        e.stopPropagation()
         let $currentTag = $(e.currentTarget).parents('.selection-tag')
         if ($currentTag.hasClass('removeable')) {
             $('#selected-terms .selection-tag').filter(function (i2, e2) { return $(e2).find('.selection-tag-cui').text() == $currentTag.find('.selection-tag-cui').text() }).remove()
             fetchDiseases()
         }
         else if (!$currentTag.hasClass('selected')) {
-            expandTag($currentTag)
+            if (window.matchMedia("(hover: none)").matches) {
+                expandTag($currentTag)
+
+            }
+            else {
+                // expandTag($currentTag)
+                addTagToSearchAndRequery($currentTag.next().clone(true), 'positive-finding')        //next element is tag hidden beneath the expanded tag
+            }
         }
     });
+    // }
+
 
     //update popover caption
     updateTagTitle($divTag)
@@ -312,16 +327,24 @@ function createTag(parentElement, label, id, frequency, addClasses, callback) {
 
 //expand findings tag to show description
 function expandTag($currentTag) {
+    var minWidth
     $('.selection-tag.expanded').remove()
-    var width = parseInt($currentTag.outerWidth(), 10) <= 380 ? '380px' : parseInt($currentTag.outerWidth(), 10)
+    if ($(window).width() < 897) {
+        minWidth = 250
+    }
+    else {
+        minWidth = 380
+    }
+    var width = parseInt($currentTag.outerWidth(), 10) <= minWidth ? minWidth + 'px' : parseInt($currentTag.outerWidth(), 10)
     let $currentTagClone = $currentTag.clone(true)
     $currentTagClone.addClass('expanded')
     // $currentTagClone.removeClass('top-eight')
     $currentTagClone.replace
     $currentTagClone.insertAfter($currentTag.prev())
     var offset = $currentTagClone.offset()
-    $currentTagClone.find('.finding-description').toggleClass('d-none')
-    $currentTagClone.find('.finding-source').toggleClass('d-none')
+    $currentTagClone.find('.selection-tag-posneg').removeClass('d-none')
+    $currentTagClone.find('.finding-description').removeClass('d-none')
+    $currentTagClone.find('.finding-source').removeClass('d-none')
     $currentTagClone.css({
         'position': 'absolute',
         'top': offset?.top - 14,
@@ -332,17 +355,17 @@ function expandTag($currentTag) {
 
 }
 //adds a tag to the search criteria as either a positive or negative finding
-function addTagToSearchAndRequery($target) {
-    let $myTag = $target.parents('.selection-tag').clone(true)
-    $myTag.removeClass('selectable top-eight white-shadow black-shadow')
-    $myTag.addClass('mini removeable selected')
+function addTagToSearchAndRequery($divTag, addClass) {
+    // let $myTag = $target.parents('.selection-tag').clone(true)
+    $divTag.removeClass('selectable top-eight white-shadow black-shadow positive-finding negative-finding')
+    $divTag.addClass('mini removeable selected ' + addClass)
 
-    if ($target.hasClass('negative-finding')) {
-        $myTag.addClass('negative-finding').removeClass('positive-finding')
-    }
-    else {
-        $myTag.addClass('positive-finding').removeClass('negative-finding')
-    }
+    // if ($target.hasClass('negative-finding')) {
+    //     $myTag.addClass('negative-finding').removeClass('positive-finding')
+    // }
+    // else {
+    //     $myTag.addClass('positive-finding').removeClass('negative-finding')
+    // }
 
     // event handling
     // $myTag.find('.selection-tag-hover-area').off('mouseenter mouseleave')
@@ -354,18 +377,18 @@ function addTagToSearchAndRequery($target) {
     // })
 
     // append tag to search terms
-    $selectedTerms.append($myTag)
-    updateTagTitle($myTag)
+    $selectedTerms.append($divTag)
+    updateTagTitle($divTag)
 
     //requery
     // fetchDiseases()
     fetchDiseases().then(function () {
 
         //scroll screen to suggestion
-        if ($target.parents('#suggestions-container').length > 0) {
+        if ($divTag.parents('#suggestions-container').length > 0) {
             $('html, body').animate({
                 scrollTop: $('#suggestions-container .div-suggestion').filter(function (i, e) {
-                    return $(e).find('.disease-name').text() == $target.parents('.div-suggestion').find('.disease-name').text()
+                    return $(e).find('.disease-name').text() == $divTag.parents('.div-suggestion').find('.disease-name').text()
                 }).offset().top - 225
             }, 500);
         }
@@ -1031,6 +1054,11 @@ function refreshSearchHistory() {
                 })
                 $('#div-selected-terms').toggleClass('d-none', false)
                 fetchDiseases()
+                //hide search for smaller devices
+                if ($(window).width() < 897) {
+                    toggleSearchHistory(true)
+                }
+
             })
 
             oldSearchDate = searchDate
@@ -1047,6 +1075,7 @@ function refreshSearchHistory() {
 
 //show/hide search history panel
 function toggleSearchHistory(hidePanel) {
+    var searchHistoryWidth
     if (hidePanel == 'toggle') {
         if ($('#search-history-container').width() == 0) {
             hidePanel = false
@@ -1082,11 +1111,16 @@ function toggleSearchHistory(hidePanel) {
             'transition': 'width .6s'
         })
         $('#results-container').css({
-            'width': '100vw',
-            'border-left': 'none'
+            'width': '98vw',
+            'border-left': 'none',
+            'display': 'initial'
         })
-        $('body').css({
-            'overflow-y': 'hidden'
+        // $('body').css({
+        //     'overflow-y': 'hidden'
+        // })
+        $('#search-history-container').fadeOut({
+            'duration': 600,
+            'queue': 'false'
         })
 
     }
@@ -1098,20 +1132,44 @@ function toggleSearchHistory(hidePanel) {
         // $('#search-history-container').removeClass('d-none')
         // $('.gutter.gutter-horizontal').fadeIn(600)
         // $('#search-history-container').css('transition', '')    //switch off transition once faded in
-        $('#search-history-container').css({
-            'width': '40vw',
-            'padding': '0 2em',
-            'opacity': 1,
-            'transition': '.6s'
-        })
-        $('#results-container').css({
-            'width': '60vw',
-            'border-left': '5px solid grey',
-            'transition': '.6s'
+        if ($(window).width() < 897) {
+            $('#search-history-container').css({
+                'width': '100vw',
+                'padding': '0',
+                'opacity': 1,
+                'transition': '.6s'
+            })
+            $('#results-container').css({
+                'width': 0,
+                'padding': '0',
+                'border-left': 'none',
+                'transition': '.6s',
+                'display': 'none'
 
-        })
-        $('body').css({
-            'overflow-y': 'auto'
+            })
+
+        }
+        else {
+            $('#search-history-container').css({
+                'width': '40vw',
+                'padding': '0 2em',
+                'opacity': 1,
+                'transition': '.6s'
+            })
+            $('#results-container').css({
+                'width': '60vw',
+                'border-left': '5px solid grey',
+                'transition': '.6s'
+
+            })
+        }
+        // $('body').css({
+        //     'overflow-y': 'auto'
+        // })
+
+        $('#search-history-container').fadeIn({
+            'duration': 600,
+            'queue': 'false'
         })
     }
 

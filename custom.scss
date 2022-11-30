@@ -34,8 +34,10 @@ $colorRed: #f32e15;
   border-radius: 7px;
   background-color: black;
   border: 1px solid rgba($colorWhite, 0);
-  width: 55px;
-  height: 55px;
+  @media screen and (min-width: 897px) {
+    width: 55px;
+    height: 55px;
+  }
 
   &:hover {
     @include white-shadow(5px);
@@ -97,15 +99,24 @@ $colorRed: #f32e15;
 
   #search-section {
     font-size: 12px;
+    width: 100%;
   }
 
   .selection-tag {
     padding: 0.5em;
     padding-right: 1em;
+    &.mini {
+      max-width: 175px;
+    }
   }
 
   .div-suggestion {
-    padding: 1em !important;
+    padding: 0.5em !important;
+  }
+
+  #suggestions-container,
+  #bookmarked-diseases-container {
+    padding: 0.5em;
   }
 
   .expand-contract-icon {
@@ -171,11 +182,6 @@ $colorRed: #f32e15;
 
   .section-container {
     margin-bottom: 2em;
-  }
-
-  #suggestions-container,
-  #bookmarked-diseases-container {
-    padding: 1em;
   }
 
   #search-section {
@@ -369,6 +375,11 @@ div.tooltip-inner {
   }
 }
 
+#suggestions-container,
+#bookmarked-diseases-container {
+  padding: 1em;
+}
+
 header {
   background-color: black;
   color: white;
@@ -401,7 +412,9 @@ header {
   color: white;
   width: 75%;
   padding: 0.1em 0em;
-  min-height: 104px;
+  @media only screen and(    min-width: 897px) {
+    min-height: 104px;
+  }
   display: flex;
   justify-content: center;
   align-items: center;
@@ -536,7 +549,7 @@ header {
 }
 
 .div-suggestion {
-  margin: 1em;
+  margin-bottom: 1em;
   border: solid 0.2rem $colorLightBlue;
   background-color: white;
   color: black;
@@ -751,8 +764,13 @@ header {
 
   /* margin: 1em; */
 
-  &.mini .selection-tag-text {
-    margin-right: 0;
+  &.mini {
+    .content-wrapper {
+      align-self: center;
+    }
+    .selection-tag-text {
+      margin-right: 0;
+    }
   }
 
   &.selectable .posneg-finding {
@@ -761,7 +779,7 @@ header {
   }
 
   &.selected .selection-tag-posneg {
-    display: none;
+    display: none !important;
   }
 
   &.selectable:not(.negative-finding) .posneg-finding {
@@ -786,7 +804,13 @@ header {
     text-decoration: underline;
     cursor: pointer;
   }
-
+  .content-wrapper {
+    @media only screen and (min-width: 897px) {
+      overflow: hidden;
+    }
+    align-self: normal;
+    padding: 0.1em 0;
+  }
   .positive-finding,
   .negative-finding {
     cursor: pointer;
@@ -848,6 +872,8 @@ header {
   font-size: 1.5em;
   width: 3em;
   text-align: center;
+  display: flex;
+  padding-left: 5px;
 
   /* margin-left: 1em; */
   /* background-color: white;
@@ -1084,6 +1110,7 @@ header {
 #search-history {
   border: 0.2rem solid $colorLightBlue;
   border-radius: 7px;
+  margin: 0.5em;
 
   &.contracted {
     display: none;
