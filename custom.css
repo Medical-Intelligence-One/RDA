@@ -64,7 +64,7 @@
     padding-right: 1em;
   }
   .selection-tag.mini {
-    max-width: 175px;
+    max-width: 50%;
   }
   .div-suggestion {
     padding: 0.5em !important;
@@ -347,7 +347,7 @@ header {
   text-align: center;
   font-weight: bold;
   color: white;
-  width: 75%;
+  max-width: 90%;
   padding: 0.1em 0em;
   display: flex;
   justify-content: center;
@@ -663,9 +663,23 @@ header {
 }
 .selection-tag.mini .content-wrapper {
   align-self: center;
+  overflow: auto;
 }
 .selection-tag.mini .selection-tag-text {
   margin-right: 0;
+}
+.selection-tag .content-wrapper {
+  overflow: hidden;
+  padding: 0.1em 0;
+}
+@media only screen and (min-width: 897px) {
+  .selection-tag .content-wrapper {
+    align-self: center;
+  }
+}
+.selection-tag .positive-finding,
+.selection-tag .negative-finding {
+  cursor: pointer;
 }
 .selection-tag.selectable .posneg-finding {
   color: white;
@@ -694,19 +708,6 @@ header {
 
 .selection-tag:not(.selected) .selection-tag-text:hover, .selection-tag.removeable .selection-tag-text:hover {
   text-decoration: underline;
-  cursor: pointer;
-}
-.selection-tag .content-wrapper {
-  align-self: normal;
-  padding: 0.1em 0;
-}
-@media only screen and (min-width: 897px) {
-  .selection-tag .content-wrapper {
-    overflow: hidden;
-  }
-}
-.selection-tag .positive-finding,
-.selection-tag .negative-finding {
   cursor: pointer;
 }
 
@@ -756,11 +757,10 @@ header {
 .selection-tag-posneg {
   /* cursor: pointer; */
   color: #5a99e2;
-  font-size: 1.5em;
-  width: 3em;
+  font-size: 2em;
   text-align: center;
   display: flex;
-  padding-left: 5px;
+  padding-left: 0.5em;
   /* margin-left: 1em; */
   /* background-color: white;
   border-left: 0; */
@@ -1142,26 +1142,4 @@ header {
   background-color: #ffffff;
 }
 
-/*# sourceMappingURL=custom.css.map */
-.slide-out {
-  animation: slide-out 0.5s forwards;
-  -webkit-animation: slide-out 0.5s forwards;
-}
-
-@-webkit-keyframes slide-out {
-  0% {
-    transform: translateX(0%);
-  }
-  100% {
-    transform: translateX(-100%);
-  }
-}
-
-@keyframes slide-out {
-  0% {
-    transform: translateX(0%);
-  }
-  100% {
-    transform: translateX(-100%);
-  }
-}/*# sourceMappingURL=custom.css.map */
+/*# sourceMappingURL=custom.css.map *//*# sourceMappingURL=custom.css.map */

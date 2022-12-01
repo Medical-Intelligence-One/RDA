@@ -106,7 +106,7 @@ $colorRed: #f32e15;
     padding: 0.5em;
     padding-right: 1em;
     &.mini {
-      max-width: 175px;
+      max-width: 50%;
     }
   }
 
@@ -410,7 +410,7 @@ header {
   font-weight: bold;
   //   color: rgba(0, 0, 0, 0.75);
   color: white;
-  width: 75%;
+  max-width: 90%;
   padding: 0.1em 0em;
   @media only screen and(    min-width: 897px) {
     min-height: 104px;
@@ -767,10 +767,23 @@ header {
   &.mini {
     .content-wrapper {
       align-self: center;
+      overflow: auto;
     }
     .selection-tag-text {
       margin-right: 0;
     }
+  }
+
+  .content-wrapper {
+    overflow: hidden;
+    @media only screen and (min-width: 897px) {
+      align-self: center;
+    }
+    padding: 0.1em 0;
+  }
+  .positive-finding,
+  .negative-finding {
+    cursor: pointer;
   }
 
   &.selectable .posneg-finding {
@@ -802,17 +815,6 @@ header {
   &:not(.selected) .selection-tag-text:hover,
   &.removeable .selection-tag-text:hover {
     text-decoration: underline;
-    cursor: pointer;
-  }
-  .content-wrapper {
-    @media only screen and (min-width: 897px) {
-      overflow: hidden;
-    }
-    align-self: normal;
-    padding: 0.1em 0;
-  }
-  .positive-finding,
-  .negative-finding {
     cursor: pointer;
   }
 }
@@ -869,11 +871,11 @@ header {
 .selection-tag-posneg {
   /* cursor: pointer; */
   color: $colorDarkBlue;
-  font-size: 1.5em;
-  width: 3em;
+  font-size: 2em;
+  //   width: 3em;
   text-align: center;
   display: flex;
-  padding-left: 5px;
+  padding-left: 0.5em;
 
   /* margin-left: 1em; */
   /* background-color: white;
@@ -1322,19 +1324,19 @@ header {
 }
 /*# sourceMappingURL=custom.css.map */
 
-.slide-out {
-  animation: slide-out 0.5s forwards;
-  -webkit-animation: slide-out 0.5s forwards;
-}
+// .slide-out {
+//   animation: slide-out 0.5s forwards;
+//   -webkit-animation: slide-out 0.5s forwards;
+// }
 
-@keyframes slide-out {
-  0% {
-    transform: translateX(0%);
-  }
-  100% {
-    transform: translateX(-100%);
-  }
-}
+// @keyframes slide-out {
+//   0% {
+//     transform: translateX(0%);
+//   }
+//   100% {
+//     transform: translateX(-100%);
+//   }
+// }
 
 // .split {
 //   display: flex;

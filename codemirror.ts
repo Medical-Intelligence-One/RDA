@@ -345,6 +345,8 @@ function expandTag($currentTag) {
     $currentTagClone.find('.selection-tag-posneg').removeClass('d-none')
     $currentTagClone.find('.finding-description').removeClass('d-none')
     $currentTagClone.find('.finding-source').removeClass('d-none')
+    $currentTagClone.find('.selection-tag-text').removeClass('text-truncate')
+
     $currentTagClone.css({
         'position': 'absolute',
         'top': offset?.top - 14,
