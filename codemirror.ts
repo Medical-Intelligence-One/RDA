@@ -265,14 +265,14 @@ function createTag(parentElement, label, id, frequency, addClasses, callback) {
 
     //add hover event to expand/contract tag for desktops
     if (!window.matchMedia("(hover: none)").matches) {
-        $divTag.find('.selection-tag-text').on('mouseenter', function (e) {
+        $divTag.find('.selection-tag-hover-area').on('mouseenter', function (e) {
             let $currentTag = $(e.currentTarget).parents('.selection-tag')
             if (!($currentTag.hasClass('selected') || $currentTag.hasClass('expanded'))) {
                 expandTag($currentTag)
             }
         })
 
-        $divTag.find('.selection-tag-text').on('mouseleave', function (e) {
+        $divTag.find('.selection-tag-hover-area').on('mouseleave', function (e) {
             let $currentTag = $(e.currentTarget).parents('.selection-tag')
             if ($currentTag.hasClass('expanded')) {
                 $('.selection-tag.expanded').remove()
@@ -675,7 +675,7 @@ function showDiseases(data, $parentContainer) {
                 $bookmarkIcon.toggleClass('fas far')
 
                 if ($bookmarkIcon.hasClass('active')) {
-                    let $divSuggestionClone = $suggestion.clone(true)        //clone elements and events
+                    let $divSuggestionClone = $suggestion.clone(true).addClass('contracted')        //clone elements and events
                     $bookmarkedDiseasesContainer.append($divSuggestionClone)
                 }
                 else {

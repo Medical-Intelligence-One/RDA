@@ -749,7 +749,7 @@ header {
   color: #5a99e2;
   font-size: 2em;
   text-align: center;
-  display: flex;
+  display: none;
   padding-left: 0.5em;
   /* margin-left: 1em; */
   /* background-color: white;
