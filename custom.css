@@ -209,17 +209,6 @@ body {
   color: rgb(3, 184, 234);
 }
 
-/* hr.hr-1 {
-    background: linear-gradient(to right, black, $colorLightBlue, white);
-    height: 20px !important;
-    margin-bottom: 2em;
-}
-
-hr.hr-2 {
-    background: linear-gradient(to right, white, $colorLightBlue, black);
-    height: 20px !important;
-    margin-bottom: 2em;
-} */
 .h1,
 .h2,
 .h3,
@@ -670,6 +659,7 @@ header {
 }
 .selection-tag .content-wrapper {
   overflow: hidden;
+  margin-right: auto;
   padding: 0.1em 0;
 }
 @media only screen and (min-width: 897px) {

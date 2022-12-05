@@ -258,22 +258,6 @@ body {
   background-color: black;
 }
 
-// #results-container .stick-to-top {
-//   background-color: black;
-// }
-
-/* hr.hr-1 {
-    background: linear-gradient(to right, black, $colorLightBlue, white);
-    height: 20px !important;
-    margin-bottom: 2em;
-}
-
-hr.hr-2 {
-    background: linear-gradient(to right, white, $colorLightBlue, black);
-    height: 20px !important;
-    margin-bottom: 2em;
-} */
-
 .h1,
 .h2,
 .h3,
@@ -418,14 +402,6 @@ header {
   display: flex;
   justify-content: center;
   align-items: center;
-  //   border-radius: 0.6em;
-  //   background-image: linear-gradient(
-  //     to right,
-  //     rgb(3, 184, 234),
-  //     white,
-  //     rgb(3, 184, 234)
-  //   );
-  //   margin: 0.5em 0;
 }
 
 @keyframes pulse {
@@ -776,6 +752,7 @@ header {
 
   .content-wrapper {
     overflow: hidden;
+    margin-right: auto;
     @media only screen and (min-width: 897px) {
       align-self: center;
     }
