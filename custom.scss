@@ -741,7 +741,7 @@ header {
   /* margin: 1em; */
 
   &.mini {
-    .content-wrapper {
+    .findings-header {
       align-self: center;
       overflow: auto;
     }
@@ -750,13 +750,18 @@ header {
     }
   }
 
-  .content-wrapper {
+  .finding-description,
+  .finding-source {
+    display: none;
+  }
+  .findings-header {
     overflow: hidden;
     margin-right: auto;
     @media only screen and (min-width: 897px) {
       align-self: center;
     }
-    padding: 0.1em 0;
+    padding: 0.3em 0;
+    width: 100%;
   }
   .positive-finding,
   .negative-finding {
@@ -768,16 +773,15 @@ header {
     display: block;
   }
 
-  &.selected .selection-tag-posneg {
-    display: none !important;
-  }
-
   &.selectable:not(.negative-finding) .posneg-finding {
     color: $colorDarkBlue;
   }
   &.expanded {
     height: auto;
     @include black-shadow(5px);
+    // .selection-tag-posneg {
+    //   display: flex;
+    // }
   }
   .finding-description {
     font-style: italic;
@@ -846,17 +850,12 @@ header {
 } */
 
 .selection-tag-posneg {
-  /* cursor: pointer; */
   color: $colorDarkBlue;
   font-size: 2em;
-  //   width: 3em;
   text-align: center;
   display: none;
   padding-left: 0.5em;
-
-  /* margin-left: 1em; */
-  /* background-color: white;
-  border-left: 0; */
+  margin-right: 0.5em;
 
   .positive-finding {
     color: $colorDarkBlue;
@@ -1220,9 +1219,9 @@ header {
   }
 }
 
-#suggestions-container .selection-tag-hover-area:hover {
-  @include black-shadow(5px);
-}
+// #suggestions-container .selection-tag-hover-area:hover {
+//   @include black-shadow(5px);
+// }
 
 .footer {
   position: fixed;

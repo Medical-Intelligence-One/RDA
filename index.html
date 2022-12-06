@@ -34,7 +34,7 @@
 
         <!-- template for disease findings tag -->
         <div id="selection-tag-template" class="selection-tag findings-tag para3 d-flex col-auto  me-2">
-            <div class="d-flex align-items-center content-wrapper">
+            <div class="d-flex align-items-center findings-header">
                 <span class="selection-tag-hover-area">
                     <span class="selection-tag-text text-truncate"></span>
                     <span class="frequency-gradient gradient-bar" title="Frequency"></span>
@@ -43,7 +43,7 @@
                     <span class="selection-tag-cui d-none"></span>
                     <span class="selection-tag-frequency d-none" title="Frequency"
                         style="background-color: rgba(0,0,0,1)"></span>
-                    <span class="selection-tag-posneg d-none gap-1 ms-auto">
+                    <span class="selection-tag-posneg gap-1 ms-auto">
                         <i class="positive-finding fas fa-circle-plus"
                             title="Click to Add to Search Terms as Positive Finding"></i>
                         <i class="negative-finding fas fa-circle-minus"
@@ -51,8 +51,8 @@
                     </span>
                 </span>
             </div>
-            <div class="finding-description d-flex d-none"></div>
-            <div class="finding-source d-flex justify-content-center d-none"></div>
+            <div class="finding-description d-none"></div>
+            <div class="finding-source justify-content-center d-none"></div>
         </div>
         <!-- template for disease suggestion -->
         <div id="suggestion-template" class="div-suggestion hide-findings">

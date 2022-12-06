@@ -650,20 +650,25 @@ header {
   margin: 0.5em 0;
   /* margin: 1em; */
 }
-.selection-tag.mini .content-wrapper {
+.selection-tag.mini .findings-header {
   align-self: center;
   overflow: auto;
 }
 .selection-tag.mini .selection-tag-text {
   margin-right: 0;
 }
-.selection-tag .content-wrapper {
+.selection-tag .finding-description,
+.selection-tag .finding-source {
+  display: none;
+}
+.selection-tag .findings-header {
   overflow: hidden;
   margin-right: auto;
-  padding: 0.1em 0;
+  padding: 0.3em 0;
+  width: 100%;
 }
 @media only screen and (min-width: 897px) {
-  .selection-tag .content-wrapper {
+  .selection-tag .findings-header {
     align-self: center;
   }
 }
@@ -674,9 +679,6 @@ header {
 .selection-tag.selectable .posneg-finding {
   color: white;
   display: block;
-}
-.selection-tag.selected .selection-tag-posneg {
-  display: none !important;
 }
 .selection-tag.selectable:not(.negative-finding) .posneg-finding {
   color: #5a99e2;
@@ -745,15 +747,12 @@ header {
     content: "\f165";
 } */
 .selection-tag-posneg {
-  /* cursor: pointer; */
   color: #5a99e2;
   font-size: 2em;
   text-align: center;
   display: none;
   padding-left: 0.5em;
-  /* margin-left: 1em; */
-  /* background-color: white;
-  border-left: 0; */
+  margin-right: 0.5em;
 }
 .selection-tag-posneg .positive-finding {
   color: #5a99e2;
@@ -1051,13 +1050,6 @@ header {
 #search-history-lines .tag.negative-search {
   border-color: #f32e15;
   color: #f32e15;
-}
-
-#suggestions-container .selection-tag-hover-area:hover {
-  border-radius: 7px;
-  box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.3);
-  transition: 0.3s !important;
-  cursor: pointer;
 }
 
 .footer {

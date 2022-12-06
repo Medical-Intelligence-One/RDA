@@ -254,10 +254,10 @@ function createTag(parentElement, label, id, frequency, addClasses, callback) {
 
         $divTag.find('.selection-tag-posneg').on("click", function (e) {
             if ($(e.target).hasClass('positive-finding')) {
-                addTagToSearchAndRequery($(e.target).parents('.selection-tag'), 'positive-finding')
+                addTagToSearchAndRequery($(e.target).parents('.selection-tag').next(), 'positive-finding')
             }
             else {
-                addTagToSearchAndRequery($(e.target).parents('.selection-tag'), 'negative-finding')
+                addTagToSearchAndRequery($(e.target).parents('.selection-tag').next(), 'negative-finding')
 
             }
         })
@@ -265,14 +265,14 @@ function createTag(parentElement, label, id, frequency, addClasses, callback) {
 
     //add hover event to expand/contract tag for desktops
     if (!window.matchMedia("(hover: none)").matches) {
-        $divTag.find('.selection-tag-hover-area').on('mouseenter', function (e) {
+        $divTag.find('.findings-header').on('mouseenter', function (e) {
             let $currentTag = $(e.currentTarget).parents('.selection-tag')
             if (!($currentTag.hasClass('selected') || $currentTag.hasClass('expanded'))) {
                 expandTag($currentTag)
             }
         })
 
-        $divTag.find('.selection-tag-hover-area').on('mouseleave', function (e) {
+        $divTag.find('.findings-header').on('mouseleave', function (e) {
             let $currentTag = $(e.currentTarget).parents('.selection-tag')
             if ($currentTag.hasClass('expanded')) {
                 $('.selection-tag.expanded').remove()
@@ -332,9 +332,10 @@ function expandTag($currentTag) {
     $currentTagClone.replace
     $currentTagClone.insertAfter($currentTag.prev())
     var offset = $currentTagClone.offset()
-    $currentTagClone.find('.selection-tag-posneg').removeClass('d-none')
-    $currentTagClone.find('.finding-description').removeClass('d-none')
-    $currentTagClone.find('.finding-source').removeClass('d-none')
+    $currentTagClone.find('.selection-tag-posneg, .finding-description, .finding-source').removeClass('d-none').addClass('d-flex')
+    // $currentTagClone.find('.finding-description').removeClass('d-none')
+    // $currentTagClone.find('.finding-source').removeClass('d-none')
+    // $currentTagClone.find('.finding-source, .finding-description').css('display', 'flex')
     $currentTagClone.find('.selection-tag-text').removeClass('text-truncate')
     var offsetLeft = offset.left + 15 + parseInt(width.toString(), 10) > $(window).width() ? $(window).width() - parseInt(width.toString(), 10) - 15 : offset.left
     $currentTagClone.css({
@@ -357,8 +358,8 @@ function addTagToSearchAndRequery($divTag, addClass) {
     $divTagClone.addClass('mini removeable selected ' + addClass)
 
     // append tag to search terms
-    $selectedTerms.append($divTagClone)
     updateTagTitle($divTagClone)
+    $selectedTerms.append($divTagClone)
 
     //requery
     // fetchDiseases()
