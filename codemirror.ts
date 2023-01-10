@@ -267,7 +267,8 @@ function createTag(parentElement, label, id, frequency, addClasses, callback) {
     if (!window.matchMedia("(hover: none)").matches) {
         $divTag.find('.findings-header').on('mouseenter', function (e) {
             let $currentTag = $(e.currentTarget).parents('.selection-tag')
-            if (!($currentTag.hasClass('selected') || $currentTag.hasClass('expanded'))) {
+            if (!($currentTag.hasClass('mini') || $currentTag.hasClass('expanded'))) {
+                //if (!($currentTag.hasClass('expanded'))) {
                 expandTag($currentTag)
             }
         })
@@ -285,7 +286,6 @@ function createTag(parentElement, label, id, frequency, addClasses, callback) {
         // e.stopPropagation()
         //if the tag is already a search term, remove tag from search terms and requery, otherwise add tag to search terms and requery
         e.stopPropagation()
-        let parentDiseaseName = $(e.currentTarget).parents('.div-suggestion').find('.disease-name').text()
         let $currentTag = $(e.currentTarget).parents('.selection-tag')
         if ($currentTag.hasClass('removeable')) {
             $('#selected-terms .selection-tag').filter(function (i2, e2) { return $(e2).find('.selection-tag-cui').text() == $currentTag.find('.selection-tag-cui').text() }).remove()
@@ -329,13 +329,14 @@ function expandTag($currentTag) {
     let $currentTagClone = $currentTag.clone(true)
     $currentTagClone.addClass('expanded')
     // $currentTagClone.removeClass('top-eight')
-    $currentTagClone.replace
-    $currentTagClone.insertAfter($currentTag.prev())
+    // $currentTagClone.replace
+    // $currentTagClone.insertAfter($currentTag.prev())
+    $currentTagClone.insertBefore($currentTag)
     var offset = $currentTagClone.offset()
-    $currentTagClone.find('.selection-tag-posneg, .finding-description, .finding-source').removeClass('d-none').addClass('d-flex')
-    // $currentTagClone.find('.finding-description').removeClass('d-none')
-    // $currentTagClone.find('.finding-source').removeClass('d-none')
-    // $currentTagClone.find('.finding-source, .finding-description').css('display', 'flex')
+    if (!$currentTagClone.hasClass('selected')) {
+        $currentTagClone.find('.selection-tag-posneg').removeClass('d-none').addClass('d-flex')
+    }
+    $currentTagClone.find('.finding-description, .finding-source').removeClass('d-none').addClass('d-flex')
     $currentTagClone.find('.selection-tag-text').removeClass('text-truncate')
     var offsetLeft = offset.left + 15 + parseInt(width.toString(), 10) > $(window).width() ? $(window).width() - parseInt(width.toString(), 10) - 15 : offset.left
     $currentTagClone.css({
@@ -345,6 +346,8 @@ function expandTag($currentTag) {
         'width': width,
         'flex-direction': 'column'
     })
+    //update popover caption
+    updateTagTitle($currentTagClone)
 
 }
 //adds a tag to the search criteria as either a positive or negative finding
@@ -371,7 +374,7 @@ function addTagToSearchAndRequery($divTag, addClass) {
                 scrollTop: $('#suggestions-container .div-suggestion').filter(function (i, e) {
                     return $(e).find('.disease-name').text() == parentDiseaseName
                 }).offset().top - 225
-            }, 500);
+            }, 0, "easing");
         }
         // else {
         //     $('html, body').animate({
@@ -388,7 +391,7 @@ function addTagToSearchAndRequery($divTag, addClass) {
 function updateTagTitle($divTag) {
     let textTitle = ''
     if ($divTag.hasClass('selectable') && !$divTag.hasClass('selected')) {
-        // textTitle = 'Click to Add to Search Terms as Positive Finding.'
+        textTitle = 'Click to Add to Search Terms as Positive Finding.'
         // textTitle = 'Click to expand.'
     }
     else if ($divTag.hasClass('removeable')) {

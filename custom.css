@@ -116,6 +116,7 @@
   }
   #search-section {
     font-size: 16px;
+    width: 100%;
   }
   #selected-terms {
     /* background-color: rgba(0, 0, 0, .7); */
@@ -680,6 +681,9 @@ header {
   color: white;
   display: block;
 }
+.selection-tag.selected .selection-tag-posneg {
+  display: none !important;
+}
 .selection-tag.selectable:not(.negative-finding) .posneg-finding {
   color: #5a99e2;
 }
@@ -750,7 +754,6 @@ header {
   color: #5a99e2;
   font-size: 2em;
   text-align: center;
-  display: none;
   padding-left: 0.5em;
   margin-right: 0.5em;
 }

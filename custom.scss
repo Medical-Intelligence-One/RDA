@@ -186,6 +186,7 @@ $colorRed: #f32e15;
 
   #search-section {
     font-size: 16px;
+    width: 100%;
   }
 
   #selected-terms {
@@ -773,6 +774,10 @@ header {
     display: block;
   }
 
+  &.selected .selection-tag-posneg {
+    display: none !important;
+  }
+
   &.selectable:not(.negative-finding) .posneg-finding {
     color: $colorDarkBlue;
   }
@@ -853,7 +858,7 @@ header {
   color: $colorDarkBlue;
   font-size: 2em;
   text-align: center;
-  display: none;
+  //   display: flex;
   padding-left: 0.5em;
   margin-right: 0.5em;
 

@@ -43,7 +43,7 @@
                     <span class="selection-tag-cui d-none"></span>
                     <span class="selection-tag-frequency d-none" title="Frequency"
                         style="background-color: rgba(0,0,0,1)"></span>
-                    <span class="selection-tag-posneg gap-1 ms-auto">
+                    <span class="selection-tag-posneg d-none gap-1 ms-auto">
                         <i class="positive-finding fas fa-circle-plus"
                             title="Click to Add to Search Terms as Positive Finding"></i>
                         <i class="negative-finding fas fa-circle-minus"
@@ -57,7 +57,7 @@
         <!-- template for disease suggestion -->
         <div id="suggestion-template" class="div-suggestion hide-findings">
             <div class="mb-auto">
-                <div class="suggestion-header d-flex align-items-center justify-content-between h3">
+                <div class="suggestion-header d-flex align-items-top justify-content-between h3">
                     <span class="expand-contract clickable" title="Expand/Contract Disease">
                         <span class="expand-contract-icon"></span>
                         <span class="me-auto">
@@ -65,17 +65,22 @@
                         </span>
                     </span>
                     <span class="d-flex justify-content-between" style="white-space:nowrap;">
-                        <span class="disease-probability" title="Probability"></span>
-                        <span class="disease-prevalence me-2" data-bs-toggle="popover" data-bs-html="true"
+                        <span class="disease-prevalence d-none d-sm-block" data-bs-toggle="popover" data-bs-html="true"
                             data-bs-placement="auto" data-bs-trigger="hover" title="Prevalence"></span>
+                        <span class="disease-probability" title="Probability"></span>
                         <!-- <span class="associated-evidence ms-2 me-2" title="Associated Evidence" data-bs-toggle="tooltip"
                                             data-bs-placement="bottom"></span> -->
                         <!-- <i class="disease-probability fas fa-circle" aria-hidden="true" data-bs-toggle="tooltip"></i> -->
                         <i class="connected-papers fas fa-circle-nodes d-none" aria-hidden="true"
                             title="Search Connected Papers"></i>
-                        <i class="far fa-bookmark disease-bookmark clickable" title="Add to Bookmarked Diseases"></i>
+                        <i class="far fa-bookmark disease-bookmark clickable ms-2"
+                            title="Add to Bookmarked Diseases"></i>
                     </span>
                 </div>
+            </div>
+            <div class="d-flex justify-content-end h3 d-block d-sm-none">
+                <span class="disease-prevalence" data-bs-toggle="popover" data-bs-html="true" data-bs-placement="auto"
+                    data-bs-trigger="hover" title="Prevalence"></span>
             </div>
             <div class="disease-addinfo mt-3">
                 <div class="disease-info abbreviated para2 mb-3"></div>
@@ -184,12 +189,12 @@
                                         </label> -->
             </div>
         </div>
-        <div id="primary-container" class="container-fluid is-empty" style="width:100%">
+        <div id="primary-container" class="container-fluid is-empty">
             <!-- <div class="d-flex justify-content-between d-none d-lg-block">
             <a href="https://www.mi1.ai/enola-feedback" class="footer screen-left">FEEDBACK</a>
             <span class="footer screen-right">SHARE</span>
         </div> -->
-            <div class="d-flex align-self-center">
+            <div class="d-flex align-self-center w-100">
                 <!-- <div id="search-history-container" class="split col stick-to-top slide-in d-none" style="width:0px"> -->
                 <div id="search-history-container" class="_split stick-to-top slide-in" style="width:0px;">
                     <div id="search-history-title" class="d-flex justify-content-between">
