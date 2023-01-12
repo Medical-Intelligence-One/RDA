@@ -314,7 +314,7 @@ body {
   height: 100vh;
 }
 #results-container {
-  padding: 0 2em;
+  padding: 0 1em;
   //   width: 100%;
   //   max-width: 95vw;
 }
@@ -350,7 +350,7 @@ div.tooltip-inner {
   padding: 0;
 }
 
-.container-fluid.is-empty {
+#primary-container.is-empty {
   .hide-at-start {
     display: none !important;
   }
@@ -698,7 +698,8 @@ header {
 
 .cm-editor:not(.cm-focused) .cm-activeLine:before {
   /* content: "e.g. Thrombocytopenia, Occipital Encephalocele, Hypotonia"; */
-  content: "Enter disease or finding, e.g. Zellweger syndrome or liver failure";
+  //   content: "Enter disease or finding, e.g. Zellweger syndrome or liver failure";
+  content: "Enter disease or finding";
   font-style: italic;
   color: grey;
 }

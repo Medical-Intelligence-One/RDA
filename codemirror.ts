@@ -7,12 +7,14 @@ const axios = require('axios')
 const headers = {
     'Access-Control-Allow-Origin': '*'
 }
+const apiURL = "https://dev_api.mi1.ai/api/"
 var view, inputVal
 var searchOptions: any[] = []
 var searchHistoryData
 var mySplit
 var loremIpsum = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris placerat lacus eu nisi ultrices congue. Praesent venenatis at lorem sed maximus. Suspendisse potenti. Donec sit amet sem quis ante imperdiet vehicula vel et risus. Nullam nisi urna, facilisis in rutrum id, suscipit vulputate ligula. Vestibulum at malesuada lectus, nec tincidunt nunc. Pellentesque porttitor mi id erat posuere, elementum laoreet lorem tristique. Praesent mauris lorem, gravida sit amet semper ac, viverra eu sem.'
-
+// var uniqueFindingCUIs: string[] = [];
+var jsonFindingDescriptions: { [key: string]: any }[] = []
 var $selectedTerms = $('#selected-terms')
 var $bookmarkedDiseasesContainer = $('#bookmarked-diseases-container')
 var firstRecord = 1, stepCount = 5, lastRecord = firstRecord + stepCount - 1
@@ -64,7 +66,7 @@ async function fetchAutoCompleteFromAPI(startsWith) {
         }
 
         // autoCompleteData = autocompleteRareDiseaseData
-        await axios.post('https://dev_api.mi1.ai/api/autocomplete_rareDz_findings', body, { headers })
+        await axios.post(apiURL + 'autocomplete_rareDz_findings', body, { headers })
             .then(function (response) {
                 let autoCompleteData = response.data
                 searchOptions = []
@@ -163,10 +165,10 @@ let state = EditorState.create({
 
 //returns Diseases based on selected CUIS
 async function fetchDiseases() {
-    //use rareDiseaseSearch as endpoint if there are no negative findings
-    var endPoint = 'rareDiseaseSearchPosNeg'
+    //initiate arrays for getting delta of new finding CUIs
+    let uniqueFindingCUISDelta = {}
+    let arrSource = getArrayFromJson(jsonFindingDescriptions, 'HPO_ID')
 
-    //write selected CUI tag elements into array
     let cuiArrayPromise = new Promise(function (resolve) {
         sortSearchTerms()
         var matchedFindings: any[] = []
@@ -199,7 +201,7 @@ async function fetchDiseases() {
     })
 
     //get API call response and display diseases
-    await axios.post('https://dev_api.mi1.ai/api/' + endPoint, await (cuiArrayPromise), { headers })
+    await axios.post(apiURL + 'rareDiseaseSearchPosNeg', await (cuiArrayPromise), { headers })
         .then(async function (response) {
 
             if (response.data.length > 0) {
@@ -211,11 +213,24 @@ async function fetchDiseases() {
             else {
                 clearScreen()
             }
+        }).then(async function () {     //get new finding descriptions using delta of all CUIs from last API call (arrSource) against all CUIs currently displayed (arrTarget)
+            let arrTarget = getTextArrayFromElements('selection-tag-cui', $('#suggestions-container'))
+            uniqueFindingCUISDelta = getDeltaOfArraysAsJson(arrSource, arrTarget, 'HPO_ID')
+            // let listOfFindings = getCommaSeparatedListFromArray(uniqueFindingCUISDelta)
+            // const body = {
+            //     "FindingsToDefine":
+            //         [
+            //             uniqueFindingCUISDelta
+            //         ]
+            // }
+            await axios.post(apiURL + 'findingsDefinitions', uniqueFindingCUISDelta, { headers }).then(async function (response) {
+                jsonFindingDescriptions = jsonFindingDescriptions.concat(response)
+            })
+            // uniqueFindingCUIs=uniqueFindingCUIs.concat(uniqueFindingCUISDelta)
         }).catch(function (error) {
             console.log('api error: ' + error)
             clearScreen()
-        });
-
+        })
     // return focus to codemirror input
     view.focus
     try {
@@ -243,7 +258,7 @@ function createTag(parentElement, label, id, frequency, addClasses, callback) {
     $divTag.find('.empty-box').attr('title', objFrequency.description + ": " + objFrequency.range)
     $divTag.find('.empty-box').css('width', ((1 - frequency) * 4.5) + .0625 + 'em')
     $divTag.find('.empty-box').css('margin-left', ((1 - frequency) * -4.5) - .0625 + 'em')  //make 1px adjustment to allow for border width
-    $divTag.find('.finding-description').text(loremIpsum.substring(0, loremIpsum.split(' ', Math.ceil(Math.random() * 72)).join(' ').length))
+    // $divTag.find('.finding-description').text(loremIpsum.substring(0, loremIpsum.split(' ', Math.ceil(Math.random() * 72)).join(' ').length))
     $divTag.find('.finding-source').text('Source: Orphanet & HPO')
     //add any additional classes
     $divTag.addClass(addClasses)
@@ -317,7 +332,7 @@ function createTag(parentElement, label, id, frequency, addClasses, callback) {
 
 //expand findings tag to show description
 function expandTag($currentTag) {
-    var minWidth
+    let minWidth
     $('.selection-tag.expanded').remove()
     if ($(window).width() < 897) {
         minWidth = 250
@@ -325,8 +340,9 @@ function expandTag($currentTag) {
     else {
         minWidth = 380
     }
-    var width = parseInt($currentTag.outerWidth(), 10) <= minWidth ? minWidth + 'px' : parseInt($currentTag.outerWidth(), 10)
+    let width = parseInt($currentTag.outerWidth(), 10) <= minWidth ? minWidth + 'px' : parseInt($currentTag.outerWidth(), 10)
     let $currentTagClone = $currentTag.clone(true)
+    let HPO_ID = $currentTagClone.find('.selection-tag-cui').text()
     $currentTagClone.addClass('expanded')
     // $currentTagClone.removeClass('top-eight')
     // $currentTagClone.replace
@@ -337,6 +353,8 @@ function expandTag($currentTag) {
         $currentTagClone.find('.selection-tag-posneg').removeClass('d-none').addClass('d-flex')
     }
     $currentTagClone.find('.finding-description, .finding-source').removeClass('d-none').addClass('d-flex')
+    $currentTagClone.find('.finding-description').text(getFindingsText(HPO_ID))
+
     $currentTagClone.find('.selection-tag-text').removeClass('text-truncate')
     var offsetLeft = offset.left + 15 + parseInt(width.toString(), 10) > $(window).width() ? $(window).width() - parseInt(width.toString(), 10) - 15 : offset.left
     $currentTagClone.css({
@@ -437,7 +455,7 @@ function showDiseases(data, $parentContainer) {
     let diseaseFindings = []
     searchOptions = []      //global array
 
-    $('.container-fluid').removeClass('is-empty')
+    $('#primary-container').removeClass('is-empty')
     //get list of bookmarked diseases
     var bookmarkedDiseaseNames = $bookmarkedDiseasesContainer.find('.disease-name').map(function () {
         return $(this).text()
@@ -791,7 +809,7 @@ function clearScreen(clearSelectedTerms = false) {
 
     $('#suggestions-container').empty()
     // $('#bookmarked-diseases-container').empty()
-    $('.container-fluid').addClass('is-empty')
+    $('#primary-container').addClass('is-empty')
     $('.search-editor, #search-history-icon').toggleClass('d-none', false)
     // $('#search-history').toggleClass('d-none', true)
 
@@ -1088,9 +1106,9 @@ function toggleSearchHistory(hidePanel) {
                 'transition': '.6s'
             })
             $('#results-container').css({
-                'width': 0,
-                'padding': '0',
-                'border-left': 'none',
+                // 'width': 0,
+                // 'padding': '0',
+                // 'border-left': 'none',
                 'transition': '.6s',
                 'display': 'none'
 
@@ -1131,6 +1149,76 @@ function showHideImageDescriptions(showDescriptions) {
         $('#navbar-left .image-description').css('display', 'none')
     }
 }
+
+//returns an array of the text of all elements of class myClass with a parent object $parent
+function getTextArrayFromElements(myClass, $parent) {
+    let arr: string[] = []
+    $parent.find('.' + myClass).each(function (i, obj) {
+        arr.push($(obj).text())
+    })
+    return arr
+}
+
+//returns an array of items that are in arrTarget but not in arrSource
+function getDeltaOfArrays(arrSource, arrTarget) {
+    let arr: string[] = []
+    $.each(arrTarget, function (k, v) {
+        if (!arrSource.includes(v)) {
+            arr.push(v)
+        }
+    })
+    return arr
+}
+
+//returns a json object  of items that are in arrTarget but not in arrSource
+function getDeltaOfArraysAsJson(arrSource: any[], arrTarget: any[], key: string) {
+    // let jsonArrayObject = { Findings_To_Define: [] };
+    // let jsonArrayObject: { label: { [key: string]: any }[] } = { label: [] };
+    let jsonArrayObject: { Findings_To_Define: { [key: string]: any }[] } = { Findings_To_Define: [] };
+    try {
+        arrTarget.forEach((value) => {
+            if (!arrSource.includes(value) && !Object.values(jsonArrayObject).includes(value)) {
+                jsonArrayObject['Findings_To_Define'].push({ [key]: value });
+            }
+        })
+    }
+    catch (e) {
+        console.log(e)
+    }
+    return jsonArrayObject
+}
+
+function getFindingsText(HPO_ID) {
+    return jsonFindingDescriptions[0]['data'].filter(data => data['HPO_ID'] == HPO_ID)[0].Definition
+}
+//takes an array of strings and returns a single string containing a comma separated list of strings in quotes
+function getCommaSeparatedListFromArray(arr) {
+    let returnVal = "";
+    $.each(arr, function (key, value) {
+        returnVal += "'" + value + "',"
+    })
+    return returnVal
+}
+
+//takes a json object and key and returns an array of values corresponding to the given key
+function getArrayFromJson(json, key) {
+    let arr: string[] = []
+    if (typeof json != 'undefined') {
+        try {
+            $.each(JSON.parse(json), function (k, v) {
+                // if (k == key) {
+                arr.push(v)
+                // }
+            })
+        }
+        catch
+        { return [] }
+
+    }
+
+    return arr
+}
+
 //code fired after each page load
 $(function () {
 
