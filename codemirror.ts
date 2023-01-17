@@ -334,7 +334,7 @@ function createTag(parentElement, label, id, frequency, addClasses, callback) {
 function expandTag($currentTag) {
     let minWidth
     $('.selection-tag.expanded').remove()
-    if ($(window).width() < 897) {
+    if ($(window).width()! < 897) {
         minWidth = 250
     }
     else {
@@ -356,7 +356,7 @@ function expandTag($currentTag) {
     $currentTagClone.find('.finding-description').text(getFindingsText(HPO_ID))
 
     $currentTagClone.find('.selection-tag-text').removeClass('text-truncate')
-    var offsetLeft = offset.left + 15 + parseInt(width.toString(), 10) > $(window).width() ? $(window).width() - parseInt(width.toString(), 10) - 15 : offset.left
+    var offsetLeft = offset.left + 15 + parseInt(width.toString(), 10) > $(window).width()! ? $(window).width()! - parseInt(width.toString(), 10) - 15 : offset.left
     $currentTagClone.css({
         'position': 'absolute',
         'top': offset?.top - 14,
@@ -391,7 +391,7 @@ function addTagToSearchAndRequery($divTag, addClass) {
             $('html, body').animate({
                 scrollTop: $('#suggestions-container .div-suggestion').filter(function (i, e) {
                     return $(e).find('.disease-name').text() == parentDiseaseName
-                }).offset().top - 225
+                }).offset()!.top - 225
             }, 0, "easing");
         }
         // else {
@@ -409,7 +409,7 @@ function addTagToSearchAndRequery($divTag, addClass) {
 function updateTagTitle($divTag) {
     let textTitle = ''
     if ($divTag.hasClass('selectable') && !$divTag.hasClass('selected')) {
-        textTitle = 'Click to Add to Search Terms as Positive Finding.'
+        // textTitle = 'Click to Add to Search Terms as Positive Finding.'
         // textTitle = 'Click to expand.'
     }
     else if ($divTag.hasClass('removeable')) {
@@ -1021,7 +1021,7 @@ function refreshSearchHistory() {
                 $('#div-selected-terms').toggleClass('d-none', false)
                 fetchDiseases()
                 //hide search for smaller devices
-                if ($(window).width() < 897) {
+                if ($(window).width()! < 897) {
                     toggleSearchHistory(true)
                 }
 
@@ -1098,7 +1098,7 @@ function toggleSearchHistory(hidePanel) {
         // $('#search-history-container').removeClass('d-none')
         // $('.gutter.gutter-horizontal').fadeIn(600)
         // $('#search-history-container').css('transition', '')    //switch off transition once faded in
-        if ($(window).width() < 897) {
+        if ($(window).width()! < 897) {
             $('#search-history-container').css({
                 'width': '100vw',
                 'padding': '0',
@@ -1188,8 +1188,13 @@ function getDeltaOfArraysAsJson(arrSource: any[], arrTarget: any[], key: string)
     return jsonArrayObject
 }
 
+//returns finding from jsonFindingDescriptions object corresponding to HPO_ID parameter
 function getFindingsText(HPO_ID) {
-    return jsonFindingDescriptions[0]['data'].filter(data => data['HPO_ID'] == HPO_ID)[0].Definition
+    let definition = jsonFindingDescriptions[0]['data'].filter(data => data['HPO_ID'] == HPO_ID)[0].Definition
+    if (definition == null) {
+        definition = 'No definition is available.'
+    }
+    return definition
 }
 //takes an array of strings and returns a single string containing a comma separated list of strings in quotes
 function getCommaSeparatedListFromArray(arr) {
@@ -1351,7 +1356,7 @@ $(function () {
     //add event to toggle saved value when clicking corresponding 'save' icon.
     $('#search-history-line-template .save-icon').on('click', function (e) {
         // $(e.currentTarget).toggleClass('fas far')
-        var index = $(e.currentTarget).attr('index')
+        var index = $(e.currentTarget).attr('index')!
         searchHistoryData[index].saved = searchHistoryData[index].saved.toString() == 'true' ? 'false' : 'true'
         refreshSearchHistory()
     })
