@@ -1190,12 +1190,18 @@ function getDeltaOfArraysAsJson(arrSource: any[], arrTarget: any[], key: string)
 
 //returns finding from jsonFindingDescriptions object corresponding to HPO_ID parameter
 function getFindingsText(HPO_ID) {
-    let definition = jsonFindingDescriptions[0]['data'].filter(data => data['HPO_ID'] == HPO_ID)[0].Definition
-    if (definition == null) {
-        definition = 'No definition is available.'
+    try {
+        let definition = jsonFindingDescriptions[0]['data'].filter(data => data['HPO_ID'] == HPO_ID)[0].Definition
+        if (definition == null) {
+            definition = 'No definition is available.'
+        }
+        return definition
     }
-    return definition
+    catch {
+        return 'No definition is available.'
+    }
 }
+
 //takes an array of strings and returns a single string containing a comma separated list of strings in quotes
 function getCommaSeparatedListFromArray(arr) {
     let returnVal = "";
