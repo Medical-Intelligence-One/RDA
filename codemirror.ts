@@ -7,8 +7,8 @@ const axios = require('axios')
 const headers = {
     'Access-Control-Allow-Origin': '*'
 }
-// const apiURL = "https://dev_api.mi1.ai/api/"
-const apiURL = "http://35.153.231.184/api/"
+const apiURL = "https://dev_api.mi1.ai/api/"
+// const apiURL = "http://35.153.231.184/api/"
 var view, inputVal
 var searchOptions: any[] = []
 var searchHistoryData
