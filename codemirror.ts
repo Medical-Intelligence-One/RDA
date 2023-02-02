@@ -7,7 +7,8 @@ const axios = require('axios')
 const headers = {
     'Access-Control-Allow-Origin': '*'
 }
-const apiURL = "https://dev_api.mi1.ai/api/"
+// const apiURL = "https://dev_api.mi1.ai/api/"
+const apiURL = "http://35.153.231.184/api/"
 var view, inputVal
 var searchOptions: any[] = []
 var searchHistoryData
@@ -74,7 +75,7 @@ async function fetchAutoCompleteFromAPI(startsWith) {
                 //add autoComplete API response to autocomplete list. On selection, add tag to selected-terms div and refresh disease data 
                 for (var i = 0; i <= autoCompleteData.length - 1; i++) {
 
-                    let cui = autoCompleteData[i].Clinical_Finding_CUI
+                    let cui = autoCompleteData[i].Clinical_Finding_HPO_ID
                     let name = autoCompleteData[i].Clinical_Finding
                     let frequency = null
                     let addClasses = "mini removeable selected " + ($('#search-section').hasClass('positive-search') ? 'positive-finding' : 'negative-finding')
@@ -180,12 +181,12 @@ async function fetchDiseases() {
             $selectedTags.each(function (i, obj) {
                 if ($(obj).hasClass('positive-finding')) {
                     matchedFindings.push({
-                        CUI: $(obj).find('.selection-tag-cui').text()
+                        HPO_ID: $(obj).find('.selection-tag-cui').text()
                     })
                 }
                 else {
                     negativeMatchedFindings.push({
-                        CUI: $(obj).find('.selection-tag-cui').text()
+                        HPO_ID: $(obj).find('.selection-tag-cui').text()
                     })
                 }
             })
@@ -644,7 +645,7 @@ function showDiseases(data, $parentContainer) {
                 for (let j = 0; j < diseaseFindings.length; j++) {
                     let obj: any = diseaseFindings[j]
                     let label = obj.Name
-                    let cui = obj.CUI
+                    let cui = obj.HPO_ID
                     let frequency = obj.Frequency
                     let addClasses = ""
                     if (obj.TypeOfFinding == "NegativeMatched") {
